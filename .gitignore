@@ -1,0 +1,136 @@
+# ---------- Environment / secrets ----------
+# local env files (keep .env.example in repo)
+.env
+.env.local
+.env.*.local
+*.secret
+secrets.yml
+
+# ---------- Python ----------
+# virtualenvs
+.venv/
+venv/
+ENV/
+env/
+pip-wheel-metadata/
+
+# bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# mypy / pylance
+.mypy_cache/
+.pyre/
+.pytype/
+
+# pipenv / poetry
+Pipfile.lock
+poetry.lock
+
+# ---------- Node / JS ----------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+.pnp.*
+.pnp.js
+
+# build artifacts (adjust if your backoffice outputs to different folder)
+backoffice/dist/
+backoffice/build/
+*.tsbuildinfo
+
+# lockfile: usually commit package-lock.json (recommended). If you don't, remove the next line.
+# (If you DO want to commit lockfile, comment the following line)
+# package-lock.json
+# If you use pnpm
+node_modules/.pnpm-store/
+
+# ---------- Go ----------
+# build outputs
+bin/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go module cache and vendor (vendor may be tracked if you vendor deps)
+Gopkg.lock
+vendor/
+
+# ---------- Docker ----------
+# local docker-compose override
+docker-compose.override.yml
+docker-compose.*.yml
+*.env.override
+
+# docker build cache / tmp
+docker-compose-down.log
+
+# ---------- Databases / runtime ----------
+# local DB files / sqlite
+*.db
+*.sqlite
+db-data/
+pgdata/
+
+# ---------- Logs ----------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+
+# ---------- IDEs & Editors ----------
+# VSCode
+.vscode/
+.history/
+
+# JetBrains (PyCharm, GoLand, WebStorm...)
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# ---------- Misc ----------
+# generated files
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# Coverage / report tools
+.coverage.*
+.coverage
+
+# Local script outputs / temp
+*.local
+tmp/
+temp/
+
+# keep this at the end: any sensitive keys/certs
+*.pem
+*.key
+*.crt
+*.p12

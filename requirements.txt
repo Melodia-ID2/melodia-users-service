@@ -1,0 +1,23 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# ORM + DB
+sqlmodel==0.0.22
+psycopg2-binary==2.9.9
+alembic==1.13.2
+
+# Validaciones extra
+pydantic==2.9.2
+python-dotenv==1.0.1
+
+# Seguridad / JWT
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Testing
+pytest==8.3.3
+httpx==0.27.2
+pytest-asyncio==0.23.8
+
+# Utils
+requests==2.32.3
