@@ -5,12 +5,12 @@ uvicorn[standard]==0.30.6
 ruff==0.12.12
 
 # ORM + DB
-sqlmodel==0.0.22
+sqlmodel==0.0.24
 psycopg[binary]==3.2.*
 alembic==1.13.2
 
 # Validaciones extra
-pydantic==2.9.2
+pydantic==2.11.7
 python-dotenv==1.0.1
 
 # Seguridad / JWT

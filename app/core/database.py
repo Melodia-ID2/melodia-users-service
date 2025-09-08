@@ -9,7 +9,6 @@ def get_session():
     with Session(engine) as session:
         yield session
 
-def init_db():
-    from app.models.user import User
 
+def init_db():
     SQLModel.metadata.create_all(engine)
