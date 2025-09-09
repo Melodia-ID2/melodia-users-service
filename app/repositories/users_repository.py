@@ -2,11 +2,19 @@ from uuid import UUID
 from sqlmodel import Session, select
 
 from app.schemas.user import UserProfileCreate
-from app.models.user import UserProfile
+from app.models.user import UserAccount, UserProfile
 
 
 def get_all_users(session: Session):
-    return session.exec(select(UserProfile)).all()
+    stmt = (
+        select(
+            UserProfile.id,
+            UserProfile.username,
+            UserAccount.email,
+            UserProfile.role,
+        ).join(UserAccount, UserProfile.id == UserAccount.id)  # type: ignore
+    )
+    return session.exec(stmt).all()
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:

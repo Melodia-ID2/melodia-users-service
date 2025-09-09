@@ -6,9 +6,11 @@ from app.schemas.user import UserProfileCreate, UserProfileResponse
 import app.repositories.users_repository as repo
 
 
-def get_all_users(session: Session):
-    users = repo.get_all_users(session=session)
-    return [UserProfileResponse.model_validate(user) for user in users]
+def get_all_users(session: Session) -> list[dict[str, str]]:
+    users = repo.get_all_users(session)
+    return [
+        {"id": str(u[0]), "username": u[1], "email": u[2], "role": u[3]} for u in users
+    ]
 
 
 def create_user_profile(

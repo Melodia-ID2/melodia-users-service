@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from sqlmodel import Field, SQLModel
 
 
-class UserRole(Enum):
+class UserRole(str, Enum):
     LISTENER = "listener"
     ARTIST = "artist"
 
@@ -17,7 +17,7 @@ class UserAccount(SQLModel, table=True):
 
 
 class UserProfile(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
+    id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True)
     username: str = Field(index=True, unique=True, nullable=False)
     full_name: str | None = Field(default=None)
     birthdate: datetime | None = Field(default=None)
