@@ -1,11 +1,13 @@
+from uuid import UUID
 from sqlmodel import Session
 
-from app.services.users_service import UsersService
+from app.schemas.user import UserProfileCreate
+import app.services.users_service as service
 
 
-class UsersController:
-    def __init__(self, service: UsersService):
-        self.service = service
+def get_all_users(session: Session):
+    return {"users": service.get_all_users(session)}
 
-    def get_all_users(self, session: Session):
-        return self.service.get_all_users(session=session)
+
+def create_user_profile(session: Session, id: UUID, data: UserProfileCreate):
+    return {"user": service.create_user_profile(session, id, data)}

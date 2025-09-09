@@ -1,10 +1,22 @@
+from uuid import UUID
+from fastapi import HTTPException
 from sqlmodel import Session
-from app.repositories.users_repository import UsersRepository
+
+from app.schemas.user import UserProfileCreate, UserProfileResponse
+import app.repositories.users_repository as repo
 
 
-class UsersService:
-    def __init__(self, repository: UsersRepository):
-        self.repository = repository
+def get_all_users(session: Session):
+    users = repo.get_all_users(session=session)
+    return [UserProfileResponse.model_validate(user) for user in users]
 
-    def get_all_users(self, session: Session):
-        return self.repository.get_all_users(session=session)
+
+def create_user_profile(
+    session: Session, user_id: UUID, profile_data: UserProfileCreate
+) -> UserProfileResponse:
+    existing_profile = repo.get_profile_by_id(session, user_id)
+    if existing_profile:
+        raise HTTPException(status_code=400, detail="Profile already exists")
+
+    new_profile = repo.create_user_profile(session, user_id, profile_data)
+    return UserProfileResponse.model_validate(new_profile)

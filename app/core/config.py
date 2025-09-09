@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     DATABASE_NAME: str = "app"
     AUTH_SECRET: str = "dev-secret"
     AUTH_ISSUER: str = "auth-service"
+    AUTH_ALGORITHM: str = "HS256"
 
     @property
     def DATABASE_URL(self) -> str:
