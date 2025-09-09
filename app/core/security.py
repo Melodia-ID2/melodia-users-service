@@ -1,42 +1,46 @@
-from fastapi import Depends, Header, HTTPException, status
+from typing import Any
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, exceptions
 from app.core.config import settings
 
 
-def _parse_bearer_token(authorization: str | None) -> str:
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization header",
-        )
-    return authorization.split(" ", 1)[1]
+security = HTTPBearer(auto_error=False)
 
-
-def _verify_jwt(token: str) -> dict[str, str]:
+def _verify_jwt(token: str) -> dict[str, Any]:
     try:
         payload = jwt.decode(
             token,
             settings.AUTH_SECRET,
             algorithms=["HS256"],
             issuer=settings.AUTH_ISSUER,
-            options={"require": ["exp", "iat", "iss"]},
+            options={
+                "require_exp": True,
+                "require_iat": True,
+                "require_iss": True,
+                "verify_aud": False,
+                "leeway": 5,
+            },
         )
         return payload
     except exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
-    except exceptions.JWTError:
-        raise HTTPException(status_code=401, detail="Could not validate credentials")
+    except exceptions.JWTClaimsError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token claims: {str(e)}")
+    except exceptions.JWTError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
 
 def get_jwt_payload(
-    authorization: str | None = Header(default=None, alias="Authorization"),
-) -> dict[str, str]:
-    token = _parse_bearer_token(authorization)
-    payload = _verify_jwt(token)
-    return payload
+    creds: HTTPAuthorizationCredentials | None = Depends(security),
+) -> dict[str, Any]:
+    if creds is None or (creds.scheme or "").lower() != "bearer" or not creds.credentials:
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+    token = creds.credentials
+    return _verify_jwt(token)
 
 
-def require_admin(payload: dict[str, str] = Depends(get_jwt_payload)) -> dict[str, str]:
+def require_admin(payload: dict[str, Any] = Depends(get_jwt_payload)) -> dict[str, Any]:
     if payload.get("role") != "admin":
         raise HTTPException(status_code=403, detail="forbidden")
     return payload
