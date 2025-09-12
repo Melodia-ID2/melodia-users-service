@@ -9,6 +9,13 @@ class UserRole(str, Enum):
     ARTIST = "artist"
 
 
+class UserGender(Enum):
+    FEMALE = "female"
+    MALE = "male"
+    NON_BINARY = "non_binary"
+    OTHER = "other"
+    PREFER_NOT_TO_SAY = "prefer_not_to_say"
+
 class UserAccount(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     email: str = Field(index=True, unique=True, nullable=False)
@@ -18,7 +25,8 @@ class UserAccount(SQLModel, table=True):
 
 class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True)
-    username: str = Field(index=True, unique=True, nullable=False)
+    username: str | None = Field(index=True, unique=True, nullable=True, default=None)
     full_name: str | None = Field(default=None)
     birthdate: datetime | None = Field(default=None)
     role: UserRole = Field(default=UserRole.LISTENER, nullable=False)
+    gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)
