@@ -1,7 +1,9 @@
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from app.models.user import UserRole
+
+from typing import Optional
+from app.models.user import UserRole, UserGender
 
 
 def _to_camel(string: str) -> str:
@@ -10,10 +12,11 @@ def _to_camel(string: str) -> str:
 
 
 class _UserProfilePayload(BaseModel):
-    username: str
+    username: Optional[str] = None
     full_name: str
     birthdate: datetime | None = None
     role: UserRole
+    gender: UserGender
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -25,7 +28,6 @@ class _UserProfilePayload(BaseModel):
 
 class UserProfileCreate(_UserProfilePayload):
     pass
-
 
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
