@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from app.core.config import settings
-from app.models.user import UserAccount, UserProfile
 import httpx
 import asyncpg
 import asyncio
