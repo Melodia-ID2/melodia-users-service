@@ -16,11 +16,18 @@ class UserGender(Enum):
     OTHER = "other"
     PREFER_NOT_TO_SAY = "prefer_not_to_say"
 
+
+class UserAccountStatus(str, Enum):
+    ACTIVE = "active"
+    BLOCKED = "blocked"
+
+
 class UserAccount(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     email: str = Field(index=True, unique=True, nullable=False)
     password: str = Field(nullable=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    status: UserAccountStatus = Field(default=UserAccountStatus.ACTIVE, nullable=False)
 
 
 class UserProfile(SQLModel, table=True):

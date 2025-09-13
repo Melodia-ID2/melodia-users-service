@@ -1,11 +1,13 @@
 from uuid import UUID
 
+from app.errors.exceptions import NotFoundError
+from app.models.user import UserRole
 from pydantic import ValidationError
-from fastapi import HTTPException
 from sqlmodel import Session
 
 from app.schemas.user import UserProfileCreate, UserProfileResponse
 import app.repositories.users_repository as repo
+
 
 def get_all_users(session: Session) -> list[dict[str, str]]:
     users = repo.get_all_users(session)
@@ -23,3 +25,17 @@ def create_user_profile(
 
     new_profile = repo.create_user_profile(session, user_id, profile_data)
     return UserProfileResponse.model_validate(new_profile)
+
+
+def update_user_role(session: Session, user_id: UUID):
+    user = repo.get_user_account_by_id(session, user_id)
+    if not user:
+        raise NotFoundError("User with id: {} not found".format(user_id))
+    user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
+    _ = repo.create_user_account(session, user)
+    return {
+        "id": str(user.id),
+        "username": user.username,
+        "email": user.email,
+        "role": user.role,
+    }

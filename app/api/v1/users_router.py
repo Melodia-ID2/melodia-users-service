@@ -1,10 +1,10 @@
 from uuid import UUID
+from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, status
 from app.schemas.user import UserProfileCreate
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id, require_admin
-
 import app.controllers.users_controller as controller
 
 
@@ -16,6 +16,15 @@ def get_all_users(
     session: Session = Depends(get_session), _: None = Depends(require_admin)
 ):
     return controller.get_all_users(session)
+
+
+@router.patch("/{user_id}/role", status_code=status.HTTP_200_OK, responses= error_responses(400, 404))
+def update_user_role(
+    user_id: UUID,
+    session: Session = Depends(get_session),
+    _: None = Depends(require_admin),
+):
+    return controller.update_user_role(session, user_id)
 
 
 @router.post("/profile", status_code=status.HTTP_201_CREATED)

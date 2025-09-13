@@ -11,3 +11,7 @@ def get_all_users(session: Session):
 
 def create_user_profile(session: Session, id: UUID, data: UserProfileCreate):
     return {"user": service.create_user_profile(session, id, data)}
+
+
+def update_user_role(session: Session, user_id: UUID):
+    return {"user": service.update_user_role(session, user_id)}

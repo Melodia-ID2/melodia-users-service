@@ -20,6 +20,8 @@ def get_all_users(session: Session):
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
     return session.get(UserProfile, user_id)
 
+def get_user_account_by_id(session: Session, user_id: UUID) -> UserAccount | None:
+    return session.get(UserAccount, user_id)
 
 def create_user_profile(
     session: Session, user_id: UUID, profile_data: UserProfileCreate
@@ -29,3 +31,9 @@ def create_user_profile(
     session.commit()
     session.refresh(new_profile)
     return new_profile
+
+def create_user_account(session: Session, user: UserAccount) -> UserAccount:
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
