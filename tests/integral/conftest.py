@@ -9,6 +9,9 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.models.user import UserAccount, UserProfile
 import httpx
+import asyncpg
+import asyncio
+
 
 
 BASE_URL = "http://localhost:8002"
@@ -34,6 +37,23 @@ async def truncate_tables():
             print(f"Error al limpiar tablas: {e}")
             raise
 
+
+async def wait_for_db():
+    for _ in range(30):
+        try:
+            conn = await asyncpg.connect(
+                user=settings.DATABASE_USER,
+                password=settings.DATABASE_PASSWORD,
+                database=settings.DATABASE_NAME,
+                host=settings.DATABASE_HOST,
+                port=settings.DATABASE_PORT,
+            )
+            await conn.close()
+            return
+        except Exception:
+            await asyncio.sleep(1)
+
+
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def prepare_db():
     await create_tables()
@@ -46,9 +66,13 @@ async def clean_tables_fixture():
     yield
 
 
+
+
 @pytest.fixture(scope="session", autouse=True)
 def start_server():
+
     """Levanta uvicorn dentro del contenedor para tests integrales."""
+    asyncio.run(wait_for_db())
     proc = subprocess.Popen(
         ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
     )
