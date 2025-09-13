@@ -34,3 +34,11 @@ def create_user_profile(
     user_id: UUID = Depends(get_current_user_id),
 ):
     return controller.create_user_profile(session, user_id, profile_data)
+
+@router.delete("/{user_id}/delete", status_code=status.HTTP_204_NO_CONTENT, responses= error_responses(400, 404))
+def delete_user(
+    user_id: UUID,
+    session: Session = Depends(get_session),
+    _: None = Depends(require_admin),
+):
+    return controller.delete_user(session, user_id)

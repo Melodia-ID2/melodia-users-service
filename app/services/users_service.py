@@ -39,3 +39,13 @@ def update_user_role(session: Session, user_id: UUID):
         "email": user.email,
         "role": user.role,
     }
+
+
+def delete_user(session: Session, user_id: UUID):
+    profile = repo.get_profile_by_id(session, user_id)
+    account = repo.get_user_account_by_id(session, user_id)
+    if not profile or not account:
+        raise NotFoundError("User with id: {} not found".format(user_id))
+    _= repo.delete_user_profile(session, profile)
+    _= repo.delete_user_account(session, account)
+    return None
