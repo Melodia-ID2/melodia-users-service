@@ -1,4 +1,5 @@
 from typing import Any
+from app.errors.exceptions import AuthenticationError
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, exceptions
@@ -40,7 +41,7 @@ def get_jwt_payload(
         or (creds.scheme or "").lower() != "bearer"
         or not creds.credentials
     ):
-        raise HTTPException(status_code=401, detail="Invalid authorization header")
+        raise AuthenticationError("Invalid or missing authorization token")
     token = creds.credentials
     return _verify_jwt(token)
 

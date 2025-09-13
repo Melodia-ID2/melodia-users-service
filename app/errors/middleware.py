@@ -5,6 +5,7 @@ from app.errors.exceptions import (
     ValidationError,
     NotFoundError,
     DatabaseError,
+    AuthenticationError
 )
 from app.errors.error_responses import create_error_response
 
@@ -32,6 +33,14 @@ class Middleware(BaseHTTPMiddleware):
                 status_code=404,
                 content=create_error_response(
                     404, "Resource Not Found", str(exc), str(request.url.path)
+                ),
+            )
+
+        except AuthenticationError as exc:
+            return JSONResponse(
+                status_code=401,
+                content=create_error_response(
+                    401, "Authentication Error", str(exc), str(request.url.path)
                 ),
             )
 

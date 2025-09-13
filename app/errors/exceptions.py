@@ -16,3 +16,8 @@ class NotFoundError(MelodiaError):
 class DatabaseError(MelodiaError):
     """Database-related errors"""
     pass
+
+
+class AuthenticationError(MelodiaError):
+    """Authentication-related errors"""
+    pass
