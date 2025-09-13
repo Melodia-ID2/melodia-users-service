@@ -48,7 +48,7 @@ def get_jwt_payload(
 
 def require_admin(payload: dict[str, Any] = Depends(get_jwt_payload)) -> dict[str, Any]:
     if payload.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin privileges required")
+        raise AuthenticationError("Admin privileges required")
     return payload
 
 
