@@ -1,7 +1,7 @@
-FROM python:3.12-slim
+FROM python:3.12-slim AS base
 
 ENV PYTHONUNBUFFERED=1 \
-    POETRY_VIRTUALENVS_CREATE=false
+  POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /app
 
@@ -18,4 +18,11 @@ COPY . .
 
 EXPOSE ${PORT:-8002}
 
+# Stage de test
+FROM base AS test
+RUN pip install --no-cache-dir pytest pytest-cov
+CMD ["pytest", "--maxfail=1", "--disable-warnings", "-q"]
+
+# Stage dev
+FROM base AS dev
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8002}"]

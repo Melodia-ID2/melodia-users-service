@@ -1,0 +1,46 @@
+services:
+
+  users-test-db:
+    image: postgres:16.3-bookworm
+    container_name: users-test-db
+    environment:
+      POSTGRES_DB: melodia_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - test-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d melodia_test -h localhost || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  users-integral-tests:
+    build:
+      context: .
+      target: test
+    container_name: users-integral-tests
+    env_file: .env.test
+    networks:
+      - test-net
+    depends_on:
+      - users-test-db
+    command: >
+      pytest -c pytest_integral.ini tests/integral --maxfail=1 --disable-warnings
+
+  # servicio para tests unitarios (usa pytest por defecto en el stage test)
+  users-tests:
+    build:
+      context: .
+      target: test
+    container_name: users-tests
+    env_file: .env.test
+    networks:
+      - test-net
+    depends_on:
+      - users-test-db
+
+networks:
+  test-net:
+    external: false

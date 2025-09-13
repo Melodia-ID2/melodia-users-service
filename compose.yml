@@ -1,6 +1,8 @@
 services:
   users:
-    build: .
+    build:
+      context: .
+      target: dev
     container_name: users-service
     env_file: .env
     ports:
