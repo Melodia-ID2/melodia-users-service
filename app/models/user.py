@@ -31,9 +31,16 @@ class UserAccount(SQLModel, table=True):
 
 
 class UserProfile(SQLModel, table=True):
-    id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True)
+    id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")
     username: str | None = Field(index=True, unique=True, nullable=True, default=None)
     full_name: str | None = Field(default=None)
     birthdate: datetime | None = Field(default=None)
     role: UserRole = Field(default=UserRole.LISTENER, nullable=False)
     gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)
+
+class RefreshToken(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="useraccount.id", ondelete="CASCADE", index=True, nullable=False)
+    token: str = Field(nullable=False, unique=True)
+    revoked: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

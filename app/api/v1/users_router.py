@@ -35,7 +35,7 @@ def create_user_profile(
 ):
     return controller.create_user_profile(session, user_id, profile_data)
 
-@router.delete("/{user_id}/delete", status_code=status.HTTP_204_NO_CONTENT, responses= error_responses(400, 404))
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, responses= error_responses(400, 404))
 def delete_user(
     user_id: UUID,
     session: Session = Depends(get_session),

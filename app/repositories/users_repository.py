@@ -38,11 +38,6 @@ def create_user_account(session: Session, user: UserAccount) -> UserAccount:
     session.refresh(user)
     return user
 
-def delete_user_profile(session: Session, profile: UserProfile) -> None:
-    session.delete(profile)
-    session.commit()
-    return None
-
 def delete_user_account(session: Session, account: UserAccount) -> None:
     session.delete(account)
     session.commit()
