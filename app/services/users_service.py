@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from app.errors.exceptions import NotFoundError
-from app.models.user import UserRole
+from app.models.user import UserProfile, UserRole
 from pydantic import ValidationError
 from sqlmodel import Session
 
@@ -22,7 +22,7 @@ def create_user_profile(
     existing_profile = repo.get_profile_by_id(session, user_id)
     if existing_profile:
         raise ValidationError("Profile already exists")
-
+    new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     new_profile = repo.create_user_profile(session, user_id, profile_data)
     return UserProfileResponse.model_validate(new_profile)
 
@@ -31,13 +31,16 @@ def update_user_role(session: Session, user_id: UUID):
     user = repo.get_user_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("User with id: {} not found".format(user_id))
-    user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
+    user_profile = repo.get_profile_by_id(session, user_id)
+    user_profile.role = UserRole.ARTIST if user_profile.role == UserRole.LISTENER else UserRole.LISTENER
+    _ = repo.create_user_profile(session, user_profile)
     _ = repo.create_user_account(session, user)
+    
     return {
         "id": str(user.id),
-        "username": user.username,
+        "username": user_profile.username,
         "email": user.email,
-        "role": user.role,
+        "role": user_profile.role,
     }
 
 

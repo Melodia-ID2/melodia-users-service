@@ -24,9 +24,8 @@ def get_user_account_by_id(session: Session, user_id: UUID) -> UserAccount | Non
     return session.get(UserAccount, user_id)
 
 def create_user_profile(
-    session: Session, user_id: UUID, profile_data: UserProfileCreate
+    session: Session, new_profile: UserProfile
 ) -> UserProfile:
-    new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     session.add(new_profile)
     session.commit()
     session.refresh(new_profile)
