@@ -43,6 +43,7 @@ def test_01_delete_user_returns_204_and_deletes_user():
         assert deleted_token is None
         assert deleted_profile is None
         assert deleted_user is None
+    app.dependency_overrides = {}
 
 def test_02_delete_user_with_many_tokens_deletes_all_tokens():
     app.dependency_overrides[require_admin] = override_require_admin
@@ -75,6 +76,7 @@ def test_02_delete_user_with_many_tokens_deletes_all_tokens():
         assert deleted_token2 is None
         assert deleted_profile is None
         assert deleted_user is None
+    app.dependency_overrides = {}
 
 def test_03_delete_nonexistent_user_returns_404():
     app.dependency_overrides[require_admin] = override_require_admin

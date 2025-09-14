@@ -111,3 +111,4 @@ def test_05_patch_user_status_with_non_admin_token_returns_401():
         "detail": "Admin privileges required",
         "instance": f"/users/{user_id}/status"
     }
+    app.dependency_overrides = {}

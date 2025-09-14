@@ -84,6 +84,7 @@ def test_03_patch_user_with_non_existent_id_returns_404():
         "detail": f"User with id: {user_id} not found",
         "instance": f"/users/{user_id}/role"
     }
+    app.dependency_overrides = {}
 
 def test_04_patch_user_role_without_admin_token_returns_401():
     user_id = uuid.uuid4()
@@ -112,3 +113,4 @@ def test_05_patch_user_role_with_non_admin_token_returns_401():
         "detail": "Admin privileges required",
         "instance": f"/users/{user_id}/role"
     }
+    app.dependency_overrides = {}

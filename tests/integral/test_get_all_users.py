@@ -104,3 +104,4 @@ async def test_05_get_all_without_admin_role_returns_401():
         "detail": "Admin privileges required",
         "instance": "/users/"
     }
+    app.dependency_overrides = {}
