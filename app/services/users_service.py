@@ -32,15 +32,14 @@ def update_user_role(session: Session, user_id: UUID):
     if not user:
         raise NotFoundError("User with id: {} not found".format(user_id))
     user_profile = repo.get_profile_by_id(session, user_id)
-    user_profile.role = UserRole.ARTIST if user_profile.role == UserRole.LISTENER else UserRole.LISTENER
-    _ = repo.create_user_profile(session, user_profile)
+    user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
     _ = repo.create_user_account(session, user)
-    
+    username= None if not user_profile else user_profile.username
     return {
         "id": str(user.id),
-        "username": user_profile.username,
+        "username": username,
         "email": user.email,
-        "role": user_profile.role,
+        "role": user.role,
         "status": user.status,
     }
 
@@ -59,10 +58,11 @@ def update_user_status(session: Session, user_id: UUID):
     user.status = UserAccountStatus.ACTIVE if user.status == UserAccountStatus.BLOCKED else UserAccountStatus.BLOCKED
     _ = repo.create_user_account(session, user)
     user_profile = repo.get_profile_by_id(session, user_id)
+    username= None if not user_profile else user_profile.username
     return {
         "id": str(user.id),
-        "username": user_profile.username,
+        "username": username,
         "email": user.email,
-        "role": user_profile.role,
+        "role": user.role,
         "status": user.status,
     }

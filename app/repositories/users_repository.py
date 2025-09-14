@@ -8,12 +8,12 @@ from app.models.user import UserAccount, UserProfile
 def get_all_users(session: Session):
     stmt = (
         select(
-            UserProfile.id,
+            UserAccount.id,
             UserProfile.username,
             UserAccount.email,
-            UserProfile.role,
+            UserAccount.role,
             UserAccount.status,
-        ).join(UserAccount, UserProfile.id == UserAccount.id)  # type: ignore
+        ).outerjoin(UserProfile, UserAccount.id == UserProfile.id)  # type: ignore
     )
     return session.exec(stmt).all()
 
