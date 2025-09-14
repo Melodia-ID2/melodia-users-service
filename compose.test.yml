@@ -1,5 +1,4 @@
 services:
-
   users-test-db:
     image: postgres:16.3-bookworm
     container_name: users-test-db
@@ -10,7 +9,11 @@ services:
     networks:
       - test-net
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d melodia_test -h localhost || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d melodia_test -h localhost || exit 1",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -25,7 +28,8 @@ services:
     networks:
       - test-net
     depends_on:
-      - users-test-db
+      users-test-db:
+        condition: service_healthy
     command: >
       pytest -c pytest_integral.ini tests/integral --maxfail=1 --disable-warnings
 
