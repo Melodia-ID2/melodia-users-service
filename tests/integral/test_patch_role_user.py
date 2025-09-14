@@ -40,7 +40,8 @@ def test_01_patch_user_with_listener_role_to_artist():
             "id": str(user_id),
             "email": "test@example.com",
             "username": None,
-            "role": "artist"
+            "role": "artist",
+            "status": "active"
         }
     }
     with Session(sync_engine) as session:
@@ -61,7 +62,8 @@ def test_02_patch_user_with_artist_role_to_listener():
             "id": str(user_id),
             "email": "test@example.com",
             "username": None,
-            "role": "listener"
+            "role": "listener",
+            "status": "active"
         }
     }
     with Session(sync_engine) as session:

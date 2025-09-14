@@ -39,6 +39,7 @@ def assert_n_users_in_response(response, n, user_ids):
         assert user["email"] == f"email{i+1}@example.com"
         assert user["username"] == None
         assert user["role"] == "listener"
+        assert user["status"] == "active"
 
 def override_require_admin():
     return None
