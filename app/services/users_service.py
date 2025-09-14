@@ -12,7 +12,7 @@ import app.repositories.users_repository as repo
 def get_all_users(session: Session) -> list[dict[str, str]]:
     users = repo.get_all_users(session)
     return [
-        {"id": str(u[0]), "username": u[1], "email": u[2], "role": u[3]} for u in users
+        {"id": str(u[0]), "username": u[1], "email": u[2], "role": u[3], "status": u[4]} for u in users
     ]
 
 
@@ -41,6 +41,7 @@ def update_user_role(session: Session, user_id: UUID):
         "username": user_profile.username,
         "email": user.email,
         "role": user_profile.role,
+        "status": user.status,
     }
 
 

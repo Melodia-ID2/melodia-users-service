@@ -12,6 +12,7 @@ def get_all_users(session: Session):
             UserProfile.username,
             UserAccount.email,
             UserProfile.role,
+            UserAccount.status,
         ).join(UserAccount, UserProfile.id == UserAccount.id)  # type: ignore
     )
     return session.exec(stmt).all()
