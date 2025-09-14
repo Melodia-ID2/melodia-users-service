@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from app.errors.exceptions import NotFoundError
-from app.models.user import UserProfile, UserRole
+from app.models.user import UserAccountStatus, UserProfile, UserRole
 from pydantic import ValidationError
 from sqlmodel import Session
 
@@ -50,3 +50,18 @@ def delete_user(session: Session, user_id: UUID):
         raise NotFoundError("User with id: {} not found".format(user_id))
     _= repo.delete_user_account(session, account)
     return None
+
+def update_user_status(session: Session, user_id: UUID):
+    user = repo.get_user_account_by_id(session, user_id)
+    if not user:
+        raise NotFoundError("User with id: {} not found".format(user_id))
+    user.status = UserAccountStatus.ACTIVE if user.status == UserAccountStatus.BLOCKED else UserAccountStatus.BLOCKED
+    _ = repo.create_user_account(session, user)
+    user_profile = repo.get_profile_by_id(session, user_id)
+    return {
+        "id": str(user.id),
+        "username": user_profile.username,
+        "email": user.email,
+        "role": user_profile.role,
+        "status": user.status,
+    }

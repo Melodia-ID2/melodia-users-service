@@ -19,3 +19,6 @@ def update_user_role(session: Session, user_id: UUID):
 def delete_user(session: Session, user_id: UUID):
     service.delete_user(session, user_id)
     return None
+
+def update_user_status(session: Session, user_id: UUID):
+    return {"user": service.update_user_status(session, user_id)}

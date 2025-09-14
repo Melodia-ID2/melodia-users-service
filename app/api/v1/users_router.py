@@ -42,3 +42,11 @@ def delete_user(
     _: None = Depends(require_admin),
 ):
     return controller.delete_user(session, user_id)
+
+@router.patch("/{user_id}/status", status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
+def update_user_status(
+    user_id: UUID,
+    session: Session = Depends(get_session),
+    _: None = Depends(require_admin),
+):
+    return controller.update_user_status(session, user_id)
