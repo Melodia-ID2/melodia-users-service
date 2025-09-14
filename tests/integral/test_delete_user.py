@@ -15,6 +15,9 @@ sync_engine = create_engine(settings.DATABASE_URL.replace('+asyncpg', ''))
 def override_require_admin():
     return None
 
+def override_get_jwt_payload():
+    return {"role": "listener"}
+
 def test_01_delete_user_returns_204_and_deletes_user():
     app.dependency_overrides[require_admin] = override_require_admin
     user_id = uuid.uuid4()
@@ -87,3 +90,33 @@ def test_03_delete_nonexistent_user_returns_404():
         "detail": f"User with id: {user_id} not found",
         "instance": f"/users/{user_id}"
     }
+    app.dependency_overrides = {}
+
+def test_04_delete_user_without_admin_token_returns_401():
+    user_id = uuid.uuid4()
+    client = TestClient(app)
+    response = client.delete(f"/users/{user_id}")
+    assert response.status_code == 401
+    assert response.json() == {
+        "type": "about:blank",
+        "title": "Authentication Error",
+        "status": 401,
+        "detail": "Invalid or missing authorization token",
+        "instance": f"/users/{user_id}"
+    }
+
+def test_05_delete_user_with_non_admin_token_returns_401():
+    app.dependency_overrides[get_jwt_payload] = override_get_jwt_payload
+    user_id = uuid.uuid4()
+    client = TestClient(app)
+    headers = {"Authorization": f"Bearer {user_id}"}
+    response = client.delete(f"/users/{user_id}", headers=headers)
+    assert response.status_code == 401
+    assert response.json() == {
+        "type": "about:blank",
+        "title": "Authentication Error",
+        "status": 401,
+        "detail": "Admin privileges required",
+        "instance": f"/users/{user_id}"
+    }
+    app.dependency_overrides = {}

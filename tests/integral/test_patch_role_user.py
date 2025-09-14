@@ -13,6 +13,9 @@ sync_engine = create_engine(settings.DATABASE_URL.replace('+asyncpg', ''))
 def override_require_admin():
     return None
 
+def override_get_jwt_payload():
+    return {"role": "listener"}
+
 def create_user_with_role(role: str) -> uuid.UUID:
     user_id = uuid.uuid4()
     with Session(sync_engine) as session:
@@ -79,5 +82,33 @@ def test_03_patch_user_with_non_existent_id_returns_404():
         "title": "Resource Not Found",
         "status": 404,
         "detail": f"User with id: {user_id} not found",
+        "instance": f"/users/{user_id}/role"
+    }
+
+def test_04_patch_user_role_without_admin_token_returns_401():
+    user_id = uuid.uuid4()
+    client = TestClient(app)
+    response = client.patch(f"/users/{user_id}/role")
+    assert response.status_code == 401
+    assert response.json() == {
+        "type": "about:blank",
+        "title": "Authentication Error",
+        "status": 401,
+        "detail": "Invalid or missing authorization token",
+        "instance": f"/users/{user_id}/role"
+    }
+
+def test_05_patch_user_role_with_non_admin_token_returns_401():
+    app.dependency_overrides[get_jwt_payload] = override_get_jwt_payload
+    user_id = uuid.uuid4()
+    client = TestClient(app)
+    headers = {"Authorization": f"Bearer {user_id}"}
+    response = client.patch(f"/users/{user_id}/role", headers=headers)
+    assert response.status_code == 401
+    assert response.json() == {
+        "type": "about:blank",
+        "title": "Authentication Error",
+        "status": 401,
+        "detail": "Admin privileges required",
         "instance": f"/users/{user_id}/role"
     }
