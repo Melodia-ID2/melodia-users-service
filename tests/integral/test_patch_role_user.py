@@ -19,8 +19,8 @@ def override_get_jwt_payload():
 def create_user_with_role(role: str) -> uuid.UUID:
     user_id = uuid.uuid4()
     with Session(sync_engine) as session:
-        user = UserAccount(id=user_id, email="test@example.com", password="password")
-        user_profile = UserProfile(id=user_id, role=role)
+        user = UserAccount(id=user_id, email="test@example.com", password="password", role=role)
+        user_profile = UserProfile(id=user_id)
         session.add(user)
         session.add(user_profile)
 
@@ -45,8 +45,8 @@ def test_01_patch_user_with_listener_role_to_artist():
         }
     }
     with Session(sync_engine) as session:
-        user_profile = session.get(UserProfile, user_id)
-        assert user_profile.role == "artist"
+        user = session.get(UserAccount, user_id)
+        assert user.role == "artist"
     app.dependency_overrides = {}
 
 def test_02_patch_user_with_artist_role_to_listener():
@@ -67,8 +67,8 @@ def test_02_patch_user_with_artist_role_to_listener():
         }
     }
     with Session(sync_engine) as session:
-        user_profile = session.get(UserProfile, user_id)
-        assert user_profile.role == "listener"
+        user = session.get(UserAccount, user_id)
+        assert user.role == "listener"
     app.dependency_overrides = {}
 
 def test_03_patch_user_with_non_existent_id_returns_404():
@@ -115,4 +115,20 @@ def test_05_patch_user_role_with_non_admin_token_returns_401():
         "detail": "Admin privileges required",
         "instance": f"/users/{user_id}/role"
     }
+    app.dependency_overrides = {}
+
+def test_06_patch_user_with_existent_account_and_non_exist_profile_returns_200():
+    app.dependency_overrides[require_admin] = override_require_admin
+    user_id = uuid.uuid4()
+    user = UserAccount(id=user_id, email="test@example.com", password="password")
+    with Session(sync_engine) as session:
+        session.add(user)
+        session.commit()
+        user_id_str = str(user.id)
+        user_email = user.email
+    client = TestClient(app)
+    headers = {"Authorization": f"Bearer {user_id_str}"}
+    response = client.patch(f"/users/{user_id_str}/role", headers=headers)
+    assert response.status_code == 200
+    assert response.json() == {"user": {"id": user_id_str, "email": user_email, "username": None, "role": "artist", "status": "active"}}
     app.dependency_overrides = {}
