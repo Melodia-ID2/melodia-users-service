@@ -23,7 +23,7 @@ def create_user_profile(
     if existing_profile:
         raise ValidationError("Profile already exists")
     new_profile = UserProfile(id=user_id, **profile_data.model_dump())
-    new_profile = repo.create_user_profile(session, user_id, profile_data)
+    new_profile = repo.create_user_profile(session, new_profile)
     return UserProfileResponse.model_validate(new_profile)
 
 
