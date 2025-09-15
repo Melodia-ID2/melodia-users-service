@@ -33,14 +33,12 @@ def test_01_patch_user_status_from_active_to_blocked():
     headers = {"Authorization": f"Bearer {user_id}"}
     response = client.patch(f"/users/{user_id}/status", headers=headers)
     assert response.status_code == 200
-    assert response.json()=={
-        "user": {
-            "id": str(user_id),
-            "email": "test@example.com",
-            "username": None,
-            "role": "listener",
-            "status": "blocked"
-        }
+    assert response.json() == {
+        "id": str(user_id),
+        "email": "test@example.com",
+        "username": None,
+        "role": "listener",
+        "status": "blocked"
     }
     with Session(sync_engine) as session:
         user_account = session.get(UserAccount, user_id)
@@ -54,14 +52,12 @@ def test_02_patch_user_status_from_blocked_to_active():
     headers = {"Authorization": f"Bearer {user_id}"}
     response = client.patch(f"/users/{user_id}/status", headers=headers)
     assert response.status_code == 200
-    assert response.json()=={
-        "user": {
-            "id": str(user_id),
-            "email": "test@example.com",
-            "username": None,
-            "role": "listener",
-            "status": "active"
-        }
+    assert response.json() == {
+        "id": str(user_id),
+        "email": "test@example.com",
+        "username": None,
+        "role": "listener",
+        "status": "active"
     }
     with Session(sync_engine) as session:
         user_account = session.get(UserAccount, user_id)
@@ -126,5 +122,5 @@ def test_06_patch_user_status_with_existent_account_and_non_exist_profile_return
     headers = {"Authorization": f"Bearer {user_id_str}"}
     response = client.patch(f"/users/{user_id_str}/status", headers=headers)
     assert response.status_code == 200
-    assert response.json() == {"user": {"id": user_id_str, "email": user_email, "username": None, "role": "listener", "status": "blocked"}}
+    assert response.json() == {"id": user_id_str, "email": user_email, "username": None, "role": "listener", "status": "blocked"}
     app.dependency_overrides = {}

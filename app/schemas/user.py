@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 from typing import Optional
-from app.models.user import UserRole, UserGender
+from app.models.user import UserGender
 
 
 def _to_camel(string: str) -> str:
@@ -15,7 +15,6 @@ class _UserProfilePayload(BaseModel):
     username: Optional[str] = None
     full_name: str
     birthdate: datetime | None = None
-    role: UserRole
     gender: UserGender
 
     model_config = ConfigDict(
@@ -31,3 +30,14 @@ class UserProfileCreate(_UserProfilePayload):
 
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
+
+class UserInfoToList(BaseModel):
+    id: str
+    email: str
+    username: Optional[str] = None
+    role: str
+    status: str
+
+class GetAllUserResponse(BaseModel):
+    users: list[UserInfoToList]
+
