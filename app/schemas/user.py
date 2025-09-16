@@ -37,6 +37,15 @@ class UserInfoToList(BaseModel):
     username: Optional[str] = None
     role: str
     status: str
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    last_login: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+    model_config = ConfigDict(
+        alias_generator=_to_camel,
+    )
+
 
 class GetAllUserResponse(BaseModel):
     users: list[UserInfoToList]
