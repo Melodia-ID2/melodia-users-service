@@ -17,6 +17,15 @@ def get_all_users(
     return controller.get_all_users(session)
 
 
+@router.get("/{user_id}", response_model=UserInfoToList, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
+def get_user(
+    user_id: UUID,
+    session: Session = Depends(get_session),
+    _: None = Depends(require_admin),
+):
+    return controller.get_user(session, user_id)
+
+
 @router.patch("/{user_id}/role", response_model=UserInfoToList, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
 def update_user_role(
     user_id: UUID,

@@ -9,6 +9,10 @@ def get_all_users(session: Session):
     return {"users": service.get_all_users(session)}
 
 
+def get_user(session: Session, user_id: UUID):
+    return service.get_user(session, user_id)
+
+
 def create_user_profile(session: Session, id: UUID, data: UserProfileCreate):
     return service.create_user_profile(session, id, data)
 

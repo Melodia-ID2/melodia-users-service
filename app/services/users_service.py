@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from app.errors.exceptions import NotFoundError
@@ -14,6 +15,25 @@ def get_all_users(session: Session) -> list[dict[str, str]]:
     return [
         {"id": str(u[0]), "username": u[1], "email": u[2], "role": u[3], "status": u[4]} for u in users
     ]
+
+
+def get_user(session: Session, user_id: UUID) -> dict[str, Any]:
+    user = repo.get_user_account_by_id(session, user_id)
+    if not user:
+        raise NotFoundError("User with id: {} not found".format(user_id))
+    user_profile = repo.get_profile_by_id(session, user_id)
+    username = None if not user_profile else user_profile.username
+    return {
+        "id": str(user.id),
+        "username": username,
+        "email": user.email,
+        "role": user.role,
+        "status": user.status,
+        "phone_number": None if not user_profile else user_profile.phone_number,
+        "address": None if not user_profile else user_profile.address,
+        "last_login": user.last_login,
+        "created_at": user.created_at,
+    }
 
 
 def create_user_profile(
@@ -41,6 +61,10 @@ def update_user_role(session: Session, user_id: UUID):
         "email": user.email,
         "role": user.role,
         "status": user.status,
+        "phone_number": None if not user_profile else user_profile.phone_number,
+        "address": None if not user_profile else user_profile.address,
+        "last_login": user.last_login,
+        "created_at": user.created_at,
     }
 
 
@@ -65,4 +89,8 @@ def update_user_status(session: Session, user_id: UUID):
         "email": user.email,
         "role": user.role,
         "status": user.status,
+        "phone_number": None if not user_profile else user_profile.phone_number,
+        "address": None if not user_profile else user_profile.address,
+        "last_login": user.last_login,
+        "created_at": user.created_at,
     }
