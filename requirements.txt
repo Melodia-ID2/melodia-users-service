@@ -1,23 +1,26 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 
+# Linteo y formateo
+ruff==0.12.12
+
 # ORM + DB
-sqlmodel==0.0.22
-psycopg2-binary==2.9.9
+sqlmodel==0.0.24
+psycopg[binary]==3.2.*
 alembic==1.13.2
 
 # Validaciones extra
-pydantic==2.9.2
+pydantic==2.11.7
+pydantic-settings==2.10.1
 python-dotenv==1.0.1
 
 # Seguridad / JWT
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+bcrypt<4.0.0
 
 # Testing
 pytest==8.3.3
 httpx==0.27.2
 pytest-asyncio==0.23.8
-
-# Utils
-requests==2.32.3
+asyncpg>=0.27.0
