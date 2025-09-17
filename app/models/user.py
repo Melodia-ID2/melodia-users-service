@@ -29,7 +29,7 @@ class UserAccount(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     role: UserRole = Field(default=UserRole.LISTENER, nullable=False)
     status: UserAccountStatus = Field(default=UserAccountStatus.ACTIVE, nullable=False)
-
+    is_profile_completed: bool = Field(default=False)
 
 class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")

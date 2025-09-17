@@ -21,3 +21,11 @@ class DatabaseError(MelodiaError):
 class AuthenticationError(MelodiaError):
     """Authentication-related errors"""
     pass
+
+class UsernameTakenError(ValidationError):
+    """Username already taken"""
+    pass
+
+class ProfileAlreadyExistsError(ValidationError):
+    """Profile already exists"""
+    pass
