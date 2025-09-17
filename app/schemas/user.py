@@ -34,9 +34,10 @@ class UserProfileResponse(_UserProfilePayload):
 class UserInfoToList(BaseModel):
     id: str
     email: str
-    username: Optional[str] = None
     role: str
     status: str
+    username: Optional[str] = None
+    full_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
     last_login: Optional[datetime] = None
