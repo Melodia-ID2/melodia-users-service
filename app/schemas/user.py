@@ -42,6 +42,7 @@ class UserDetailedInfo(UserBasicInfo):
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
+    birthdate: datetime | None = None
     last_login: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
