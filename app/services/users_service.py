@@ -23,9 +23,11 @@ def create_user_profile(
     existing_profile = repo.get_profile_by_id(session, user_id)
     if existing_profile:
         raise ProfileAlreadyExistsError("El perfil ya existe")
-    existing_username = repo.get_profile_by_username(session, profile_data.username)
-    if existing_username:
-        raise UsernameTakenError("El nombre de usuario ya está en uso")
+    # Así pueden haber varios artistas sin nombre inicialmente
+    if profile_data.username and profile_data.username.strip():
+        existing_username = repo.get_profile_by_username(session, profile_data.username)
+        if existing_username:
+            raise UsernameTakenError("El nombre de usuario ya está en uso")
     new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     new_profile = repo.create_user_profile(session, new_profile)
     return UserProfileResponse.model_validate(new_profile)
