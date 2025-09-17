@@ -1,7 +1,7 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, status
-from app.schemas.user import GetAllUserResponse, UserInfoToList, UserProfileCreate
+from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id, require_admin
@@ -17,7 +17,7 @@ def get_all_users(
     return controller.get_all_users(session)
 
 
-@router.get("/{user_id}", response_model=UserInfoToList, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
+@router.get("/{user_id}", response_model=UserDetailedInfo, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
 def get_user(
     user_id: UUID,
     session: Session = Depends(get_session),
@@ -26,7 +26,7 @@ def get_user(
     return controller.get_user(session, user_id)
 
 
-@router.patch("/{user_id}/role", response_model=UserInfoToList, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
+@router.patch("/{user_id}/role", response_model=UserDetailedInfo, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
 def update_user_role(
     user_id: UUID,
     session: Session = Depends(get_session),
@@ -51,7 +51,7 @@ def delete_user(
 ):
     return controller.delete_user(session, user_id)
 
-@router.patch("/{user_id}/status", response_model=UserInfoToList, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
+@router.patch("/{user_id}/status", response_model=UserDetailedInfo, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
 def update_user_status(
     user_id: UUID,
     session: Session = Depends(get_session),

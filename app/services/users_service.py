@@ -1,4 +1,3 @@
-from typing import Any
 from uuid import UUID
 
 from app.errors.exceptions import NotFoundError
@@ -6,7 +5,7 @@ from app.models.user import UserAccountStatus, UserProfile, UserRole
 from pydantic import ValidationError
 from sqlmodel import Session
 
-from app.schemas.user import UserInfoToList, UserProfileCreate, UserProfileResponse
+from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse
 import app.repositories.users_repository as repo
 
 
@@ -17,12 +16,12 @@ def get_all_users(session: Session) -> list[dict[str, str]]:
     ]
 
 
-def get_user(session: Session, user_id: UUID) -> UserInfoToList:
+def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
     user = repo.get_user_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("User with id: {} not found".format(user_id))
     user_profile = repo.get_profile_by_id(session, user_id)
-    return UserInfoToList(
+    return UserDetailedInfo(
         id=str(user.id),
         username=None if not user_profile else user_profile.username,
         email=user.email,
@@ -48,7 +47,7 @@ def create_user_profile(
     return UserProfileResponse.model_validate(new_profile)
 
 
-def update_user_role(session: Session, user_id: UUID) -> UserInfoToList:
+def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
     user = repo.get_user_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("User with id: {} not found".format(user_id))
@@ -56,7 +55,7 @@ def update_user_role(session: Session, user_id: UUID) -> UserInfoToList:
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
     _ = repo.create_user_account(session, user)
     username= None if not user_profile else user_profile.username
-    return UserInfoToList(
+    return UserDetailedInfo(
         id=str(user.id),
         username=username,
         email=user.email,
@@ -76,7 +75,7 @@ def delete_user(session: Session, user_id: UUID):
     _= repo.delete_user_account(session, account)
     return None
 
-def update_user_status(session: Session, user_id: UUID) -> UserInfoToList:
+def update_user_status(session: Session, user_id: UUID) -> UserDetailedInfo:
     user = repo.get_user_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("User with id: {} not found".format(user_id))
@@ -84,7 +83,7 @@ def update_user_status(session: Session, user_id: UUID) -> UserInfoToList:
     _ = repo.create_user_account(session, user)
     user_profile = repo.get_profile_by_id(session, user_id)
     username= None if not user_profile else user_profile.username
-    return UserInfoToList(
+    return UserDetailedInfo(
         id=str(user.id),
         username=username,
         email=user.email,

@@ -31,12 +31,14 @@ class UserProfileCreate(_UserProfilePayload):
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
 
-class UserInfoToList(BaseModel):
+class UserBasicInfo(BaseModel):
     id: str
     email: str
+    username: str | None = None
     role: str
     status: str
-    username: Optional[str] = None
+
+class UserDetailedInfo(UserBasicInfo):
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
@@ -49,5 +51,5 @@ class UserInfoToList(BaseModel):
 
 
 class GetAllUserResponse(BaseModel):
-    users: list[UserInfoToList]
+    users: list[UserBasicInfo]
 
