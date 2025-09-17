@@ -47,6 +47,9 @@ class UserDetailedInfo(UserBasicInfo):
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
+        populate_by_name=True,
+        extra="forbid",
+        from_attributes=True,
     )
 
 
