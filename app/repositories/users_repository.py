@@ -13,7 +13,7 @@ def get_all_users(session: Session):
             UserAccount.email,
             UserAccount.role,
             UserAccount.status,
-        ).outerjoin(UserProfile, UserAccount.id == UserProfile.id)  # type: ignore
+        ).outerjoin(UserProfile, UserAccount.id == UserProfile.id)
     )
     return session.exec(stmt).all()
 

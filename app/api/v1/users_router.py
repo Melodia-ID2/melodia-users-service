@@ -8,7 +8,6 @@ from app.core.security import get_current_user_id, require_admin
 import app.controllers.users_controller as controller
 from app.schemas.photo_profile import PhotoProfileResponse
 
-
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/", response_model=GetAllUserResponse, status_code=status.HTTP_200_OK, responses= error_responses(401))
@@ -61,13 +60,9 @@ def update_user_status(
     return controller.update_user_status(session, user_id)
 
 
-@router.post("/upload-photo-profile", response_model=PhotoProfileResponse)
-async def upload_photo_profile(
+@router.post("/photo-profile", response_model=PhotoProfileResponse)
+async def update_photo_profile(
     file: UploadFile = File(...), 
-    current_user_id: UUID = Depends(get_current_user_id),
-    session: Session = Depends(get_session),
+    current_user_id: UUID = Depends(get_current_user_id)
 ):
-
-    uploaded_url = "https://storage.ejemplo.com/user-avatars/123.jpg"
-
-    return PhotoProfileResponse(photo_profile=uploaded_url)
+    return await controller.update_photo_profile(current_user_id, file)

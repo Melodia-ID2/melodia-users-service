@@ -27,3 +27,6 @@ asyncpg>=0.27.0
 
 # Storage
 python-multipart==0.0.7
+
+# Cloudinary
+cloudinary
