@@ -70,4 +70,4 @@ async def upload_photo_profile(
 
     uploaded_url = "https://storage.ejemplo.com/user-avatars/123.jpg"
 
-    return PhotoProfileResponse(url=uploaded_url)
+    return PhotoProfileResponse(photo_profile=uploaded_url)
