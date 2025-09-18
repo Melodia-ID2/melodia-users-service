@@ -5,7 +5,8 @@ from app.errors.exceptions import (
     ValidationError,
     NotFoundError,
     DatabaseError,
-    AuthenticationError
+    AuthenticationError,
+    FileUploadError
 )
 from app.errors.error_responses import create_error_response
 
@@ -44,6 +45,14 @@ class Middleware(BaseHTTPMiddleware):
                 ),
             )
 
+        except FileUploadError as exc:
+            return JSONResponse(
+                status_code=500,
+                content=create_error_response(
+                    500, "File Upload Error", str(exc), str(request.url.path)
+                ),
+            )
+            
         except DatabaseError as exc:
             return JSONResponse(
                 status_code=500,

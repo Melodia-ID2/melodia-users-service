@@ -29,3 +29,8 @@ class UsernameTakenError(ValidationError):
 class ProfileAlreadyExistsError(ValidationError):
     """Profile already exists"""
     pass
+
+
+class FileUploadError(MelodiaError):
+    """File upload related errors"""
+    pass
