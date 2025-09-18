@@ -30,11 +30,11 @@ class UserAccount(SQLModel, table=True):
     last_login: datetime | None = Field(default=None)
     role: UserRole = Field(default=UserRole.LISTENER, nullable=False)
     status: UserAccountStatus = Field(default=UserAccountStatus.ACTIVE, nullable=False)
-
+    is_profile_completed: bool = Field(default=False)
 
 class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")
-    username: str | None = Field(index=True, unique=True, nullable=True, default=None)
+    username: str | None = Field(index=True, nullable=True, default=None)
     full_name: str | None = Field(default=None)
     birthdate: datetime | None = Field(default=None)
     gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)

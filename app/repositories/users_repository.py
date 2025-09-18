@@ -24,10 +24,19 @@ def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
 def get_user_account_by_id(session: Session, user_id: UUID) -> UserAccount | None:
     return session.get(UserAccount, user_id)
 
+def get_profile_by_username(session: Session, username: str):
+    return session.exec(select(UserProfile).where(UserProfile.username == username)).first()
+
 def create_user_profile(
     session: Session, new_profile: UserProfile
 ) -> UserProfile:
     session.add(new_profile)
+    
+    user = session.get(UserAccount, new_profile.id)
+    if user:
+        user.is_profile_completed = True
+        session.add(user)
+    
     session.commit()
     session.refresh(new_profile)
     return new_profile
