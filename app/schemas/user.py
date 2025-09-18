@@ -1,6 +1,7 @@
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from pydantic.networks import HttpUrl
 
 from typing import Optional
 from app.models.user import UserGender
@@ -45,6 +46,7 @@ class UserDetailedInfo(UserBasicInfo):
     birthdate: datetime | None = None
     last_login: Optional[datetime] = None
     created_at: Optional[datetime] = None
+    profile_photo: HttpUrl | None = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
