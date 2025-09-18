@@ -1,11 +1,12 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, UploadFile, File
 from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id, require_admin
 import app.controllers.users_controller as controller
+from app.schemas.photo_profile import PhotoProfileResponse
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -58,3 +59,15 @@ def update_user_status(
     _: None = Depends(require_admin),
 ):
     return controller.update_user_status(session, user_id)
+
+
+@router.post("/upload-photo-profile", response_model=PhotoProfileResponse)
+async def upload_photo_profile(
+    file: UploadFile = File(...), 
+    current_user_id: UUID = Depends(get_current_user_id),
+    session: Session = Depends(get_session),
+):
+
+    uploaded_url = "https://storage.ejemplo.com/user-avatars/123.jpg"
+
+    return PhotoProfileResponse(url=uploaded_url)
