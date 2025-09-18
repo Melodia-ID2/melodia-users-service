@@ -1,9 +1,9 @@
 from uuid import UUID
 
 from app.errors.exceptions import NotFoundError
-from app.models.user import UserAccount, UserAccountStatus, UserProfile, UserRole
-from pydantic import ValidationError
+from app.models.user import UserAccountStatus, UserProfile, UserRole
 from sqlmodel import Session
+import cloudinary.uploader
 
 from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse
 from app.schemas.photo_profile import PhotoProfileResponse
@@ -100,7 +100,7 @@ def update_user_status(session: Session, user_id: UUID) -> UserDetailedInfo:
         created_at=user.created_at,
     )
 
-def update_photo_profile(user_id: UUID, photo_file_bytes: bytes) -> PhotoProfileResponse:
+def update_photo_profile(session: Session,user_id: UUID, photo_file_bytes: bytes) -> PhotoProfileResponse:
     uploaded_url = cloudinary.uploader.upload(
             photo_file_bytes,
             folder="user-photo-profile",
@@ -110,5 +110,8 @@ def update_photo_profile(user_id: UUID, photo_file_bytes: bytes) -> PhotoProfile
 
     if not uploaded_url:
         raise FileUploadError("Error at upload photo profile")
+    if not repo.update_photo_profile(session,user_id, uploaded_url):
+        raise NotFoundError("User with id: {} not found".format(user_id))
+
 
     return PhotoProfileResponse(photo_profile=uploaded_url)

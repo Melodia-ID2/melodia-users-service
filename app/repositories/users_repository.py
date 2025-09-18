@@ -51,3 +51,14 @@ def delete_user_account(session: Session, account: UserAccount) -> None:
     session.delete(account)
     session.commit()
     return None
+
+def update_photo_profile(session: Session, user_id: UUID, photo_url: str) -> UserProfile | None:
+    user_profile = session.get(UserProfile, user_id)
+    if not user_profile:
+        return None
+    
+    user_profile.photo_profile = photo_url
+    session.add(user_profile)
+    session.commit()
+    session.refresh(user_profile)
+    return user_profile

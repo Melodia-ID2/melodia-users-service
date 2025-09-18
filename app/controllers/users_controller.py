@@ -28,7 +28,7 @@ def update_user_status(session: Session, user_id: UUID):
     return service.update_user_status(session, user_id)
 
 
-async def update_photo_profile(user_id: UUID, file: UploadFile = File(...)):
+async def update_photo_profile(session: Session,user_id: UUID, file: UploadFile = File(...)):
     file_bytes = await file.read()
-    return service.update_photo_profile(user_id, file_bytes)
+    return service.update_photo_profile(session,user_id, file_bytes)
     

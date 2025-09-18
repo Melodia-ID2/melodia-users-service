@@ -63,6 +63,7 @@ def update_user_status(
 @router.post("/photo-profile", response_model=PhotoProfileResponse)
 async def update_photo_profile(
     file: UploadFile = File(...), 
-    current_user_id: UUID = Depends(get_current_user_id)
+    current_user_id: UUID = Depends(get_current_user_id),
+    session: Session = Depends(get_session),
 ):
-    return await controller.update_photo_profile(current_user_id, file)
+    return await controller.update_photo_profile(session,current_user_id, file)
