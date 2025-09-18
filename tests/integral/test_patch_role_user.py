@@ -40,7 +40,13 @@ def test_01_patch_user_with_listener_role_to_artist():
         "email": "test@example.com",
         "username": None,
         "role": "artist",
-        "status": "active"
+        "status": "active",
+        "fullName": None,
+        "phoneNumber": None,
+        "address": None,
+        "lastLogin": None,
+        "createdAt": response.json()["createdAt"],
+        "birthdate": None
     }
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
@@ -60,8 +66,14 @@ def test_02_patch_user_with_artist_role_to_listener():
         "email": "test@example.com",
         "username": None,
         "role": "listener",
-            "status": "active"
-        }
+        "status": "active",
+        "fullName": None,
+        "phoneNumber": None,
+        "address": None,
+        "lastLogin": None,
+        "createdAt": response.json()["createdAt"],
+        "birthdate": None
+    }
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
         assert user.role == "listener"
@@ -126,5 +138,17 @@ def test_06_patch_user_with_existent_account_and_non_exist_profile_returns_200()
     headers = {"Authorization": f"Bearer {user_id_str}"}
     response = client.patch(f"/users/{user_id_str}/role", headers=headers)
     assert response.status_code == 200
-    assert response.json() == {"id": user_id_str, "email": user_email, "username": None, "role": "artist", "status": "active"}
+    assert response.json() == {
+        "id": user_id_str, 
+        "email": user_email, 
+        "username": None, 
+        "role": "artist", 
+        "status": "active",
+        "fullName": None,
+        "phoneNumber": None,
+        "address": None,
+        "lastLogin": None,
+        "createdAt": response.json()["createdAt"],
+        "birthdate": None
+    }
     app.dependency_overrides = {}

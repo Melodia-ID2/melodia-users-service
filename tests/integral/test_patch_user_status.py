@@ -38,7 +38,14 @@ def test_01_patch_user_status_from_active_to_blocked():
         "email": "test@example.com",
         "username": None,
         "role": "listener",
-        "status": "blocked"
+        "status": "blocked",
+        "fullName": None,
+        "phoneNumber": None,
+        "address": None,
+        "lastLogin": None,
+        "createdAt": response.json()["createdAt"],
+        "birthdate": None
+
     }
     with Session(sync_engine) as session:
         user_account = session.get(UserAccount, user_id)
@@ -57,7 +64,13 @@ def test_02_patch_user_status_from_blocked_to_active():
         "email": "test@example.com",
         "username": None,
         "role": "listener",
-        "status": "active"
+        "status": "active",
+        "fullName": None,
+        "phoneNumber": None,
+        "address": None,
+        "lastLogin": None,
+        "createdAt": response.json()["createdAt"],
+        "birthdate": None
     }
     with Session(sync_engine) as session:
         user_account = session.get(UserAccount, user_id)
@@ -122,5 +135,17 @@ def test_06_patch_user_status_with_existent_account_and_non_exist_profile_return
     headers = {"Authorization": f"Bearer {user_id_str}"}
     response = client.patch(f"/users/{user_id_str}/status", headers=headers)
     assert response.status_code == 200
-    assert response.json() == {"id": user_id_str, "email": user_email, "username": None, "role": "listener", "status": "blocked"}
+    assert response.json() == {
+        "id": user_id_str, 
+        "email": user_email, 
+        "username": None, 
+        "role": "listener", 
+        "status": "blocked",
+        "fullName": None, 
+        "phoneNumber": None, 
+        "address": None,
+        "lastLogin": None,
+        "createdAt": response.json()["createdAt"],
+        "birthdate": None
+    }
     app.dependency_overrides = {}

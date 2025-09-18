@@ -31,13 +31,29 @@ class UserProfileCreate(_UserProfilePayload):
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
 
-class UserInfoToList(BaseModel):
+class UserBasicInfo(BaseModel):
     id: str
     email: str
-    username: Optional[str] = None
+    username: str | None = None
     role: str
     status: str
 
+class UserDetailedInfo(UserBasicInfo):
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    birthdate: datetime | None = None
+    last_login: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+    model_config = ConfigDict(
+        alias_generator=_to_camel,
+        populate_by_name=True,
+        extra="forbid",
+        from_attributes=True,
+    )
+
+
 class GetAllUserResponse(BaseModel):
-    users: list[UserInfoToList]
+    users: list[UserBasicInfo]
 

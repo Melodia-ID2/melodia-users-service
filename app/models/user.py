@@ -27,6 +27,7 @@ class UserAccount(SQLModel, table=True):
     email: str = Field(index=True, unique=True, nullable=False)
     password: str = Field(nullable=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_login: datetime | None = Field(default=None)
     role: UserRole = Field(default=UserRole.LISTENER, nullable=False)
     status: UserAccountStatus = Field(default=UserAccountStatus.ACTIVE, nullable=False)
 
@@ -37,6 +38,9 @@ class UserProfile(SQLModel, table=True):
     full_name: str | None = Field(default=None)
     birthdate: datetime | None = Field(default=None)
     gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)
+    phone_number: str | None = Field(default=None)
+    address: str | None = Field(default=None)
+
 
 class RefreshToken(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
