@@ -40,6 +40,7 @@ class UserProfile(SQLModel, table=True):
     gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)
     phone_number: str | None = Field(default=None)
     address: str | None = Field(default=None)
+    photo_profile: str | None = Field(default=None)
 
 
 class RefreshToken(SQLModel, table=True):

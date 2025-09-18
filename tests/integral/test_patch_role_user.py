@@ -46,7 +46,8 @@ def test_01_patch_user_with_listener_role_to_artist():
         "address": None,
         "lastLogin": None,
         "createdAt": response.json()["createdAt"],
-        "birthdate": None
+        "birthdate": None,
+        "profilePhoto": None
     }
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
@@ -72,7 +73,8 @@ def test_02_patch_user_with_artist_role_to_listener():
         "address": None,
         "lastLogin": None,
         "createdAt": response.json()["createdAt"],
-        "birthdate": None
+        "birthdate": None,
+        "profilePhoto": None
     }
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
@@ -149,6 +151,7 @@ def test_06_patch_user_with_existent_account_and_non_exist_profile_returns_200()
         "address": None,
         "lastLogin": None,
         "createdAt": response.json()["createdAt"],
-        "birthdate": None
+        "birthdate": None,
+        "profilePhoto": None
     }
     app.dependency_overrides = {}

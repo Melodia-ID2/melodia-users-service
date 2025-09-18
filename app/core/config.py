@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     AUTH_ISSUER: str = "auth-service"
     AUTH_ALGORITHM: str = "HS256"
 
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+    
+
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+psycopg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"

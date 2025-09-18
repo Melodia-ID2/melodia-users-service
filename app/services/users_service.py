@@ -1,11 +1,12 @@
 from uuid import UUID
 
 from app.errors.exceptions import NotFoundError
-from app.models.user import UserAccount, UserAccountStatus, UserProfile, UserRole
-from pydantic import ValidationError
+from app.models.user import UserAccountStatus, UserProfile, UserRole
 from sqlmodel import Session
+import cloudinary.uploader
 
 from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse
+from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
 
 from app.errors.exceptions import UsernameTakenError, ProfileAlreadyExistsError
@@ -43,14 +44,12 @@ def create_user_profile(
     existing_profile = repo.get_profile_by_id(session, user_id)
     if existing_profile:
         raise ProfileAlreadyExistsError("El perfil ya existe")
-    # Así pueden haber varios artistas sin nombre inicialmente
     if profile_data.username and profile_data.username.strip():
         existing_username = repo.get_profile_by_username(session, profile_data.username)
         if existing_username:
             raise UsernameTakenError("El nombre de usuario ya está en uso")
     new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     new_profile = repo.create_user_profile(session, new_profile)
-    print(new_profile)
     return UserProfileResponse.model_validate(new_profile)
 
 
@@ -73,7 +72,6 @@ def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
         last_login=user.last_login,
         created_at=user.created_at,
     )
-
 
 def delete_user(session: Session, user_id: UUID):
     account = repo.get_user_account_by_id(session, user_id)
@@ -101,3 +99,19 @@ def update_user_status(session: Session, user_id: UUID) -> UserDetailedInfo:
         last_login=user.last_login,
         created_at=user.created_at,
     )
+
+def update_photo_profile(session: Session,user_id: UUID, photo_file_bytes: bytes) -> PhotoProfileResponse:
+    uploaded_url = cloudinary.uploader.upload(
+            photo_file_bytes,
+            folder="user-photo-profile",
+            public_id=str(user_id),
+            overwrite=True
+        )["secure_url"]
+
+    if not uploaded_url:
+        raise FileUploadError("Error at upload photo profile")
+    if not repo.update_photo_profile(session,user_id, uploaded_url):
+        raise NotFoundError("User with id: {} not found".format(user_id))
+
+
+    return PhotoProfileResponse(photo_profile=uploaded_url)
