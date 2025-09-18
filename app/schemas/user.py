@@ -17,6 +17,9 @@ class _UserProfilePayload(BaseModel):
     full_name: str
     birthdate: datetime | None = None
     gender: UserGender
+    phone_number: str | None = None
+    address: str | None = None
+    profile_photo: HttpUrl | None = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -44,9 +47,9 @@ class UserDetailedInfo(UserBasicInfo):
     phone_number: Optional[str] = None
     address: Optional[str] = None
     birthdate: datetime | None = None
-    last_login: Optional[datetime] = None
-    created_at: Optional[datetime] = None
     profile_photo: HttpUrl | None = None
+    last_login: Optional[datetime] = None
+    created_at: Optional[datetime] = None 
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
