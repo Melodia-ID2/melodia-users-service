@@ -5,7 +5,7 @@ from app.models.user import UserAccountStatus, UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
 
-from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse
+from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserRoleUpdateResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
 
@@ -58,20 +58,11 @@ def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
     user = repo.get_user_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("User with id: {} not found".format(user_id))
-    user_profile = repo.get_profile_by_id(session, user_id)
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
     _ = repo.create_user_account(session, user)
-    username= None if not user_profile else user_profile.username
-    return UserDetailedInfo(
+    return UserRoleUpdateResponse(
         id=str(user.id),
-        username=username,
-        email=user.email,
         role=user.role,
-        status=user.status,
-        phone_number=None if not user_profile else user_profile.phone_number,
-        address=None if not user_profile else user_profile.address,
-        last_login=user.last_login,
-        created_at=user.created_at,
     )
 
 def delete_user(session: Session, user_id: UUID):

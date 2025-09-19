@@ -1,7 +1,7 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, status, UploadFile, File
-from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate
+from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserRoleUpdateResponse
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id, require_admin
@@ -26,7 +26,7 @@ def get_user(
     return controller.get_user(session, user_id)
 
 
-@router.patch("/{user_id}/role", response_model=UserDetailedInfo, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
+@router.patch("/{user_id}/role", response_model=UserRoleUpdateResponse, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
 def update_user_role(
     user_id: UUID,
     session: Session = Depends(get_session),
