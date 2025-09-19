@@ -87,10 +87,12 @@ def update_photo_profile(session: Session,user_id: UUID, photo_file_bytes: bytes
     return PhotoProfileResponse(photo_profile=uploaded_url)
 
 def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
-    profile = repo.get_user_profile_by_user_id(session, user_id)
+    profile = repo.get_profile_by_id(session, user_id)
     if not profile:
         raise NotFoundError("Perfil no encontrado")
-    return UserProfileResponse.model_validate(profile)
+    response = UserProfileResponse.model_validate(profile)
+    response.profile_photo = profile.photo_profile
+    return response
 
 def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     profile = repo.get_user_profile_by_user_id(session, user_id)
