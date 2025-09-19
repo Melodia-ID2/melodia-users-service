@@ -62,3 +62,18 @@ def update_photo_profile(session: Session, user_id: UUID, photo_url: str) -> Use
     session.commit()
     session.refresh(user_profile)
     return user_profile
+
+def get_user_profile_by_user_id(session: Session, user_id: UUID):
+    return session.get(UserProfile, user_id)
+
+def update_user_profile(session: Session, user_id: UUID, data: dict):
+    profile = session.get(UserProfile, user_id)
+    if not profile:
+        return None
+    for key, value in data.items():
+        if hasattr(profile, key) and value is not None and getattr(profile, key) != value:
+            setattr(profile, key, value)
+    session.add(profile)
+    session.commit()
+    session.refresh(profile)
+    return profile

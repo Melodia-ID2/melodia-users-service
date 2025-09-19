@@ -1,7 +1,7 @@
 from uuid import UUID
 from sqlmodel import Session
 
-from app.schemas.user import UserProfileCreate
+from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfileUpdate
 import app.services.users_service as service
 from fastapi import UploadFile, File
 
@@ -31,4 +31,9 @@ def update_user_status(session: Session, user_id: UUID):
 async def update_photo_profile(session: Session,user_id: UUID, file: UploadFile = File(...)):
     file_bytes = await file.read()
     return service.update_photo_profile(session,user_id, file_bytes)
-    
+
+def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
+    return service.get_me(session, user_id)
+
+def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
+    return service.update_me(session, user_id, data)
