@@ -35,6 +35,7 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
         birthdate=None if not user_profile else user_profile.birthdate,
         last_login=user.last_login,
         created_at=user.created_at,
+        profile_photo=None if not user_profile else user_profile.photo_profile,
     )
 
 
