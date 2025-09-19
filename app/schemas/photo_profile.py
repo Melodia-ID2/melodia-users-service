@@ -1,5 +1,4 @@
-from uuid import UUID
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class PhotoProfileResponse(BaseModel):

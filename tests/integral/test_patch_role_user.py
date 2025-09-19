@@ -1,8 +1,7 @@
-import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.security import get_jwt_payload, require_admin
-from app.models.user import UserAccount, UserProfile
+from app.models.user import UserAccount
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 import uuid

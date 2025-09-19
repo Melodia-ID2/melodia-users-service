@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from app.errors.exceptions import NotFoundError
-from app.models.user import UserAccountStatus, UserProfile, UserRole
+from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
 

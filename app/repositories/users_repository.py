@@ -1,7 +1,6 @@
 from uuid import UUID
 from sqlmodel import Session, select
 
-from app.schemas.user import UserProfileCreate
 from app.models.user import UserAccount, UserProfile
 
 
