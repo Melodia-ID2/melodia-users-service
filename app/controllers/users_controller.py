@@ -24,9 +24,6 @@ def delete_user(session: Session, user_id: UUID):
     service.delete_user(session, user_id)
     return None
 
-def update_user_status(session: Session, user_id: UUID):
-    return service.update_user_status(session, user_id)
-
 
 async def update_photo_profile(session: Session,user_id: UUID, file: UploadFile = File(...)):
     file_bytes = await file.read()
