@@ -28,6 +28,20 @@ class _UserProfilePayload(BaseModel):
         from_attributes=True,
     )
 
+class UserProfileUpdate(BaseModel):
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    birthdate: Optional[datetime] = None
+    gender: Optional[UserGender] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+
+    model_config = ConfigDict(
+        alias_generator=_to_camel,
+        populate_by_name=True,
+        extra="forbid",
+        from_attributes=True,
+    )
 
 class UserProfileCreate(_UserProfilePayload):
     pass

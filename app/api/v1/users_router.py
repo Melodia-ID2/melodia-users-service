@@ -1,7 +1,7 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, status, UploadFile, File
-from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserRoleUpdateResponse
+from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id, require_admin
@@ -9,6 +9,24 @@ import app.controllers.users_controller as controller
 from app.schemas.photo_profile import PhotoProfileResponse
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.get("/me", response_model=UserProfileResponse)
+def get_me(
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    return controller.get_me(session, user_id)
+
+
+@router.put("/me", response_model=UserProfileResponse)
+def update_me(
+    data: UserProfileUpdate,
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    return controller.update_me(session, user_id, data)
+
 
 @router.get("/", response_model=GetAllUserResponse, status_code=status.HTTP_200_OK, responses= error_responses(401))
 def get_all_users(
@@ -59,3 +77,5 @@ async def update_photo_profile(
     session: Session = Depends(get_session),
 ):
     return await controller.update_photo_profile(session,current_user_id, file)
+
+

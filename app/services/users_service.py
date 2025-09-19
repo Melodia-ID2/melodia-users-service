@@ -1,14 +1,11 @@
 from uuid import UUID
-
 from app.errors.exceptions import NotFoundError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
-
-from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserRoleUpdateResponse
+from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
-
 from app.errors.exceptions import UsernameTakenError, ProfileAlreadyExistsError
 
 def get_all_users(session: Session) -> list[dict[str, str]]:
@@ -88,3 +85,16 @@ def update_photo_profile(session: Session,user_id: UUID, photo_file_bytes: bytes
 
 
     return PhotoProfileResponse(photo_profile=uploaded_url)
+
+def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
+    profile = repo.get_user_profile_by_user_id(session, user_id)
+    if not profile:
+        raise NotFoundError("Perfil no encontrado")
+    return UserProfileResponse.model_validate(profile)
+
+def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
+    profile = repo.get_user_profile_by_user_id(session, user_id)
+    if not profile:
+        raise NotFoundError("Perfil no encontrado")
+    updated_profile = repo.update_user_profile(session, user_id, data.model_dump(exclude_unset=True))
+    return UserProfileResponse.model_validate(updated_profile)
