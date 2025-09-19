@@ -20,10 +20,7 @@ def create_user_with_role(role: str) -> uuid.UUID:
     user_id = uuid.uuid4()
     with Session(sync_engine) as session:
         user = UserAccount(id=user_id, email="test@example.com", password="password", role=role)
-        user_profile = UserProfile(id=user_id)
         session.add(user)
-        session.add(user_profile)
-
         session.commit()
     return user_id
 
@@ -37,17 +34,7 @@ def test_01_patch_user_with_listener_role_to_artist():
     assert response.status_code == 200
     assert response.json() == {
         "id": str(user_id),
-        "email": "test@example.com",
-        "username": None,
         "role": "artist",
-        "status": "active",
-        "fullName": None,
-        "phoneNumber": None,
-        "address": None,
-        "lastLogin": None,
-        "createdAt": response.json()["createdAt"],
-        "birthdate": None,
-        "profilePhoto": None
     }
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
@@ -64,17 +51,7 @@ def test_02_patch_user_with_artist_role_to_listener():
     assert response.status_code == 200
     assert response.json() == {
         "id": str(user_id),
-        "email": "test@example.com",
-        "username": None,
         "role": "listener",
-        "status": "active",
-        "fullName": None,
-        "phoneNumber": None,
-        "address": None,
-        "lastLogin": None,
-        "createdAt": response.json()["createdAt"],
-        "birthdate": None,
-        "profilePhoto": None
     }
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
@@ -142,16 +119,6 @@ def test_06_patch_user_with_existent_account_and_non_exist_profile_returns_200()
     assert response.status_code == 200
     assert response.json() == {
         "id": user_id_str, 
-        "email": user_email, 
-        "username": None, 
         "role": "artist", 
-        "status": "active",
-        "fullName": None,
-        "phoneNumber": None,
-        "address": None,
-        "lastLogin": None,
-        "createdAt": response.json()["createdAt"],
-        "birthdate": None,
-        "profilePhoto": None
     }
     app.dependency_overrides = {}
