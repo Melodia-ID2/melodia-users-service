@@ -72,6 +72,9 @@ class UserDetailedInfo(UserBasicInfo):
         from_attributes=True,
     )
 
+class UserRoleUpdateResponse(BaseModel):
+    id: str
+    role: str
 
 class GetAllUserResponse(BaseModel):
     users: list[UserBasicInfo]

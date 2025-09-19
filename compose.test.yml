@@ -12,7 +12,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U postgres -d melodia_test -h localhost || exit 1",
+          "pg_isready -U postgres -d melodia_test -h users-test-db || exit 1",
         ]
       interval: 5s
       timeout: 5s
