@@ -78,4 +78,8 @@ class UserRoleUpdateResponse(BaseModel):
 
 class GetAllUserResponse(BaseModel):
     users: list[UserBasicInfo]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
 
