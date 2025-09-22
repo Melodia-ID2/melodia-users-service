@@ -13,6 +13,7 @@ def get_all_users(session: Session, page: int, page_size: int):
             UserAccount.role,
             UserAccount.status,
         ).outerjoin(UserProfile, UserAccount.id == UserProfile.id)
+        .order_by(UserAccount.created_at)
         .offset((page - 1) * page_size)
         .limit(page_size)
     )
