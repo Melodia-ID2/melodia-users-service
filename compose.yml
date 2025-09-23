@@ -4,9 +4,23 @@ services:
       context: .
       target: dev
     container_name: users-service
-    env_file: .env
     ports:
-      - "${PORT:-8002}:8002"
+      - "${PORT}:${PORT}"
+      - "${HOST}:${HOST}"
+      - ENVIRONMENT=development
+      - LOG_LEVEL=INFO
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_ISSUER=${AUTH_ISSUER}
+      - AUTH_ALGORITHM=HS256
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_URL=${CLOUDINARY_URL}
     networks:
       - melodia-net
 
