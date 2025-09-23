@@ -7,8 +7,8 @@ services:
     ports:
       - "${PORT}:${PORT}"
     environment:
-      - PORT=${PORT}
-      - HOST=${HOST}
+      - PORT=8080
+      - HOST=0.0.0.0
       - ENVIRONMENT=development
       - LOG_LEVEL=INFO
       - DATABASE_HOST=${DATABASE_HOST}
