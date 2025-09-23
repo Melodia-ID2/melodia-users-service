@@ -6,7 +6,9 @@ services:
     container_name: users-service
     ports:
       - "${PORT}:${PORT}"
-      - "${HOST}:${HOST}"
+    environment:
+      - PORT=${PORT}
+      - HOST=${HOST}
       - ENVIRONMENT=development
       - LOG_LEVEL=INFO
       - DATABASE_HOST=${DATABASE_HOST}
