@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 from app.errors.exceptions import NotFoundError
 from app.models.user import UserProfile, UserRole
@@ -8,11 +9,17 @@ from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
 from app.errors.exceptions import UsernameTakenError, ProfileAlreadyExistsError
 
-def get_all_users(session: Session) -> list[dict[str, str]]:
-    users = repo.get_all_users(session)
-    return [
-        {"id": str(u[0]), "username": u[1], "email": u[2], "role": u[3], "status": u[4]} for u in users
-    ]
+def get_all_users(session: Session, page: int, page_size: int) -> dict[str, Any]:
+    users, total = repo.get_all_users(session, page, page_size)
+    return {
+        "users": [
+            {"id": str(u[0]), "username": u[1], "email": u[2], "role": u[3], "status": u[4]} for u in users
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size,
+    }
 
 
 def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
