@@ -1,10 +1,10 @@
 from uuid import UUID
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 
 from app.models.user import UserAccount, UserProfile
 
 
-def get_all_users(session: Session):
+def get_all_users(session: Session, page: int, page_size: int):
     stmt = (
         select(
             UserAccount.id,
@@ -13,8 +13,13 @@ def get_all_users(session: Session):
             UserAccount.role,
             UserAccount.status,
         ).outerjoin(UserProfile, UserAccount.id == UserProfile.id)
+        .order_by(UserAccount.created_at)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     )
-    return session.exec(stmt).all()
+    users = session.exec(stmt).all()
+    total = session.scalar(select(func.count()).select_from(UserAccount))
+    return users, total
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:

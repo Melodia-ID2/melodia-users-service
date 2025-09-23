@@ -5,8 +5,8 @@ from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfile
 import app.services.users_service as service
 from fastapi import UploadFile, File
 
-def get_all_users(session: Session):
-    return {"users": service.get_all_users(session)}
+def get_all_users(session: Session, page: int, page_size: int):
+    return service.get_all_users(session, page, page_size)
 
 
 def get_user(session: Session, user_id: UUID):

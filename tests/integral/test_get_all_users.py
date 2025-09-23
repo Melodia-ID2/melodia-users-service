@@ -72,7 +72,7 @@ async def test_02_get_all_with_admin_token_and_no_users_returns_empty_list():
     app.dependency_overrides[require_admin] = override_require_admin
     response = make_request()
     assert response.status_code == 200
-    assert response.json() == {"users": []}
+    assert response.json()["users"] == []
     app.dependency_overrides = {}
 
 
@@ -119,5 +119,5 @@ def test_06_get_all_with_existent_account_and_non_exist_profile_returns_200():
     response = make_request()
 
     assert response.status_code == 200
-    assert response.json() == {"users": [{"id": user_id_str, "email": user_email, "username": None, "role": "listener", "status": "active"}]}
+    assert response.json()["users"] == [{"id": user_id_str, "email": user_email, "username": None, "role": "listener", "status": "active"}]
     app.dependency_overrides = {}
