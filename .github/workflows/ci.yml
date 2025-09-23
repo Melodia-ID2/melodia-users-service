@@ -34,7 +34,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -54,9 +54,11 @@ jobs:
         run: echo "DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/melodia" >> $GITHUB_ENV
 
       - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
-          if [ -f pytest.ini ] || [ -d tests ]; then
-            pytest -q || ( echo "Users tests failed" && exit 1 )
+          if [ -d tests/unit ]; then
+            pytest -c pytest.ini tests/unit -v --cov=app --cov-report=term-missing || (echo "Users tests failed" && exit 1)
           else
-            echo "No tests for users"
+            echo "No unit tests found"
           fi
