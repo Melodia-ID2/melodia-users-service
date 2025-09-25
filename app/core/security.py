@@ -26,11 +26,11 @@ def _verify_jwt(token: str) -> dict[str, Any]:
         )
         return payload
     except exceptions.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
+        raise AuthenticationError("El token ha expirado")
     except exceptions.JWTClaimsError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token claims: {str(e)}")
+        raise AuthenticationError(f"Token invalido 'claims': {str(e)}")
     except exceptions.JWTError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+        raise AuthenticationError(f"Token invalido: {str(e)}")
 
 
 def get_jwt_payload(
@@ -41,19 +41,19 @@ def get_jwt_payload(
         or (creds.scheme or "").lower() != "bearer"
         or not creds.credentials
     ):
-        raise AuthenticationError("Invalid or missing authorization token")
+        raise AuthenticationError("Token de autenticación invalido o no proporcionado")
     token = creds.credentials
     return _verify_jwt(token)
 
 
 def require_admin(payload: dict[str, Any] = Depends(get_jwt_payload)) -> dict[str, Any]:
     if payload.get("role") != "admin":
-        raise AuthenticationError("Admin privileges required")
+        raise AuthenticationError("Se requiere privilegios de administrador")
     return payload
 
 
 def get_current_user_id(payload: dict[str, Any] = Depends(get_jwt_payload)) -> str:
     user_id = payload.get("user_id")
     if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid token: user_id missing")
+        raise AuthenticationError("Token invalido: user_id faltante")
     return user_id

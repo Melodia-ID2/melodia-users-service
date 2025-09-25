@@ -1,6 +1,6 @@
 from typing import Any
 from uuid import UUID
-from app.errors.exceptions import NotFoundError
+from app.errors.exceptions import NotFoundError, FileUploadError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
@@ -25,7 +25,7 @@ def get_all_users(session: Session, page: int, page_size: int) -> dict[str, Any]
 def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
     user = repo.get_user_account_by_id(session, user_id)
     if not user:
-        raise NotFoundError("User with id: {} not found".format(user_id))
+        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user_profile = repo.get_profile_by_id(session, user_id)
     return UserDetailedInfo(
         id=str(user.id),
@@ -61,7 +61,7 @@ def create_user_profile(
 def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
     user = repo.get_user_account_by_id(session, user_id)
     if not user:
-        raise NotFoundError("User with id: {} not found".format(user_id))
+        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
     _ = repo.create_user_account(session, user)
     return UserRoleUpdateResponse(
@@ -72,7 +72,7 @@ def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
 def delete_user(session: Session, user_id: UUID):
     account = repo.get_user_account_by_id(session, user_id)
     if not account:
-        raise NotFoundError("User with id: {} not found".format(user_id))
+        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     _= repo.delete_user_account(session, account)
     return None
 
@@ -86,9 +86,9 @@ def update_photo_profile(session: Session,user_id: UUID, photo_file_bytes: bytes
         )["secure_url"]
 
     if not uploaded_url:
-        raise FileUploadError("Error at upload photo profile")
+        raise FileUploadError("Error al guardar la foto de perfil")
     if not repo.update_photo_profile(session,user_id, uploaded_url):
-        raise NotFoundError("User with id: {} not found".format(user_id))
+        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
 
 
     return PhotoProfileResponse(photo_profile=uploaded_url)
