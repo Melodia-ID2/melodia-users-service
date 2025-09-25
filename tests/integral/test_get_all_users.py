@@ -63,7 +63,7 @@ async def test_01_get_all_without_admin_token_returns_401():
             "type": "about:blank",
             "title": "Authentication Error",
             "status": 401,
-            "detail": "Invalid or missing authorization token",
+            "detail": "Token de autenticación invalido o no proporcionado",
             "instance": "/users/"
         }
 
@@ -102,7 +102,7 @@ async def test_05_get_all_without_admin_role_returns_401():
         "type": "about:blank",
         "title": "Authentication Error",
         "status": 401,
-        "detail": "Admin privileges required",
+        "detail": "Se requiere privilegios de administrador",
         "instance": "/users/"
     }
     app.dependency_overrides = {}
