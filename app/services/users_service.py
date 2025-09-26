@@ -74,7 +74,12 @@ def delete_user(session: Session, user_id: UUID):
     account = repo.get_user_account_by_id(session, user_id)
     if not account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
-    _= repo.delete_user_account(session, account)
+    user_profile = repo.get_profile_by_id(session, user_id)
+    repo.delete_user_account(session, account)
+
+    if user_profile and user_profile.photo_profile:
+        cloudinary.uploader.destroy(public_id=f"user-photo-profile/{user_id}")
+    
     return None
 
 
