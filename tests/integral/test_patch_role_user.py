@@ -69,7 +69,7 @@ def test_03_patch_user_with_non_existent_id_returns_404():
         "type": "about:blank",
         "title": "Resource Not Found",
         "status": 404,
-        "detail": f"User with id: {user_id} not found",
+        "detail": f"Usuario con id: {user_id} no encontrado",
         "instance": f"/users/{user_id}/role"
     }
     app.dependency_overrides = {}
@@ -83,7 +83,7 @@ def test_04_patch_user_role_without_admin_token_returns_401():
         "type": "about:blank",
         "title": "Authentication Error",
         "status": 401,
-        "detail": "Invalid or missing authorization token",
+        "detail": "Token de autenticación invalido o no proporcionado",
         "instance": f"/users/{user_id}/role"
     }
 
@@ -98,7 +98,7 @@ def test_05_patch_user_role_with_non_admin_token_returns_401():
         "type": "about:blank",
         "title": "Authentication Error",
         "status": 401,
-        "detail": "Admin privileges required",
+        "detail": "Se requiere privilegios de administrador",
         "instance": f"/users/{user_id}/role"
     }
     app.dependency_overrides = {}
