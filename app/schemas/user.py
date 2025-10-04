@@ -83,3 +83,15 @@ class GetAllUserResponse(BaseModel):
     page_size: int
     total_pages: int
 
+
+class UserSearchResult(BaseModel):
+    id: str
+    full_name: str | None = None
+
+    model_config = ConfigDict(
+        alias_generator=_to_camel,
+        populate_by_name=True,
+        extra="forbid",
+        from_attributes=True,
+    )
+

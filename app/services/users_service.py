@@ -8,6 +8,7 @@ import cloudinary.uploader
 from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
+from app.schemas.user import UserSearchResult
 from app.errors.exceptions import UsernameTakenError, ProfileAlreadyExistsError
 
 def get_all_users(session: Session, page: int, page_size: int) -> dict[str, Any]:
@@ -74,7 +75,11 @@ def delete_user(session: Session, user_id: UUID):
     account = repo.get_user_account_by_id(session, user_id)
     if not account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
-    _= repo.delete_user_account(session, account)
+    user_profile = repo.get_profile_by_id(session, user_id)
+    if user_profile and user_profile.photo_profile:
+        cloudinary.uploader.destroy(public_id=f"user-photo-profile/{user_id}")
+
+    repo.delete_user_account(session, account)
     return None
 
 
@@ -139,3 +144,9 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     
     updated_profile = repo.update_user_profile(session, user_id, update_data)
     return UserProfileResponse.model_validate(updated_profile)
+
+
+def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> list[UserSearchResult]:
+    # search by full_name or username in profile, optionally filter by account role
+    results = repo.search_profiles(session, query, role, page, page_size)
+    return [UserSearchResult(id=str(r.id), full_name=r.full_name or "") for r in results]
