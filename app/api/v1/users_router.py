@@ -65,6 +65,25 @@ def update_user_role(
     _: None = Depends(require_admin),
 ):
     return controller.update_user_role(session, user_id)
+
+
+@router.post("/profile", status_code=status.HTTP_201_CREATED)
+def create_user_profile(
+    profile_data: UserProfileCreate,
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    return controller.create_user_profile(session, user_id, profile_data)
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, responses= error_responses(401, 404))
+def delete_user(
+    user_id: UUID,
+    session: Session = Depends(get_session),
+    _: None = Depends(require_admin),
+):
+    return controller.delete_user(session, user_id)
+
+
 @router.post("/photo-profile", response_model=PhotoProfileResponse)
 async def update_photo_profile(
     file: UploadFile = File(...), 
