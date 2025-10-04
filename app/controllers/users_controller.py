@@ -34,3 +34,7 @@ def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
 
 def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     return service.update_me(session, user_id, data)
+
+
+def search_users(session: Session, query: str, role: str | None, page: int, page_size: int):
+    return service.search_users(session, query, role, page, page_size)

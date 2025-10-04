@@ -1,12 +1,13 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
-from fastapi import APIRouter, Depends, Query, status, UploadFile, File
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
 from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
 from sqlmodel import Session
 from app.core.database import get_session
-from app.core.security import get_current_user_id, require_admin
+from app.core.security import get_current_user_id, require_admin, get_jwt_payload
 import app.controllers.users_controller as controller
 from app.schemas.photo_profile import PhotoProfileResponse
+from app.schemas.user import UserSearchResult
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -35,6 +36,19 @@ def get_all_users(
     return controller.get_all_users(session, page, page_size)
 
 
+@router.get("/search", response_model=list[UserSearchResult], status_code=status.HTTP_200_OK)
+def search_users(
+    query: str | None = None,
+    role: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    session: Session = Depends(get_session),
+    request: Request = None,
+    _payload: dict = Depends(get_jwt_payload),
+):
+    return controller.search_users(session, query or "", role, page, page_size)
+
+
 @router.get("/{user_id}", response_model=UserDetailedInfo, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))
 def get_user(
     user_id: UUID,
@@ -51,25 +65,6 @@ def update_user_role(
     _: None = Depends(require_admin),
 ):
     return controller.update_user_role(session, user_id)
-
-
-@router.post("/profile", status_code=status.HTTP_201_CREATED)
-def create_user_profile(
-    profile_data: UserProfileCreate,
-    session: Session = Depends(get_session),
-    user_id: UUID = Depends(get_current_user_id),
-):
-    return controller.create_user_profile(session, user_id, profile_data)
-
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, responses= error_responses(401, 404))
-def delete_user(
-    user_id: UUID,
-    session: Session = Depends(get_session),
-    _: None = Depends(require_admin),
-):
-    return controller.delete_user(session, user_id)
-
-
 @router.post("/photo-profile", response_model=PhotoProfileResponse)
 async def update_photo_profile(
     file: UploadFile = File(...), 
