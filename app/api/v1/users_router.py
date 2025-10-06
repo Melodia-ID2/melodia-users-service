@@ -1,7 +1,8 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
-from fastapi import APIRouter, Depends, Query, status, UploadFile, File
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
 from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, SearchUsersResponse
+from app.schemas.artist import ArtistPublicProfile
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id, require_admin
@@ -90,3 +91,9 @@ async def update_photo_profile(
     return await controller.update_photo_profile(session,current_user_id, file)
 
 
+@router.get("/artist/{artist_id}", response_model=ArtistPublicProfile)
+def get_artist(
+    artist_id: UUID,
+    session: Session = Depends(get_session)
+):
+    return controller.get_artist(session, artist_id)

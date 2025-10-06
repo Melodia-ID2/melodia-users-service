@@ -39,3 +39,8 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
 
 def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     return service.update_me(session, user_id, data)
+
+
+def get_artist(session, artist_id):
+    from app.services.users_service import get_artist as get_artist_service
+    return get_artist_service(session, artist_id)

@@ -5,8 +5,8 @@ from app.errors.exceptions import NotFoundError, FileUploadError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
-from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, UserSearchItem
-from app.schemas.user import SearchUsersResponse
+from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, UserSearchItem, SearchUsersResponse
+from app.schemas.artist import ArtistPublicProfile
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
 from app.errors.exceptions import UsernameTakenError, ProfileAlreadyExistsError
@@ -151,3 +151,31 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     
     updated_profile = repo.update_user_profile(session, user_id, update_data)
     return UserProfileResponse.model_validate(updated_profile)
+
+
+def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> list[UserSearchResult]:
+    # search by full_name or username in profile, optionally filter by account role
+    results = repo.search_profiles(session, query, role, page, page_size)
+    return [UserSearchResult(id=str(r.id), full_name=r.full_name or "") for r in results]
+
+def get_artist(session, artist_id):
+    account = repo.get_user_account_by_id(session, artist_id)
+    if not account or str(account.role) != "artist":
+        raise NotFoundError("Artista no encontrado")
+
+    profile = repo.get_profile_by_id(session, artist_id)
+    if not profile:
+        raise NotFoundError("Perfil de artista no encontrado")
+
+    photos = repo.get_artist_photos(session, artist_id)
+    photos_sorted = sorted(photos, key=lambda p: p.position)
+    links = repo.get_artist_links(session, artist_id)
+
+    return ArtistPublicProfile(
+        username=profile.username,
+        full_name=profile.full_name,
+        photo_profile=profile.photo_profile,
+        bio=profile.bio,
+        photos=[photo.url for photo in photos_sorted],
+        links=[link.url for link in links],
+    )

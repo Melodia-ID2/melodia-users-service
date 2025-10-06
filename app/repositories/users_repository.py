@@ -2,7 +2,7 @@ from typing import Any
 from uuid import UUID
 from sqlmodel import Session, func, select
 
-from app.models.user import UserAccount, UserProfile
+from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserProfile
 
 
 def get_all_users(session: Session, page: int, page_size: int):
@@ -108,3 +108,27 @@ def update_user_profile(session: Session, user_id: UUID, data: dict):
     session.commit()
     session.refresh(profile)
     return profile
+
+
+def search_profiles(session: Session, query: str, role: str | None, page: int, page_size: int):
+    stmt = select(UserProfile).outerjoin(UserAccount, UserAccount.id == UserProfile.id)
+    if query:
+        q = f"%{query}%"
+        stmt = stmt.where((UserProfile.full_name.ilike(q)) | (UserProfile.username.ilike(q)))
+    if role:
+        stmt = stmt.where(UserAccount.role == role)
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+    results = session.exec(stmt).all()
+    return results
+
+def get_artist_photos(session: Session, artist_id: UUID):
+    return session.exec(
+        select(ArtistPhoto)
+        .where(ArtistPhoto.artist_id == artist_id)
+        .order_by(ArtistPhoto.position)
+    ).all()
+
+def get_artist_links(session: Session, artist_id: UUID):
+    return session.exec(
+        select(SocialLink).where(SocialLink.artist_id == artist_id)
+    ).all()
