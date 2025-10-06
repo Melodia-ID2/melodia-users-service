@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 from sqlmodel import Session, func, select
 
@@ -20,6 +21,32 @@ def get_all_users(session: Session, page: int, page_size: int):
     users = session.exec(stmt).all()
     total = session.scalar(select(func.count()).select_from(UserAccount))
     return users, total
+
+
+def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> list[Any]:
+    SIMILARITY_THRESHOLD = 0.3
+
+    like_q = f"%{query}%"
+    similarity_expr = func.similarity(UserProfile.username, query)
+    cond = (
+        (UserProfile.username.ilike(like_q)) |
+        (similarity_expr > SIMILARITY_THRESHOLD)
+    )
+
+    if role:
+        cond = cond & (UserAccount.role == role)
+    
+    stmt = (
+        select(UserProfile.id, UserProfile.username, UserProfile.photo_profile)
+        .join(UserAccount, UserProfile.id == UserAccount.id)
+        .where(cond)
+        .order_by(similarity_expr.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    users = session.exec(stmt).all()
+
+    return users
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
@@ -81,15 +108,3 @@ def update_user_profile(session: Session, user_id: UUID, data: dict):
     session.commit()
     session.refresh(profile)
     return profile
-
-
-def search_profiles(session: Session, query: str, role: str | None, page: int, page_size: int):
-    stmt = select(UserProfile).outerjoin(UserAccount, UserAccount.id == UserProfile.id)
-    if query:
-        q = f"%{query}%"
-        stmt = stmt.where((UserProfile.full_name.ilike(q)) | (UserProfile.username.ilike(q)))
-    if role:
-        stmt = stmt.where(UserAccount.role == role)
-    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
-    results = session.exec(stmt).all()
-    return results
