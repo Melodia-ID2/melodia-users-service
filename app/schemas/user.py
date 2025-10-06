@@ -84,9 +84,10 @@ class GetAllUserResponse(BaseModel):
     total_pages: int
 
 
-class UserSearchResult(BaseModel):
+class UserSearchItem(BaseModel):
     id: str
-    full_name: str | None = None
+    username: str | None = None
+    profile_photo: str | None = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -95,3 +96,6 @@ class UserSearchResult(BaseModel):
         from_attributes=True,
     )
 
+
+class SearchUsersResponse(BaseModel):
+    users: list[UserSearchItem]
