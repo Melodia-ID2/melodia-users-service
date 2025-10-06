@@ -1,7 +1,7 @@
 from uuid import UUID
 from sqlmodel import Session, func, select
 
-from app.models.user import UserAccount, UserProfile
+from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserProfile
 
 
 def get_all_users(session: Session, page: int, page_size: int):
@@ -93,3 +93,15 @@ def search_profiles(session: Session, query: str, role: str | None, page: int, p
     stmt = stmt.offset((page - 1) * page_size).limit(page_size)
     results = session.exec(stmt).all()
     return results
+
+def get_artist_photos(session: Session, artist_id: UUID):
+    return session.exec(
+        select(ArtistPhoto)
+        .where(ArtistPhoto.artist_id == artist_id)
+        .order_by(ArtistPhoto.position)
+    ).all()
+
+def get_artist_links(session: Session, artist_id: UUID):
+    return session.exec(
+        select(SocialLink).where(SocialLink.artist_id == artist_id)
+    ).all()
