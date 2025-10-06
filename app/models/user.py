@@ -41,7 +41,7 @@ class UserProfile(SQLModel, table=True):
     phone_number: str | None = Field(default=None)
     address: str | None = Field(default=None)
     photo_profile: str | None = Field(default=None)
-
+    bio: str | None = Field(default=None)
 
 class RefreshToken(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)

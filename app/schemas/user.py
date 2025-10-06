@@ -20,6 +20,7 @@ class _UserProfilePayload(BaseModel):
     phone_number: str | None = None
     address: str | None = None
     profile_photo: HttpUrl | None = None
+    bio: str | None = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -35,6 +36,7 @@ class UserProfileUpdate(BaseModel):
     gender: Optional[UserGender] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
+    bio: Optional[str] = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
