@@ -1,13 +1,12 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
-from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
-from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File
+from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, SearchUsersResponse
 from sqlmodel import Session
 from app.core.database import get_session
-from app.core.security import get_current_user_id, require_admin, get_jwt_payload
+from app.core.security import get_current_user_id, require_admin
 import app.controllers.users_controller as controller
 from app.schemas.photo_profile import PhotoProfileResponse
-from app.schemas.user import UserSearchResult
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -36,17 +35,15 @@ def get_all_users(
     return controller.get_all_users(session, page, page_size)
 
 
-@router.get("/search", response_model=list[UserSearchResult], status_code=status.HTTP_200_OK)
+@router.get("/search", response_model=SearchUsersResponse, status_code=status.HTTP_200_OK)
 def search_users(
-    query: str | None = None,
-    role: str | None = None,
-    page: int = 1,
-    page_size: int = 20,
+    query: str = Query(..., min_length=1),
+    role: str | None = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     session: Session = Depends(get_session),
-    request: Request = None,
-    _payload: dict = Depends(get_jwt_payload),
 ):
-    return controller.search_users(session, query or "", role, page, page_size)
+    return controller.search_users(session, query, role, page, page_size)
 
 
 @router.get("/{user_id}", response_model=UserDetailedInfo, status_code=status.HTTP_200_OK, responses= error_responses(401, 404))

@@ -5,10 +5,10 @@ from app.errors.exceptions import NotFoundError, FileUploadError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
-from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
+from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, UserSearchItem
+from app.schemas.user import SearchUsersResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
-from app.schemas.user import UserSearchResult
 from app.errors.exceptions import UsernameTakenError, ProfileAlreadyExistsError
 
 def get_all_users(session: Session, page: int, page_size: int) -> dict[str, Any]:
@@ -107,6 +107,13 @@ def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
     response.profile_photo = profile.photo_profile
     return response
 
+
+def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> SearchUsersResponse:
+    users = repo.search_users(session, query, role, page, page_size)
+    return SearchUsersResponse(
+        users=[UserSearchItem(id=str(u.id), username=u.username, profile_photo=u.photo_profile) for u in users],
+    )
+
 def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     profile = repo.get_user_profile_by_user_id(session, user_id)
     if not profile:
@@ -144,9 +151,3 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     
     updated_profile = repo.update_user_profile(session, user_id, update_data)
     return UserProfileResponse.model_validate(updated_profile)
-
-
-def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> list[UserSearchResult]:
-    # search by full_name or username in profile, optionally filter by account role
-    results = repo.search_profiles(session, query, role, page, page_size)
-    return [UserSearchResult(id=str(r.id), full_name=r.full_name or "") for r in results]
