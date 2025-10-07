@@ -2,7 +2,7 @@ from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
 from app.schemas.user import GetAllUserResponse, ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
-from app.schemas.artist import ArtistPublicProfile
+from app.schemas.artist import ArtistPublicProfile, SocialLinksUpdateRequest
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id, require_admin, get_jwt_payload
@@ -108,3 +108,11 @@ def visualize_user(
     session: Session = Depends(get_session)
 ):
     return controller.visualize_user(session, user_id)
+
+@router.put("/artist/social-links", status_code=204)
+def update_artist_social_links(
+    data: SocialLinksUpdateRequest,
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    return controller.update_artist_social_links(session, user_id, data)

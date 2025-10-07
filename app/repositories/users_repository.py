@@ -105,3 +105,14 @@ def get_artist_links(session: Session, artist_id: UUID):
     return session.exec(
         select(SocialLink).where(SocialLink.artist_id == artist_id)
     ).all()
+
+def delete_artist_social_links(session: Session, artist_id: UUID):
+    session.exec(
+        select(SocialLink).where(SocialLink.artist_id == artist_id)
+    ).delete(synchronize_session=False)
+    session.commit()
+
+def add_artist_social_link(session: Session, artist_id: UUID, url: str):
+    link = SocialLink(artist_id=artist_id, url=url)
+    session.add(link)
+    session.commit()

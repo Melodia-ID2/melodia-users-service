@@ -1,7 +1,8 @@
 from typing import Any
 from uuid import UUID
-from pydantic import ValidationError
+from pydantic import AnyUrl, ValidationError
 from app.errors.exceptions import NotFoundError, FileUploadError
+from pydantic import AnyUrl, ValidationError as PydanticValidationError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
@@ -154,7 +155,7 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
 
 def get_artist(session, artist_id):
     account = repo.get_user_account_by_id(session, artist_id)
-    if not account or str(account.role) != "artist":
+    if not account or account.role != UserRole.ARTIST:
         raise NotFoundError("Artista no encontrado")
 
     profile = repo.get_profile_by_id(session, artist_id)
@@ -186,3 +187,19 @@ def visualize_user(session, user_id):
         photo_profile=profile.photo_profile,
         bio=profile.bio,
     )
+
+def update_artist_social_links(session, user_id, data):
+    account = repo.get_user_account_by_id(session, user_id)
+    if not account or account.role != UserRole.ARTIST:
+        raise NotFoundError("Solo los artistas pueden modificar sus redes sociales")
+
+    for url in data.links:
+        try:
+            AnyUrl(url=url)
+        except PydanticValidationError:
+            raise ValidationError(f"El link '{url}' no es una URL válida.")
+
+    repo.delete_artist_social_links(session, user_id)
+    for url in data.links:
+        repo.add_artist_social_link(session, user_id, url)
+    return None

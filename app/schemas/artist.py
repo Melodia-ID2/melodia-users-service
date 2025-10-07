@@ -9,3 +9,6 @@ class ArtistPublicProfile(BaseModel):
     bio: str | None
     photos: List[str]
     links: List[str]
+
+class SocialLinksUpdateRequest(BaseModel):
+    links: List[str]
