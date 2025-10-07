@@ -2,8 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import init_db
-from app.api.v1.users_router import router as users_router
-from app.api.v1.system_router import router as system_router
+from app.api.v1.routers.users_router import router as users_router
+from app.api.v1.routers.system_router import router as system_router
 from app.errors.middleware import Middleware
 
 
