@@ -203,3 +203,18 @@ def update_artist_social_links(session, user_id, data):
     for url in data.links:
         repo.add_artist_social_link(session, user_id, url)
     return None
+
+def update_artist_photos(session, user_id, data):
+    account = repo.get_user_account_by_id(session, user_id)
+    if not account or account.role != UserRole.ARTIST:
+        raise NotFoundError("Solo los artistas pueden modificar sus fotos")
+
+    if len(data.photos) > 5:
+        raise ValidationError("Solo puedes guardar hasta 5 fotos de artista.")
+
+    # Elimina las fotos anteriores
+    repo.delete_artist_photos(session, user_id)
+    # Agrega las nuevas fotos en el orden recibido
+    for position, url in enumerate(data.photos):
+        repo.add_artist_photo(session, user_id, url, position)
+    return None

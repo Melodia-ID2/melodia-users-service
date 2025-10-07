@@ -48,3 +48,6 @@ def visualize_user(session, user_id):
 
 def update_artist_social_links(session, user_id, data):
     return update_artist_social_links(session, user_id, data)
+
+def update_artist_photos(session, user_id, data):
+    return service.update_artist_photos(session, user_id, data)

@@ -116,3 +116,14 @@ def add_artist_social_link(session: Session, artist_id: UUID, url: str):
     link = SocialLink(artist_id=artist_id, url=url)
     session.add(link)
     session.commit()
+
+def delete_artist_photos(session: Session, artist_id: UUID):
+    session.exec(
+        select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id)
+    ).delete(synchronize_session=False)
+    session.commit()
+
+def add_artist_photo(session: Session, artist_id: UUID, url: str, position: int):
+    photo = ArtistPhoto(artist_id=artist_id, url=url, position=position)
+    session.add(photo)
+    session.commit()
