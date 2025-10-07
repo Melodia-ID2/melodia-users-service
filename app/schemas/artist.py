@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 
 
 class ArtistPublicProfile(BaseModel):
@@ -9,3 +9,9 @@ class ArtistPublicProfile(BaseModel):
     bio: str | None
     photos: List[str]
     links: List[str]
+
+class SocialLinksUpdateRequest(BaseModel):
+    links: List[str]
+
+class ArtistPhotosUpdateRequest(BaseModel):
+    photos: List[HttpUrl]

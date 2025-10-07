@@ -1,11 +1,12 @@
 from typing import Any
 from uuid import UUID
-from pydantic import ValidationError
+from pydantic import AnyUrl, ValidationError
 from app.errors.exceptions import NotFoundError, FileUploadError
+from pydantic import AnyUrl, ValidationError as PydanticValidationError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
-from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, UserSearchItem, SearchUsersResponse
+from app.schemas.user import ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, UserSearchItem, SearchUsersResponse
 from app.schemas.artist import ArtistPublicProfile
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
@@ -153,14 +154,14 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     return UserProfileResponse.model_validate(updated_profile)
 
 
-def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> list[UserSearchResult]:
+def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> SearchUsersResponse:
     # search by full_name or username in profile, optionally filter by account role
     results = repo.search_profiles(session, query, role, page, page_size)
-    return [UserSearchResult(id=str(r.id), full_name=r.full_name or "") for r in results]
+    return SearchUsersResponse
 
 def get_artist(session, artist_id):
     account = repo.get_user_account_by_id(session, artist_id)
-    if not account or str(account.role) != "artist":
+    if not account or account.role != UserRole.ARTIST:
         raise NotFoundError("Artista no encontrado")
 
     profile = repo.get_profile_by_id(session, artist_id)
@@ -179,3 +180,47 @@ def get_artist(session, artist_id):
         photos=[photo.url for photo in photos_sorted],
         links=[link.url for link in links],
     )
+
+def visualize_user(session, user_id):
+    account = repo.get_user_account_by_id(session, user_id)
+    if not account or account.role != UserRole.LISTENER:
+        raise NotFoundError("Usuario oyente no encontrado")
+    profile = repo.get_profile_by_id(session, user_id)
+    if not profile:
+        raise NotFoundError("Usuario no encontrado")
+    return ListenerPublicProfile(
+        username=profile.username,
+        photo_profile=profile.photo_profile,
+        bio=profile.bio,
+    )
+
+def update_artist_social_links(session, user_id, data):
+    account = repo.get_user_account_by_id(session, user_id)
+    if not account or account.role != UserRole.ARTIST:
+        raise NotFoundError("Solo los artistas pueden modificar sus redes sociales")
+
+    for url in data.links:
+        try:
+            AnyUrl(url=url)
+        except PydanticValidationError:
+            raise ValidationError(f"El link '{url}' no es una URL válida.")
+
+    repo.delete_artist_social_links(session, user_id)
+    for url in data.links:
+        repo.add_artist_social_link(session, user_id, url)
+    return None
+
+def update_artist_photos(session, user_id, data):
+    account = repo.get_user_account_by_id(session, user_id)
+    if not account or account.role != UserRole.ARTIST:
+        raise NotFoundError("Solo los artistas pueden modificar sus fotos")
+
+    if len(data.photos) > 5:
+        raise ValidationError("Solo puedes guardar hasta 5 fotos de artista.")
+
+    # Elimina las fotos anteriores
+    repo.delete_artist_photos(session, user_id)
+    # Agrega las nuevas fotos en el orden recibido
+    for position, url in enumerate(data.photos):
+        repo.add_artist_photo(session, user_id, url, position)
+    return None

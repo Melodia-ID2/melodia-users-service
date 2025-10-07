@@ -43,4 +43,13 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
 
 def get_artist(session, artist_id):
     from app.services.users_service import get_artist as get_artist_service
-    return get_artist_service(session, artist_id)
+    return service.get_artist(session, artist_id)
+
+def visualize_user(session, user_id):
+    return service.visualize_user(session, user_id)
+
+def update_artist_social_links(session, user_id, data):
+    return update_artist_social_links(session, user_id, data)
+
+def update_artist_photos(session, user_id, data):
+    return service.update_artist_photos(session, user_id, data)

@@ -99,5 +99,10 @@ class UserSearchItem(BaseModel):
     )
 
 
+class ListenerPublicProfile(BaseModel):
+    username: str | None
+    photo_profile: str | None
+    bio: str | None
+
 class SearchUsersResponse(BaseModel):
     users: list[UserSearchItem]
