@@ -42,3 +42,7 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
 def get_artist(session, artist_id):
     from app.services.users_service import get_artist as get_artist_service
     return get_artist_service(session, artist_id)
+
+def visualize_user(session, user_id):
+    from app.services.users_service import visualize_user as visualize_user_service
+    return visualize_user_service(session, user_id)

@@ -1,7 +1,7 @@
 from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
-from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
+from app.schemas.user import GetAllUserResponse, ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
 from app.schemas.artist import ArtistPublicProfile
 from sqlmodel import Session
 from app.core.database import get_session
@@ -100,3 +100,11 @@ def get_artist(
     session: Session = Depends(get_session)
 ):
     return controller.get_artist(session, artist_id)
+
+
+@router.get("/visualize/user/{user_id}", response_model=ListenerPublicProfile)
+def visualize_user(
+    user_id: UUID,
+    session: Session = Depends(get_session)
+):
+    return controller.visualize_user(session, user_id)

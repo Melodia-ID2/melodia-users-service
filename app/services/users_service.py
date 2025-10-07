@@ -5,7 +5,7 @@ from app.errors.exceptions import NotFoundError, FileUploadError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
-from app.schemas.user import UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
+from app.schemas.user import ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse
 from app.schemas.artist import ArtistPublicProfile
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
@@ -172,4 +172,17 @@ def get_artist(session, artist_id):
         bio=profile.bio,
         photos=[photo.url for photo in photos_sorted],
         links=[link.url for link in links],
+    )
+
+def visualize_user(session, user_id):
+    account = repo.get_user_account_by_id(session, user_id)
+    if not account or account.role != UserRole.LISTENER:
+        raise NotFoundError("Usuario oyente no encontrado")
+    profile = repo.get_profile_by_id(session, user_id)
+    if not profile:
+        raise NotFoundError("Usuario no encontrado")
+    return ListenerPublicProfile(
+        username=profile.username,
+        photo_profile=profile.photo_profile,
+        bio=profile.bio,
     )

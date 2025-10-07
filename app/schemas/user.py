@@ -97,3 +97,8 @@ class UserSearchResult(BaseModel):
         from_attributes=True,
     )
 
+
+class ListenerPublicProfile(BaseModel):
+    username: str | None
+    photo_profile: str | None
+    bio: str | None
