@@ -28,7 +28,7 @@ def test_01_patch_user_with_listener_role_to_artist():
     user_id = create_user_with_role("listener")
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.patch(f"/users/{user_id}/role", headers=headers)
+    response = client.patch(f"/users/admin/{user_id}/role", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == {
@@ -45,7 +45,7 @@ def test_02_patch_user_with_artist_role_to_listener():
     user_id = create_user_with_role("artist")
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.patch(f"/users/{user_id}/role", headers=headers)
+    response = client.patch(f"/users/admin/{user_id}/role", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == {
@@ -62,7 +62,7 @@ def test_03_patch_user_with_non_existent_id_returns_404():
     client = TestClient(app)
     user_id = uuid.uuid4()
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.patch(f"/users/{user_id}/role", headers=headers)
+    response = client.patch(f"/users/admin/{user_id}/role", headers=headers)
 
     assert response.status_code == 404
     assert response.json() == {
@@ -70,21 +70,21 @@ def test_03_patch_user_with_non_existent_id_returns_404():
         "title": "Resource Not Found",
         "status": 404,
         "detail": f"Usuario con id: {user_id} no encontrado",
-        "instance": f"/users/{user_id}/role"
+        "instance": f"/users/admin/{user_id}/role"
     }
     app.dependency_overrides = {}
 
 def test_04_patch_user_role_without_admin_token_returns_401():
     user_id = uuid.uuid4()
     client = TestClient(app)
-    response = client.patch(f"/users/{user_id}/role")
+    response = client.patch(f"/users/admin/{user_id}/role")
     assert response.status_code == 401
     assert response.json() == {
         "type": "about:blank",
         "title": "Authentication Error",
         "status": 401,
         "detail": "Token de autenticación invalido o no proporcionado",
-        "instance": f"/users/{user_id}/role"
+        "instance": f"/users/admin/{user_id}/role"
     }
 
 def test_05_patch_user_role_with_non_admin_token_returns_401():
@@ -92,14 +92,14 @@ def test_05_patch_user_role_with_non_admin_token_returns_401():
     user_id = uuid.uuid4()
     client = TestClient(app)
     headers = {"Authorization": f"Bearer {user_id}"}
-    response = client.patch(f"/users/{user_id}/role", headers=headers)
+    response = client.patch(f"/users/admin/{user_id}/role", headers=headers)
     assert response.status_code == 401
     assert response.json() == {
         "type": "about:blank",
         "title": "Authentication Error",
         "status": 401,
         "detail": "Se requiere privilegios de administrador",
-        "instance": f"/users/{user_id}/role"
+        "instance": f"/users/admin/{user_id}/role"
     }
     app.dependency_overrides = {}
 
@@ -111,13 +111,36 @@ def test_06_patch_user_with_existent_account_and_non_exist_profile_returns_200()
         session.add(user)
         session.commit()
         user_id_str = str(user.id)
-        user_email = user.email
     client = TestClient(app)
     headers = {"Authorization": f"Bearer {user_id_str}"}
-    response = client.patch(f"/users/{user_id_str}/role", headers=headers)
+    response = client.patch(f"/users/admin/{user_id_str}/role", headers=headers)
     assert response.status_code == 200
     assert response.json() == {
         "id": user_id_str, 
         "role": "artist", 
+    }
+    app.dependency_overrides = {}
+
+def test_07_when_patch_user_role_then_the_user_request_are_invalid():
+    app.dependency_overrides[require_admin] = override_require_admin
+    user_id = create_user_with_role("listener")
+    client = TestClient(app)
+    headers = {"Authorization": "Bearer admin_token"}
+    response = client.patch(f"/users/admin/{user_id}/role", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(user_id),
+        "role": "artist",
+    }
+    app.dependency_overrides[get_jwt_payload] = lambda: {"user_id": str(user_id), "role": "listener"}
+    response = client.get("/users/me", headers={"Authorization": f"Bearer {user_id}"})
+    response.status_code == 401
+    assert response.json() == {
+        "type": "about:blank",
+        "title": "Authentication Error",
+        "status": 401,
+        "detail": "El rol del usuario no coincide con el del token",
+        "instance": "/users/me"
     }
     app.dependency_overrides = {}
