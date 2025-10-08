@@ -111,7 +111,7 @@ def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
 def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> SearchUsersResponse:
     users = repo.search_users(session, query, role, page, page_size)
     return SearchUsersResponse(
-        users=[UserSearchItem(id=str(u.id), username=u.username, profile_photo=u.photo_profile) for u in users],
+        users=[UserSearchItem(id=str(u.id), role=u.role, username=u.username, profile_photo=u.photo_profile) for u in users],
     )
 
 def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:

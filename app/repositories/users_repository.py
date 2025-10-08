@@ -37,7 +37,7 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
         cond = cond & (UserAccount.role == role)
     
     stmt = (
-        select(UserProfile.id, UserProfile.username, UserProfile.photo_profile)
+        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.photo_profile)
         .join(UserAccount, UserProfile.id == UserAccount.id)
         .where(cond)
         .order_by(similarity_expr.desc())
