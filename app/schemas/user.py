@@ -88,6 +88,7 @@ class GetAllUserResponse(BaseModel):
 
 class UserSearchItem(BaseModel):
     id: str
+    role: str
     username: str | None = None
     profile_photo: str | None = None
 
