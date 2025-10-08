@@ -1,6 +1,6 @@
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
-from datetime import datetime
+from datetime import datetime, date
 from pydantic.networks import HttpUrl
 
 from typing import Optional
@@ -15,7 +15,7 @@ def _to_camel(string: str) -> str:
 class _UserProfilePayload(BaseModel):
     username: Optional[str] = None
     full_name: str
-    birthdate: datetime | None = None
+    birthdate: date | None = None
     gender: UserGender
     phone_number: str | None = None
     address: str | None = None
@@ -31,7 +31,7 @@ class _UserProfilePayload(BaseModel):
 class UserProfileUpdate(BaseModel):
     username: Optional[str] = None
     full_name: Optional[str] = None
-    birthdate: Optional[datetime] = None
+    birthdate: Optional[date] = None
     gender: Optional[UserGender] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
@@ -60,7 +60,7 @@ class UserDetailedInfo(UserBasicInfo):
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
-    birthdate: datetime | None = None
+    birthdate: date | None = None
     profile_photo: HttpUrl | None = None
     last_login: Optional[datetime] = None
     created_at: Optional[datetime] = None 
