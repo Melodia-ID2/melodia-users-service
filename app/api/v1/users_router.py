@@ -2,7 +2,7 @@ from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
 from app.schemas.user import GetAllUserResponse, ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, SearchUsersResponse
-from app.schemas.artist import ArtistPublicProfile
+from app.schemas.artist import ArtistPublicProfile, ArtistPhotosUpdateRequest
 from app.schemas.artist import ArtistPublicProfile, SocialLinksUpdateRequest
 from sqlmodel import Session
 from app.core.database import get_session

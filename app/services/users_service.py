@@ -153,12 +153,6 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     updated_profile = repo.update_user_profile(session, user_id, update_data)
     return UserProfileResponse.model_validate(updated_profile)
 
-
-def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> SearchUsersResponse:
-    # search by full_name or username in profile, optionally filter by account role
-    results = repo.search_profiles(session, query, role, page, page_size)
-    return SearchUsersResponse
-
 def get_artist(session, artist_id):
     account = repo.get_user_account_by_id(session, artist_id)
     if not account or account.role != UserRole.ARTIST:
