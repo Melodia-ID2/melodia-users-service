@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from pydantic.networks import HttpUrl
 
-from typing import Optional
+from typing import Optional, List
 from app.models.user import UserGender
 
 
@@ -50,6 +50,11 @@ class UserProfileCreate(_UserProfilePayload):
 
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
+    
+class ArtistProfileResponse(_UserProfilePayload):
+    id: UUID
+    photos: List[str] = []
+    links: List[str] = []
 
 class UserBasicInfo(BaseModel):
     id: str

@@ -1,7 +1,8 @@
+from typing import Union
 from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
-from app.schemas.user import GetAllUserResponse, ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, SearchUsersResponse
+from app.schemas.user import ArtistProfileResponse, GetAllUserResponse, ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, SearchUsersResponse
 from app.schemas.artist import ArtistPublicProfile, ArtistPhotosUpdateRequest
 from app.schemas.artist import ArtistPublicProfile, SocialLinksUpdateRequest
 from sqlmodel import Session
@@ -13,7 +14,7 @@ from app.schemas.photo_profile import PhotoProfileResponse
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/me", response_model=UserProfileResponse)
+@router.get("/me", response_model=Union[UserProfileResponse, ArtistProfileResponse])
 def get_me(
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),

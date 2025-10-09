@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 from uuid import UUID
 from pydantic import AnyUrl
 from app.errors.exceptions import NotFoundError, FileUploadError, ValidationError
@@ -6,7 +6,7 @@ from pydantic import AnyUrl, ValidationError as PydanticValidationError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader
-from app.schemas.user import ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, UserSearchItem, SearchUsersResponse
+from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, UserSearchItem, SearchUsersResponse
 from app.schemas.artist import ArtistPublicProfile
 from app.schemas.photo_profile import PhotoProfileResponse
 import app.repositories.users_repository as repo
@@ -100,13 +100,47 @@ def update_photo_profile(session: Session,user_id: UUID, photo_file_bytes: bytes
 
     return PhotoProfileResponse(photo_profile=uploaded_url)
 
-def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
+def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, ArtistProfileResponse]:
     profile = repo.get_profile_by_id(session, user_id)
     if not profile:
         raise NotFoundError("Perfil no encontrado")
-    response = UserProfileResponse.model_validate(profile)
-    response.profile_photo = profile.photo_profile
-    return response
+    
+    user_account = repo.get_user_account_by_id(session, user_id)
+    
+    response_data = {
+        "id": profile.id,
+        "username": profile.username,
+        "full_name": profile.full_name,
+        "birthdate": profile.birthdate,
+        "gender": profile.gender,
+        "phone_number": profile.phone_number,
+        "address": profile.address,
+        "profile_photo": profile.photo_profile,
+        "bio": profile.bio,
+    }
+    
+    if user_account.role == UserRole.ARTIST:
+        try:
+            photos = repo.get_artist_photos(session, user_id)
+            photos_sorted = sorted(photos, key=lambda p: p.position)
+            links = repo.get_artist_links(session, user_id)
+            
+            artist_data = {
+                **response_data,
+                "photos": [photo.url for photo in photos_sorted],
+                "links": [link.url for link in links]
+            }
+            return ArtistProfileResponse(**artist_data)
+        except Exception as e:
+            print(f"Error obteniendo datos de artista: {e}")
+            artist_data = {
+                **response_data,
+                "photos": [],
+                "links": []
+            }
+            return ArtistProfileResponse(**artist_data)
+    else:
+        return UserProfileResponse(**response_data) # Oyente
 
 
 def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> SearchUsersResponse:

@@ -29,7 +29,7 @@ async def update_photo_profile(session: Session,user_id: UUID, file: UploadFile 
     file_bytes = await file.read()
     return service.update_photo_profile(session,user_id, file_bytes)
 
-def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
+def get_me(session: Session, user_id: UUID):
     return service.get_me(session, user_id)
 
 
