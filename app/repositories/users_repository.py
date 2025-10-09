@@ -4,6 +4,8 @@ from sqlmodel import Session, func, select, delete
 
 from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserProfile
 
+def get_user_by_id(session: Session, user_id: UUID) -> UserAccount | None:
+    return session.exec(select(UserAccount).where(UserAccount.id == user_id)).first()
 
 def get_all_users(session: Session, page: int, page_size: int):
     stmt = (

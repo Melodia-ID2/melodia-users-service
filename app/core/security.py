@@ -1,10 +1,13 @@
 from typing import Any
+
+from sqlmodel import Session
+from app.core.database import get_session
 from app.errors.exceptions import AuthenticationError
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, exceptions
 from app.core.config import settings
-
+from app.repositories import users_repository as user_repo
 
 security = HTTPBearer(auto_error=False)
 
@@ -52,8 +55,16 @@ def require_admin(payload: dict[str, Any] = Depends(get_jwt_payload)) -> dict[st
     return payload
 
 
-def get_current_user_id(payload: dict[str, Any] = Depends(get_jwt_payload)) -> str:
+def get_current_user_id(payload: dict[str, Any] = Depends(get_jwt_payload), session: Session = Depends(get_session)) -> str:
     user_id = payload.get("user_id")
     if not user_id:
-        raise AuthenticationError("Token invalido: user_id faltante")
+        raise AuthenticationError("ID de usuario no encontrado en el token")
+    user = user_repo.get_user_by_id(session, user_id)
+    if not user:
+        raise AuthenticationError("Usuario no encontrado")
+    if user.status != "active":
+        raise AuthenticationError("El usuario está bloqueado")
+    if payload.get("role") != user.role:
+        raise AuthenticationError("El rol del usuario no coincide con el del token")
+
     return user_id

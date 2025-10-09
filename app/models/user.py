@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from enum import Enum
 from uuid import UUID, uuid4
 from sqlmodel import Field, SQLModel
@@ -36,7 +36,7 @@ class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")
     username: str | None = Field(index=True, nullable=True, default=None)
     full_name: str | None = Field(default=None)
-    birthdate: datetime | None = Field(default=None)
+    birthdate: date | None = Field(default=None)
     gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)
     phone_number: str | None = Field(default=None)
     address: str | None = Field(default=None)

@@ -51,20 +51,20 @@ def override_get_jwt_payload():
 def make_request():
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    return client.get("/users/", headers=headers)
+    return client.get("/users/admin", headers=headers)
 
 
 @pytest.mark.asyncio
 async def test_01_get_all_without_admin_token_returns_401():
     async with httpx.AsyncClient(base_url=BASE_URL) as client:
-        r = await client.get("/users/")
+        r = await client.get("/users/admin")
         assert r.status_code == 401
         assert r.json() == {
             "type": "about:blank",
             "title": "Authentication Error",
             "status": 401,
             "detail": "Token de autenticación invalido o no proporcionado",
-            "instance": "/users/"
+            "instance": "/users/admin"
         }
 
 @pytest.mark.asyncio
@@ -103,7 +103,7 @@ async def test_05_get_all_without_admin_role_returns_401():
         "title": "Authentication Error",
         "status": 401,
         "detail": "Se requiere privilegios de administrador",
-        "instance": "/users/"
+        "instance": "/users/admin"
     }
     app.dependency_overrides = {}
 
