@@ -1,6 +1,6 @@
 from typing import Any
 from uuid import UUID
-from sqlmodel import Session, func, select
+from sqlmodel import Session, func, select, delete
 
 from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserProfile
 
@@ -134,10 +134,8 @@ def get_artist_links(session: Session, artist_id: UUID):
     ).all()
 
 def delete_artist_social_links(session: Session, artist_id: UUID):
-    session.exec(
-        select(SocialLink).where(SocialLink.artist_id == artist_id)
-    ).delete(synchronize_session=False)
-    session.commit()
+    stmt = delete(SocialLink).where(SocialLink.artist_id == artist_id)
+    session.exec(stmt)
 
 def add_artist_social_link(session: Session, artist_id: UUID, url: str):
     link = SocialLink(artist_id=artist_id, url=url)
@@ -149,8 +147,20 @@ def delete_artist_photos(session: Session, artist_id: UUID):
         select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id)
     ).delete(synchronize_session=False)
     session.commit()
-
+    
 def add_artist_photo(session: Session, artist_id: UUID, url: str, position: int):
-    photo = ArtistPhoto(artist_id=artist_id, url=url, position=position)
+    """Agregar una foto de artista"""
+    photo = ArtistPhoto(
+        artist_id=artist_id,
+        url=url,
+        position=position
+    )
     session.add(photo)
     session.commit()
+    session.refresh(photo)
+    return photo
+
+def get_artist_photos(session: Session, artist_id: UUID):
+    """Obtener todas las fotos de un artista"""
+    stmt = select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id)
+    return session.exec(stmt).all()

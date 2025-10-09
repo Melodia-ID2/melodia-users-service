@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
-from pydantic import AnyUrl, ValidationError
-from app.errors.exceptions import NotFoundError, FileUploadError
+from pydantic import AnyUrl
+from app.errors.exceptions import NotFoundError, FileUploadError, ValidationError
 from pydantic import AnyUrl, ValidationError as PydanticValidationError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
@@ -204,17 +204,47 @@ def update_artist_social_links(session, user_id, data):
         repo.add_artist_social_link(session, user_id, url)
     return None
 
-def update_artist_photos(session, user_id, data):
-    account = repo.get_user_account_by_id(session, user_id)
-    if not account or account.role != UserRole.ARTIST:
-        raise NotFoundError("Solo los artistas pueden modificar sus fotos")
+def add_artist_photo(session: Session,user_id: UUID, photo_file_bytes: bytes):
+    """
+    Agrega una foto al perfil del artista.
+    Máximo 5 fotos permitidas.
+    """
+    # Verificar que el usuario existe y es artista
+    user_account = repo.get_user_account_by_id(session, user_id)
+    if not user_account:
+        raise NotFoundError("Usuario no encontrado")
+    
+    if user_account.role != UserRole.ARTIST:
+        raise ValidationError("Solo los artistas modificar sus fotos")
+    
+    # Verificar cuántas fotos ya tiene
+    current_photos = repo.get_artist_photos(session, user_id)
+    if len(current_photos) >= 5:
+        raise ValidationError("Máximo 5 fotos permitidas. Elimina una foto antes de agregar otra.")
+    
+    next_position = len(current_photos) + 1
+    
+    # Subir la foto a Cloudinary
+    try:
+        uploaded_url = cloudinary.uploader.upload(
+            photo_file_bytes,
+            folder="artist-photos",
+            public_id=f"{user_id}_{next_position}",
+            overwrite=False 
+        )["secure_url"]
 
-    if len(data.photos) > 5:
-        raise ValidationError("Solo puedes guardar hasta 5 fotos de artista.")
-
-    # Elimina las fotos anteriores
-    repo.delete_artist_photos(session, user_id)
-    # Agrega las nuevas fotos en el orden recibido
-    for position, url in enumerate(data.photos):
-        repo.add_artist_photo(session, user_id, url, position)
-    return None
+        if not uploaded_url:
+            raise FileUploadError("Error al guardar la foto del artista")
+        
+        repo.add_artist_photo(session, user_id, uploaded_url, next_position)
+        
+        return {
+            "message": "Foto agregada exitosamente",
+            "photo_url": uploaded_url,
+            "position": next_position,
+            "total_photos": len(current_photos) + 1
+        }
+        
+    except Exception as e:
+        session.rollback()
+        raise FileUploadError(f"Error al subir la foto: {str(e)}")

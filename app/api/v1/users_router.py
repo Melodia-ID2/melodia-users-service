@@ -115,10 +115,10 @@ def update_artist_social_links(
 ):
     return controller.update_artist_social_links(session, user_id, data)
 
-@router.put("/artist/photos", status_code=204)
-def update_artist_photos(
-    data: ArtistPhotosUpdateRequest,
+@router.put("/artist/photos", status_code=201)
+async def add_artist_photo(
+    file: UploadFile = File(...),
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),
 ):
-    return controller.update_artist_photos(session, user_id, data)
+    return await controller.add_artist_photo(session, user_id, file)
