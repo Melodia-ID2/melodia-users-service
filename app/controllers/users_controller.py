@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 from sqlmodel import Session
 
@@ -42,7 +43,6 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
 
 
 def get_artist(session, artist_id):
-    from app.services.users_service import get_artist as get_artist_service
     return service.get_artist(session, artist_id)
 
 def visualize_user(session, user_id):
@@ -54,3 +54,9 @@ def update_artist_social_links(session, user_id, data):
 async def add_artist_photo(session: Session, user_id: UUID, file: UploadFile):
     file_bytes = await file.read()
     return service.add_artist_photo(session, user_id, file_bytes)
+
+def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
+    return service.delete_artist_photo(session, user_id, photo_url)
+
+def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]):
+    return service.reorder_artist_photos(session, user_id, photo_urls)

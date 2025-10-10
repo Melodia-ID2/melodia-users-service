@@ -111,7 +111,6 @@ def update_user_profile(session: Session, user_id: UUID, data: dict):
     session.refresh(profile)
     return profile
 
-
 def search_profiles(session: Session, query: str, role: str | None, page: int, page_size: int):
     stmt = select(UserProfile).outerjoin(UserAccount, UserAccount.id == UserProfile.id)
     if query:
@@ -163,6 +162,37 @@ def add_artist_photo(session: Session, artist_id: UUID, url: str, position: int)
     return photo
 
 def get_artist_photos(session: Session, artist_id: UUID):
-    """Obtener todas las fotos de un artista"""
     stmt = select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id)
     return session.exec(stmt).all()
+
+def get_artist_photo_by_url(session: Session, artist_id: UUID, photo_url: str):
+    stmt = select(ArtistPhoto).where(
+        ArtistPhoto.artist_id == artist_id,
+        ArtistPhoto.url == photo_url
+    )
+    return session.exec(stmt).first()
+
+def delete_artist_photo(session: Session, artist_id: UUID, photo_url: str):    
+    stmt = delete(ArtistPhoto).where(
+        ArtistPhoto.artist_id == artist_id,
+        ArtistPhoto.url == photo_url
+    )
+    session.exec(stmt)
+    session.commit()
+
+def update_photo_position(session: Session, photo_id: UUID, new_position: int):
+    stmt = select(ArtistPhoto).where(ArtistPhoto.id == photo_id)
+    photo = session.exec(stmt).first()
+    if photo:
+        photo.position = new_position
+        session.commit()
+
+def update_photo_position_by_url(session: Session, artist_id: UUID, photo_url: str, new_position: int):
+    stmt = select(ArtistPhoto).where(
+        ArtistPhoto.artist_id == artist_id,
+        ArtistPhoto.url == photo_url
+    )
+    photo = session.exec(stmt).first()
+    if photo:
+        photo.position = new_position
+        session.commit()

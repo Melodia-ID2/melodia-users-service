@@ -1,5 +1,6 @@
-from typing import Any, Union
-from uuid import UUID
+import time
+from typing import Any, List, Union
+from uuid import UUID, uuid4
 from pydantic import AnyUrl
 from app.errors.exceptions import NotFoundError, FileUploadError, ValidationError
 from pydantic import AnyUrl, ValidationError as PydanticValidationError
@@ -258,13 +259,18 @@ def add_artist_photo(session: Session,user_id: UUID, photo_file_bytes: bytes):
     
     next_position = len(current_photos) + 1
     
+    timestamp = int(time.time() * 1000)  # timestamp en millisegundos
+    unique_suffix = uuid4().hex[:8]  # 8 caracteres únicos
+    unique_public_id = f"{user_id}_{timestamp}_{unique_suffix}"
+    
     # Subir la foto a Cloudinary
     try:
         uploaded_url = cloudinary.uploader.upload(
             photo_file_bytes,
             folder="artist-photos",
-            public_id=f"{user_id}_{next_position}",
-            overwrite=False 
+            public_id=unique_public_id,
+            overwrite=False,
+            resource_type="image"
         )["secure_url"]
 
         if not uploaded_url:
@@ -282,3 +288,83 @@ def add_artist_photo(session: Session,user_id: UUID, photo_file_bytes: bytes):
     except Exception as e:
         session.rollback()
         raise FileUploadError(f"Error al subir la foto: {str(e)}")
+
+def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
+    user_account = repo.get_user_account_by_id(session, user_id)
+    if not user_account:
+        raise NotFoundError("Usuario no encontrado")
+    
+    if user_account.role != UserRole.ARTIST:
+        raise ValidationError("Solo los artistas pueden eliminar sus fotos")
+    
+    photo = repo.get_artist_photo_by_url(session, user_id, photo_url)
+    if not photo:
+        raise NotFoundError("Foto no encontrada")
+    
+    try:
+        deleted_position = photo.position
+        # Eliminar de Cloudinary
+        # Extraer public_id de la URL
+        url_parts = photo_url.split("/")
+        if "artist-photos" in url_parts:
+            public_id_with_extension = url_parts[-1]  # Último elemento
+            public_id = public_id_with_extension.split(".")[0]  # Remover extensión
+            full_public_id = f"artist-photos/{public_id}"
+        else:
+            # Fallback para URLs diferentes
+            public_id = photo_url.split("/")[-1].split(".")[0]
+            full_public_id = f"artist-photos/{public_id}"
+        
+        cloudinary.uploader.destroy(full_public_id)
+        
+        repo.delete_artist_photo(session, user_id, photo_url)
+        
+        # Reordenar las posiciones de las fotos restantes
+        remaining_photos = repo.get_artist_photos(session, user_id)
+        photos_to_reorder = [p for p in remaining_photos if p.position > deleted_position]
+        
+        # Actualizar posiciones de las fotos que estaban después
+        for photo in photos_to_reorder:
+            new_position = photo.position - 1
+            repo.update_photo_position(session, photo.id, new_position)
+        
+        return {
+            "message": "Foto eliminada exitosamente",
+            "remaining_photos": len(remaining_photos)
+        }
+        
+    except Exception as e:
+        session.rollback()
+        raise FileUploadError(f"Error al eliminar la foto: {str(e)}")
+
+def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]):
+    user_account = repo.get_user_account_by_id(session, user_id)
+    if not user_account:
+        raise NotFoundError("Usuario no encontrado")
+    
+    if user_account.role != UserRole.ARTIST:
+        raise ValidationError("Solo los artistas pueden reordenar sus fotos")
+    
+    current_photos = repo.get_artist_photos(session, user_id)
+    current_urls = {photo.url for photo in current_photos}
+    
+    for url in photo_urls:
+        if url not in current_urls:
+            raise ValidationError(f"Foto no encontrada: {url}")
+    
+    if len(photo_urls) != len(current_photos):
+        raise ValidationError("Debe incluir todas las fotos en el reordenamiento")
+    
+    try:
+        # Actualizar las posiciones
+        for position, url in enumerate(photo_urls, 1):
+            repo.update_photo_position_by_url(session, user_id, url, position)
+        
+        return {
+            "message": "Fotos reordenadas exitosamente",
+            "new_order": photo_urls
+        }
+        
+    except Exception as e:
+        session.rollback()
+        raise ValidationError(f"Error al reordenar fotos: {str(e)}")

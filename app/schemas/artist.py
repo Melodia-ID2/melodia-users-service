@@ -14,4 +14,7 @@ class SocialLinksUpdateRequest(BaseModel):
     links: List[str]
 
 class ArtistPhotosUpdateRequest(BaseModel):
-    photos: List[HttpUrl]
+    photos: List[str]
+    
+class DeletePhotoRequest(BaseModel):
+    photo_url: str

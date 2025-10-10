@@ -2,12 +2,12 @@ from typing import Union
 from uuid import UUID
 from app.errors.error_responses import error_responses
 from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
-from app.schemas.user import ArtistProfileResponse, GetAllUserResponse, ListenerPublicProfile, UserDetailedInfo, UserProfileCreate, UserProfileResponse, UserProfileUpdate, UserRoleUpdateResponse, SearchUsersResponse
-from app.schemas.artist import ArtistPublicProfile, ArtistPhotosUpdateRequest
+from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, UserProfileCreate, UserProfileResponse, UserProfileUpdate, SearchUsersResponse
+from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest
 from app.schemas.artist import ArtistPublicProfile, SocialLinksUpdateRequest
 from sqlmodel import Session
 from app.core.database import get_session
-from app.core.security import get_current_user_id, require_admin
+from app.core.security import get_current_user_id
 import app.controllers.users_controller as controller
 from app.schemas.photo_profile import PhotoProfileResponse
 from app.api.v1.routers.admin_router import router as admin_router
@@ -92,3 +92,19 @@ async def add_artist_photo(
     user_id: UUID = Depends(get_current_user_id),
 ):
     return await controller.add_artist_photo(session, user_id, file)
+
+@router.delete("/artist/photos", status_code=200)
+def delete_artist_photo(
+    data: DeletePhotoRequest,
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    return controller.delete_artist_photo(session, user_id, data.photo_url)
+
+@router.put("/artist/photos/reorder", status_code=200)
+def reorder_artist_photos(
+    data: ArtistPhotosUpdateRequest,
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    return controller.reorder_artist_photos(session, user_id, data.photos)
