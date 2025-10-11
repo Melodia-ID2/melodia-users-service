@@ -1,7 +1,9 @@
+from typing import Any
+
 from app.schemas.error import ErrorResponse
 
 
-def error_responses(*codes: int):
+def error_responses(*codes: int) -> dict[int | str, dict[str, Any]] | None:
     """
     Generates a reusable dictionary of error responses for endpoints, based on the provided status codes.
     """

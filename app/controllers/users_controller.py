@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 from uuid import UUID
 
 from fastapi import File, UploadFile
@@ -46,15 +46,15 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     return service.update_me(session, user_id, data)
 
 
-def get_artist(session, artist_id):
+def get_artist(session: Session, artist_id: UUID):
     return service.get_artist(session, artist_id)
 
 
-def visualize_user(session, user_id):
+def visualize_user(session: Session, user_id: UUID):
     return service.visualize_user(session, user_id)
 
 
-def update_artist_social_links(session, user_id, data):
+def update_artist_social_links(session: Session, user_id: UUID, data: Any):
     return service.update_artist_social_links(session, user_id, data)
 
 
