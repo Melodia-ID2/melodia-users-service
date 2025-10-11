@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import List
 from uuid import UUID
 from sqlmodel import Session, func, select, delete
 
@@ -30,7 +30,8 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
 
     similarity_expr = func.similarity(UserProfile.username, query)
     cond = (UserProfile.username.ilike(f"%{query}%")) | (similarity_expr > SIMILARITY_THRESHOLD)
-    if role: cond = cond & (UserAccount.role == role)
+    if role: 
+        cond = cond & (UserAccount.role == role)
     
     stmt = (
         select(
@@ -165,10 +166,6 @@ def add_artist_photo(session: Session, artist_id: UUID, url: str, position: int)
     session.commit()
     session.refresh(photo)
     return photo
-
-def get_artist_photos(session: Session, artist_id: UUID):
-    stmt = select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id)
-    return session.exec(stmt).all()
 
 def get_artist_photo_by_url(session: Session, artist_id: UUID, photo_url: str):
     stmt = select(ArtistPhoto).where(

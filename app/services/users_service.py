@@ -3,7 +3,7 @@ from typing import Any, List, Union
 from uuid import UUID, uuid4
 from pydantic import AnyUrl
 from app.errors.exceptions import NotFoundError, FileUploadError, ValidationError
-from pydantic import AnyUrl, ValidationError as PydanticValidationError
+from pydantic import ValidationError as PydanticValidationError
 from app.models.user import UserProfile, UserRole
 from sqlmodel import Session
 import cloudinary.uploader

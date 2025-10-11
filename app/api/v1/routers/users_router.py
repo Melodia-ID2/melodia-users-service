@@ -1,10 +1,9 @@
 from typing import Union
 from uuid import UUID
-from app.errors.error_responses import error_responses
-from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File
 from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, UserProfileCreate, UserProfileResponse, UserProfileUpdate, SearchUsersResponse
 from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest
-from app.schemas.artist import ArtistPublicProfile, SocialLinksUpdateRequest
+from app.schemas.artist import SocialLinksUpdateRequest
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_id

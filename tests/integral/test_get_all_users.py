@@ -37,7 +37,7 @@ def assert_n_users_in_response(response, n, user_ids):
         user = data["users"][i]
         assert user["id"] == str(user_ids[i])
         assert user["email"] == f"email{i+1}@example.com"
-        assert user["username"] == None
+        assert user["username"] is None
         assert user["role"] == "listener"
         assert user["status"] == "active"
 
