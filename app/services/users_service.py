@@ -229,14 +229,16 @@ def update_artist_social_links(session, user_id, data):
         raise NotFoundError("Solo los artistas pueden modificar sus redes sociales")
 
     for url in data.links:
-        try:
-            AnyUrl(url=url)
-        except PydanticValidationError:
-            raise ValidationError(f"El link '{url}' no es una URL válida.")
+        if url.strip():  # Solo validar URLs no vacías
+            try:
+                AnyUrl(url=url)
+            except PydanticValidationError:
+                raise ValidationError(f"El link '{url}' no es una URL válida.")
 
-    repo.delete_artist_social_links(session, user_id)
-    for url in data.links:
-        repo.add_artist_social_link(session, user_id, url)
+    valid_links = [url.strip() for url in data.links if url.strip()]
+    
+    repo.update_artist_social_links(session, user_id, valid_links)
+    
     return None
 
 def add_artist_photo(session: Session,user_id: UUID, photo_file_bytes: bytes):

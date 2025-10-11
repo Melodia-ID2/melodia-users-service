@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 from uuid import UUID
 from sqlmodel import Session, func, select, delete
 
@@ -134,14 +134,20 @@ def get_artist_links(session: Session, artist_id: UUID):
         select(SocialLink).where(SocialLink.artist_id == artist_id)
     ).all()
 
-def delete_artist_social_links(session: Session, artist_id: UUID):
-    stmt = delete(SocialLink).where(SocialLink.artist_id == artist_id)
-    session.exec(stmt)
-
-def add_artist_social_link(session: Session, artist_id: UUID, url: str):
-    link = SocialLink(artist_id=artist_id, url=url)
-    session.add(link)
-    session.commit()
+def update_artist_social_links(session: Session, artist_id: UUID, urls: List[str]):
+    try:
+        stmt = delete(SocialLink).where(SocialLink.artist_id == artist_id)
+        session.exec(stmt)
+        
+        for url in urls:
+            link = SocialLink(artist_id=artist_id, url=url)
+            session.add(link)
+        
+        session.commit()
+        
+    except Exception as e:
+        session.rollback()
+        raise e
 
 def delete_artist_photos(session: Session, artist_id: UUID):
     session.exec(
