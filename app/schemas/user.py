@@ -96,6 +96,7 @@ class UserSearchItem(BaseModel):
     role: str
     username: str | None = None
     profile_photo: str | None = None
+    similarity_score: float
 
     model_config = ConfigDict(
         alias_generator=_to_camel,

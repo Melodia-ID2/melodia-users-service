@@ -25,30 +25,29 @@ def get_all_users(session: Session, page: int, page_size: int):
     return users, total
 
 
-def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> list[Any]:
-    SIMILARITY_THRESHOLD = 0.3
+def search_users(session: Session, query: str, role: str | None, page: int, page_size: int):
+    SIMILARITY_THRESHOLD = 0.1
 
-    like_q = f"%{query}%"
     similarity_expr = func.similarity(UserProfile.username, query)
-    cond = (
-        (UserProfile.username.ilike(like_q)) |
-        (similarity_expr > SIMILARITY_THRESHOLD)
-    )
-
-    if role:
-        cond = cond & (UserAccount.role == role)
+    cond = (UserProfile.username.ilike(f"%{query}%")) | (similarity_expr > SIMILARITY_THRESHOLD)
+    if role: cond = cond & (UserAccount.role == role)
     
     stmt = (
-        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.photo_profile)
+        select(
+            UserProfile.id,
+            UserAccount.role,
+            UserProfile.username,
+            UserProfile.photo_profile,
+            similarity_expr.label("similarity_score")
+        )
         .join(UserAccount, UserProfile.id == UserAccount.id)
         .where(cond)
-        .order_by(similarity_expr.desc())
+        .order_by(similarity_expr.desc(), UserProfile.username.asc())
         .offset((page - 1) * page_size)
         .limit(page_size)
     )
-    users = session.exec(stmt).all()
 
-    return users
+    return session.exec(stmt).all()
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
