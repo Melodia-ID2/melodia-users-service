@@ -1,14 +1,16 @@
-from datetime import date, datetime
-from fastapi.testclient import TestClient
-from app.main import app
-from app.core.security import require_admin
-from app.models.user import UserAccount, UserProfile, RefreshToken
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
 import uuid
+from datetime import date, datetime
+
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-sync_engine = create_engine(settings.DATABASE_URL.replace('+asyncpg', ''))
+from app.core.security import require_admin
+from app.main import app
+from app.models.user import UserAccount, UserProfile
+
+sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 
 
 def test_01_get_user_admin_returns_200_and_user_data():

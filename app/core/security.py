@@ -1,12 +1,13 @@
 from typing import Any
 
-from sqlmodel import Session
-from app.core.database import get_session
-from app.errors.exceptions import AuthenticationError
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt, exceptions
+from jose import exceptions, jwt
+from sqlmodel import Session
+
 from app.core.config import settings
+from app.core.database import get_session
+from app.errors.exceptions import AuthenticationError
 from app.repositories import users_repository as user_repo
 
 security = HTTPBearer(auto_error=False)
@@ -39,11 +40,7 @@ def _verify_jwt(token: str) -> dict[str, Any]:
 def get_jwt_payload(
     creds: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> dict[str, Any]:
-    if (
-        creds is None
-        or (creds.scheme or "").lower() != "bearer"
-        or not creds.credentials
-    ):
+    if creds is None or (creds.scheme or "").lower() != "bearer" or not creds.credentials:
         raise AuthenticationError("Token de autenticación invalido o no proporcionado")
     token = creds.credentials
     return _verify_jwt(token)

@@ -1,20 +1,21 @@
 from typing import Union
 from uuid import UUID
-from app.errors.error_responses import error_responses
-from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request
-from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, UserProfileCreate, UserProfileResponse, UserProfileUpdate, SearchUsersResponse
-from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest
-from app.schemas.artist import ArtistPublicProfile, SocialLinksUpdateRequest
+
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from sqlmodel import Session
+
+import app.controllers.users_controller as controller
+from app.api.v1.routers.admin_router import router as admin_router
 from app.core.database import get_session
 from app.core.security import get_current_user_id
-import app.controllers.users_controller as controller
+from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest, SocialLinksUpdateRequest
 from app.schemas.photo_profile import PhotoProfileResponse
-from app.api.v1.routers.admin_router import router as admin_router
+from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 router.include_router(admin_router)
+
 
 @router.get("/me", response_model=Union[UserProfileResponse, ArtistProfileResponse])
 def get_me(
@@ -55,27 +56,22 @@ def create_user_profile(
 
 @router.post("/photo-profile", response_model=PhotoProfileResponse)
 async def update_photo_profile(
-    file: UploadFile = File(...), 
+    file: UploadFile = File(...),
     current_user_id: UUID = Depends(get_current_user_id),
     session: Session = Depends(get_session),
 ):
-    return await controller.update_photo_profile(session,current_user_id, file)
+    return await controller.update_photo_profile(session, current_user_id, file)
 
 
 @router.get("/artist/{artist_id}", response_model=ArtistPublicProfile)
-def get_artist(
-    artist_id: UUID,
-    session: Session = Depends(get_session)
-):
+def get_artist(artist_id: UUID, session: Session = Depends(get_session)):
     return controller.get_artist(session, artist_id)
 
 
 @router.get("/visualize/user/{user_id}", response_model=ListenerPublicProfile)
-def visualize_user(
-    user_id: UUID,
-    session: Session = Depends(get_session)
-):
+def visualize_user(user_id: UUID, session: Session = Depends(get_session)):
     return controller.visualize_user(session, user_id)
+
 
 @router.put("/artist/social-links", status_code=204)
 def update_artist_social_links(
@@ -85,6 +81,7 @@ def update_artist_social_links(
 ):
     return controller.update_artist_social_links(session, user_id, data)
 
+
 @router.put("/artist/photos", status_code=201)
 async def add_artist_photo(
     file: UploadFile = File(...),
@@ -93,6 +90,7 @@ async def add_artist_photo(
 ):
     return await controller.add_artist_photo(session, user_id, file)
 
+
 @router.delete("/artist/photos", status_code=200)
 def delete_artist_photo(
     data: DeletePhotoRequest,
@@ -100,6 +98,7 @@ def delete_artist_photo(
     user_id: UUID = Depends(get_current_user_id),
 ):
     return controller.delete_artist_photo(session, user_id, data.photo_url)
+
 
 @router.put("/artist/photos/reorder", status_code=200)
 def reorder_artist_photos(
