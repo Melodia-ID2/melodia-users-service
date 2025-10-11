@@ -112,6 +112,8 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         raise NotFoundError("Perfil no encontrado")
 
     user_account = repo.get_account_by_id(session, user_id)
+    if user_account and user_account.role == UserRole.LISTENER:
+        return UserProfileResponse.model_validate(profile)
 
     response_data = {
         "id": profile.id,
@@ -123,6 +125,8 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         "address": profile.address,
         "profile_photo": profile.photo_profile,
         "bio": profile.bio,
+        "followers_count": profile.followers_count,
+        "following_count": profile.following_count,
     }
 
     if user_account.role == UserRole.ARTIST:
