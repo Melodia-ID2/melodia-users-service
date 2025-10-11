@@ -11,6 +11,7 @@ import app.repositories.users_repository as repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.user import UserProfile, UserRole
 from app.schemas.artist import ArtistPublicProfile
+from app.schemas.message import MessageResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -37,7 +38,7 @@ def get_all_users(session: Session, page: int, page_size: int) -> dict[str, Any]
 
 
 def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
-    user = repo.get_user_account_by_id(session, user_id)
+    user = repo.get_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user_profile = repo.get_profile_by_id(session, user_id)
@@ -71,7 +72,7 @@ def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfi
 
 
 def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
-    user = repo.get_user_account_by_id(session, user_id)
+    user = repo.get_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
@@ -83,7 +84,7 @@ def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
 
 
 def delete_user(session: Session, user_id: UUID):
-    account = repo.get_user_account_by_id(session, user_id)
+    account = repo.get_account_by_id(session, user_id)
     if not account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user_profile = repo.get_profile_by_id(session, user_id)
@@ -110,7 +111,7 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
     if not profile:
         raise NotFoundError("Perfil no encontrado")
 
-    user_account = repo.get_user_account_by_id(session, user_id)
+    user_account = repo.get_account_by_id(session, user_id)
 
     response_data = {
         "id": profile.id,
@@ -187,7 +188,7 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
 
 
 def get_artist(session, artist_id):
-    account = repo.get_user_account_by_id(session, artist_id)
+    account = repo.get_account_by_id(session, artist_id)
     if not account or account.role != UserRole.ARTIST:
         raise NotFoundError("Artista no encontrado")
 
@@ -210,7 +211,7 @@ def get_artist(session, artist_id):
 
 
 def visualize_user(session, user_id):
-    account = repo.get_user_account_by_id(session, user_id)
+    account = repo.get_account_by_id(session, user_id)
     if not account or account.role != UserRole.LISTENER:
         raise NotFoundError("Usuario oyente no encontrado")
     profile = repo.get_profile_by_id(session, user_id)
@@ -224,7 +225,7 @@ def visualize_user(session, user_id):
 
 
 def update_artist_social_links(session, user_id, data):
-    account = repo.get_user_account_by_id(session, user_id)
+    account = repo.get_account_by_id(session, user_id)
     if not account or account.role != UserRole.ARTIST:
         raise NotFoundError("Solo los artistas pueden modificar sus redes sociales")
 
@@ -248,7 +249,7 @@ def add_artist_photo(session: Session, user_id: UUID, photo_file_bytes: bytes):
     Máximo 5 fotos permitidas.
     """
     # Verificar que el usuario existe y es artista
-    user_account = repo.get_user_account_by_id(session, user_id)
+    user_account = repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Usuario no encontrado")
 
@@ -283,7 +284,7 @@ def add_artist_photo(session: Session, user_id: UUID, photo_file_bytes: bytes):
 
 
 def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
-    user_account = repo.get_user_account_by_id(session, user_id)
+    user_account = repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Usuario no encontrado")
 
@@ -329,7 +330,7 @@ def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
 
 
 def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]):
-    user_account = repo.get_user_account_by_id(session, user_id)
+    user_account = repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Usuario no encontrado")
 
@@ -356,3 +357,24 @@ def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]
     except Exception as e:
         session.rollback()
         raise ValidationError(f"Error al reordenar fotos: {str(e)}")
+
+
+def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> MessageResponse:
+    if current_user_id == user_id:
+        raise ValidationError("No puedes seguirte a ti mismo.")
+
+    followed = repo.get_profile_by_id(session, user_id)
+    if not followed:
+        raise NotFoundError("Usuario a seguir no encontrado")
+
+    try:
+        with session.begin():
+            is_now_following = repo.toggle_follow(session, current_user_id, user_id)
+
+        if is_now_following:
+            return MessageResponse(message=f"Ahora sigues a {followed.username}")
+        else:
+            return MessageResponse(message=f"Dejaste de seguir a {followed.username}")
+
+    except Exception as e:
+        raise ValidationError(f"Error al seguir o dejar de seguir al usuario: {str(e)}")

@@ -56,7 +56,7 @@ def get_current_user_id(payload: dict[str, Any] = Depends(get_jwt_payload), sess
     user_id = payload.get("user_id")
     if not user_id:
         raise AuthenticationError("ID de usuario no encontrado en el token")
-    user = user_repo.get_user_by_id(session, user_id)
+    user = user_repo.get_account_by_id(session, user_id)
     if not user:
         raise AuthenticationError("Usuario no encontrado")
     if user.status != "active":

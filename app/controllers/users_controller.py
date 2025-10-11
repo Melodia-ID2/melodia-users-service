@@ -5,6 +5,7 @@ from fastapi import File, UploadFile
 from sqlmodel import Session
 
 import app.services.users_service as service
+from app.schemas.message import MessageResponse
 from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 
@@ -69,3 +70,7 @@ def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
 
 def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]):
     return service.reorder_artist_photos(session, user_id, photo_urls)
+
+
+def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> MessageResponse:
+    return service.follow_user(session, current_user_id, user_id)

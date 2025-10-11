@@ -44,6 +44,8 @@ class UserProfile(SQLModel, table=True):
     address: str | None = Field(default=None)
     photo_profile: str | None = Field(default=None)
     bio: str | None = Field(default=None)
+    following_count: int = Field(default=0, nullable=False)
+    followers_count: int = Field(default=0, nullable=False)
 
 
 class RefreshToken(SQLModel, table=True):
@@ -66,3 +68,8 @@ class SocialLink(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     artist_id: UUID = Field(foreign_key="useraccount.id", nullable=False, index=True)
     url: str = Field(nullable=False)
+
+
+class UserFollows(SQLModel, table=True):
+    follower_id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True)
+    followed_id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True)
