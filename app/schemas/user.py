@@ -22,6 +22,8 @@ class _UserProfilePayload(BaseModel):
     address: str | None = None
     profile_photo: HttpUrl | None = None
     bio: str | None = None
+    followers_count: int = 0
+    following_count: int = 0
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
