@@ -29,6 +29,7 @@ class _UserProfilePayload(BaseModel):
         from_attributes=True,
     )
 
+
 class UserProfileUpdate(BaseModel):
     username: Optional[str] = None
     full_name: Optional[str] = None
@@ -45,16 +46,20 @@ class UserProfileUpdate(BaseModel):
         from_attributes=True,
     )
 
+
 class UserProfileCreate(_UserProfilePayload):
     pass
 
+
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
-    
+
+
 class ArtistProfileResponse(_UserProfilePayload):
     id: UUID
     photos: List[str] = []
     links: List[str] = []
+
 
 class UserBasicInfo(BaseModel):
     id: str
@@ -63,6 +68,7 @@ class UserBasicInfo(BaseModel):
     role: str
     status: str
 
+
 class UserDetailedInfo(UserBasicInfo):
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
@@ -70,7 +76,7 @@ class UserDetailedInfo(UserBasicInfo):
     birthdate: date | None = None
     profile_photo: str | None = None
     last_login: Optional[datetime] = None
-    created_at: Optional[datetime] = None 
+    created_at: Optional[datetime] = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -79,9 +85,11 @@ class UserDetailedInfo(UserBasicInfo):
         from_attributes=True,
     )
 
+
 class UserRoleUpdateResponse(BaseModel):
     id: str
     role: str
+
 
 class GetAllUserResponse(BaseModel):
     users: list[UserBasicInfo]
@@ -110,6 +118,7 @@ class ListenerPublicProfile(BaseModel):
     username: str | None
     photo_profile: str | None
     bio: str | None
+
 
 class SearchUsersResponse(BaseModel):
     users: list[UserSearchItem]

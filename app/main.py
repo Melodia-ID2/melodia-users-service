@@ -15,7 +15,7 @@ async def lifespan(_: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Users Service", lifespan=lifespan)
-    
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

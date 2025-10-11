@@ -32,6 +32,7 @@ class UserAccount(SQLModel, table=True):
     status: UserAccountStatus = Field(default=UserAccountStatus.ACTIVE, nullable=False)
     is_profile_completed: bool = Field(default=False)
 
+
 class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")
     username: str | None = Field(index=True, nullable=True, default=None)
@@ -43,6 +44,7 @@ class UserProfile(SQLModel, table=True):
     photo_profile: str | None = Field(default=None)
     bio: str | None = Field(default=None)
 
+
 class RefreshToken(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(foreign_key="useraccount.id", ondelete="CASCADE", index=True, nullable=False)
@@ -50,12 +52,14 @@ class RefreshToken(SQLModel, table=True):
     revoked: bool = Field(default=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
 class ArtistPhoto(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     artist_id: UUID = Field(foreign_key="useraccount.id", nullable=False, index=True)
     url: str = Field(nullable=False)
     position: int = Field(nullable=False)  # 0 a 4, por ejemplo
     uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 
 class SocialLink(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)

@@ -39,11 +39,7 @@ def _verify_jwt(token: str) -> dict[str, Any]:
 def get_jwt_payload(
     creds: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> dict[str, Any]:
-    if (
-        creds is None
-        or (creds.scheme or "").lower() != "bearer"
-        or not creds.credentials
-    ):
+    if creds is None or (creds.scheme or "").lower() != "bearer" or not creds.credentials:
         raise AuthenticationError("Token de autenticación invalido o no proporcionado")
     token = creds.credentials
     return _verify_jwt(token)

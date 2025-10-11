@@ -6,6 +6,7 @@ from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfile
 import app.services.users_service as service
 from fastapi import UploadFile, File
 
+
 def get_all_users(session: Session, page: int, page_size: int):
     return service.get_all_users(session, page, page_size)
 
@@ -21,14 +22,16 @@ def create_user_profile(session: Session, id: UUID, data: UserProfileCreate):
 def update_user_role(session: Session, user_id: UUID):
     return service.update_user_role(session, user_id)
 
+
 def delete_user(session: Session, user_id: UUID):
     service.delete_user(session, user_id)
     return None
 
 
-async def update_photo_profile(session: Session,user_id: UUID, file: UploadFile = File(...)):
+async def update_photo_profile(session: Session, user_id: UUID, file: UploadFile = File(...)):
     file_bytes = await file.read()
-    return service.update_photo_profile(session,user_id, file_bytes)
+    return service.update_photo_profile(session, user_id, file_bytes)
+
 
 def get_me(session: Session, user_id: UUID):
     return service.get_me(session, user_id)
@@ -45,18 +48,23 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
 def get_artist(session, artist_id):
     return service.get_artist(session, artist_id)
 
+
 def visualize_user(session, user_id):
     return service.visualize_user(session, user_id)
 
+
 def update_artist_social_links(session, user_id, data):
     return service.update_artist_social_links(session, user_id, data)
+
 
 async def add_artist_photo(session: Session, user_id: UUID, file: UploadFile):
     file_bytes = await file.read()
     return service.add_artist_photo(session, user_id, file_bytes)
 
+
 def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
     return service.delete_artist_photo(session, user_id, photo_url)
+
 
 def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]):
     return service.reorder_artist_photos(session, user_id, photo_urls)

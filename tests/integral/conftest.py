@@ -12,23 +12,24 @@ import asyncpg
 import asyncio
 
 
-
 BASE_URL = "http://localhost:8002"
 engine = create_async_engine(settings.DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
 
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
+
 async def truncate_tables():
     async with engine.connect() as conn:
         try:
             await conn.execute(text("SET session_replication_role = 'replica'"))
-            
+
             await conn.execute(text("TRUNCATE TABLE userprofile RESTART IDENTITY CASCADE"))
             await conn.execute(text("TRUNCATE TABLE useraccount RESTART IDENTITY CASCADE"))
-            
+
             await conn.execute(text("SET session_replication_role = 'origin'"))
             await conn.commit()
         except Exception as e:
@@ -57,7 +58,7 @@ async def wait_for_db():
 async def prepare_db():
     await create_tables()
     yield
- 
+
 
 @pytest_asyncio.fixture(autouse=True)
 async def clean_tables_fixture():
@@ -65,16 +66,11 @@ async def clean_tables_fixture():
     yield
 
 
-
-
 @pytest.fixture(scope="session", autouse=True)
 def start_server():
-
     """Levanta uvicorn dentro del contenedor para tests integrales."""
     asyncio.run(wait_for_db())
-    proc = subprocess.Popen(
-        ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
-    )
+    proc = subprocess.Popen(["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"])
 
     for _ in range(20):
         try:

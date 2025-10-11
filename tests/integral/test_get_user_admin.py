@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 import uuid
 
 from app.core.config import settings
-sync_engine = create_engine(settings.DATABASE_URL.replace('+asyncpg', ''))
+
+sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 
 
 def test_01_get_user_admin_returns_200_and_user_data():

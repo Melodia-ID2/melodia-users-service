@@ -10,11 +10,14 @@ class ArtistPublicProfile(BaseModel):
     photos: List[str]
     links: List[str]
 
+
 class SocialLinksUpdateRequest(BaseModel):
     links: List[str]
 
+
 class ArtistPhotosUpdateRequest(BaseModel):
     photos: List[str]
-    
+
+
 class DeletePhotoRequest(BaseModel):
     photo_url: str

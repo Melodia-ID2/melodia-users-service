@@ -1,4 +1,3 @@
-
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.security import get_jwt_payload, require_admin
@@ -8,13 +7,17 @@ from sqlalchemy.orm import Session
 import uuid
 
 from app.core.config import settings
-sync_engine = create_engine(settings.DATABASE_URL.replace('+asyncpg', ''))
+
+sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
+
 
 def override_require_admin():
     return None
 
+
 def override_get_jwt_payload():
     return {"role": "listener"}
+
 
 def test_01_delete_user_returns_204_and_deletes_user():
     app.dependency_overrides[require_admin] = override_require_admin
@@ -35,13 +38,12 @@ def test_01_delete_user_returns_204_and_deletes_user():
     with Session(sync_engine) as session:
         deleted_user = session.get(UserAccount, user_id)
         deleted_profile = session.get(UserProfile, user_id)
-        deleted_token = session.execute(
-            select(RefreshToken).where(RefreshToken.user_id == user_id)
-        ).scalar_one_or_none()
+        deleted_token = session.execute(select(RefreshToken).where(RefreshToken.user_id == user_id)).scalar_one_or_none()
         assert deleted_token is None
         assert deleted_profile is None
         assert deleted_user is None
     app.dependency_overrides = {}
+
 
 def test_02_delete_user_with_many_tokens_deletes_all_tokens():
     app.dependency_overrides[require_admin] = override_require_admin
@@ -64,17 +66,14 @@ def test_02_delete_user_with_many_tokens_deletes_all_tokens():
     with Session(sync_engine) as session:
         deleted_user = session.get(UserAccount, user_id)
         deleted_profile = session.get(UserProfile, user_id)
-        deleted_token1 = session.execute(
-            select(RefreshToken).where(RefreshToken.token == "token1")
-        ).scalar_one_or_none()
-        deleted_token2 = session.execute(
-            select(RefreshToken).where(RefreshToken.token == "token2")
-        ).scalar_one_or_none()
+        deleted_token1 = session.execute(select(RefreshToken).where(RefreshToken.token == "token1")).scalar_one_or_none()
+        deleted_token2 = session.execute(select(RefreshToken).where(RefreshToken.token == "token2")).scalar_one_or_none()
         assert deleted_token1 is None
         assert deleted_token2 is None
         assert deleted_profile is None
         assert deleted_user is None
     app.dependency_overrides = {}
+
 
 def test_03_delete_nonexistent_user_returns_404():
     app.dependency_overrides[require_admin] = override_require_admin
@@ -83,14 +82,9 @@ def test_03_delete_nonexistent_user_returns_404():
     headers = {"Authorization": "Bearer admin_token"}
     response = client.delete(f"/users/admin/{user_id}", headers=headers)
     assert response.status_code == 404
-    assert response.json() == {
-        "type": "about:blank",
-        "title": "Resource Not Found",
-        "status": 404,
-        "detail": f"Usuario con id: {user_id} no encontrado",
-        "instance": f"/users/admin/{user_id}"
-    }
+    assert response.json() == {"type": "about:blank", "title": "Resource Not Found", "status": 404, "detail": f"Usuario con id: {user_id} no encontrado", "instance": f"/users/admin/{user_id}"}
     app.dependency_overrides = {}
+
 
 def test_04_delete_user_without_admin_token_returns_401():
     user_id = uuid.uuid4()
@@ -102,8 +96,9 @@ def test_04_delete_user_without_admin_token_returns_401():
         "title": "Authentication Error",
         "status": 401,
         "detail": "Token de autenticación invalido o no proporcionado",
-        "instance": f"/users/admin/{user_id}"
+        "instance": f"/users/admin/{user_id}",
     }
+
 
 def test_05_delete_user_with_non_admin_token_returns_401():
     app.dependency_overrides[get_jwt_payload] = override_get_jwt_payload
@@ -112,14 +107,9 @@ def test_05_delete_user_with_non_admin_token_returns_401():
     headers = {"Authorization": f"Bearer {user_id}"}
     response = client.delete(f"/users/admin/{user_id}", headers=headers)
     assert response.status_code == 401
-    assert response.json() == {
-        "type": "about:blank",
-        "title": "Authentication Error",
-        "status": 401,
-        "detail": "Se requiere privilegios de administrador",
-        "instance": f"/users/admin/{user_id}"
-    }
+    assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Se requiere privilegios de administrador", "instance": f"/users/admin/{user_id}"}
     app.dependency_overrides = {}
+
 
 def test_06_when_delete_user_then_the_user_request_are_invalid():
     app.dependency_overrides[require_admin] = override_require_admin
@@ -135,11 +125,5 @@ def test_06_when_delete_user_then_the_user_request_are_invalid():
     app.dependency_overrides[get_jwt_payload] = lambda: {"user_id": str(user_id), "role": "listener"}
     response = client.get("/users/me", headers={"Authorization": f"Bearer {user_id}"})
     assert response.status_code == 401
-    assert response.json() == {
-        "type": "about:blank",
-        "title": "Authentication Error",
-        "status": 401,
-        "detail": "Usuario no encontrado",
-        "instance": "/users/me"
-    }
+    assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Usuario no encontrado", "instance": "/users/me"}
     app.dependency_overrides = {}
