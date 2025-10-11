@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime, date
 from pydantic.networks import HttpUrl
 
-from typing import Optional
+from typing import Optional, List
 from app.models.user import UserGender
 
 
@@ -19,7 +19,8 @@ class _UserProfilePayload(BaseModel):
     gender: UserGender
     phone_number: str | None = None
     address: str | None = None
-    profile_photo: str | None = None
+    profile_photo: HttpUrl | None = None
+    bio: str | None = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -35,6 +36,7 @@ class UserProfileUpdate(BaseModel):
     gender: Optional[UserGender] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
+    bio: Optional[str] = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -48,6 +50,11 @@ class UserProfileCreate(_UserProfilePayload):
 
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
+    
+class ArtistProfileResponse(_UserProfilePayload):
+    id: UUID
+    photos: List[str] = []
+    links: List[str] = []
 
 class UserBasicInfo(BaseModel):
     id: str
@@ -97,6 +104,11 @@ class UserSearchItem(BaseModel):
         from_attributes=True,
     )
 
+
+class ListenerPublicProfile(BaseModel):
+    username: str | None
+    photo_profile: str | None
+    bio: str | None
 
 class SearchUsersResponse(BaseModel):
     users: list[UserSearchItem]

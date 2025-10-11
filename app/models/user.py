@@ -41,7 +41,7 @@ class UserProfile(SQLModel, table=True):
     phone_number: str | None = Field(default=None)
     address: str | None = Field(default=None)
     photo_profile: str | None = Field(default=None)
-
+    bio: str | None = Field(default=None)
 
 class RefreshToken(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
@@ -49,3 +49,15 @@ class RefreshToken(SQLModel, table=True):
     token: str = Field(nullable=False, unique=True)
     revoked: bool = Field(default=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ArtistPhoto(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    artist_id: UUID = Field(foreign_key="useraccount.id", nullable=False, index=True)
+    url: str = Field(nullable=False)
+    position: int = Field(nullable=False)  # 0 a 4, por ejemplo
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SocialLink(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    artist_id: UUID = Field(foreign_key="useraccount.id", nullable=False, index=True)
+    url: str = Field(nullable=False)

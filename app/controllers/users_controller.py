@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 from sqlmodel import Session
 
@@ -29,7 +30,7 @@ async def update_photo_profile(session: Session,user_id: UUID, file: UploadFile 
     file_bytes = await file.read()
     return service.update_photo_profile(session,user_id, file_bytes)
 
-def get_me(session: Session, user_id: UUID) -> UserProfileResponse:
+def get_me(session: Session, user_id: UUID):
     return service.get_me(session, user_id)
 
 
@@ -39,3 +40,23 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
 
 def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     return service.update_me(session, user_id, data)
+
+
+def get_artist(session, artist_id):
+    return service.get_artist(session, artist_id)
+
+def visualize_user(session, user_id):
+    return service.visualize_user(session, user_id)
+
+def update_artist_social_links(session, user_id, data):
+    return service.update_artist_social_links(session, user_id, data)
+
+async def add_artist_photo(session: Session, user_id: UUID, file: UploadFile):
+    file_bytes = await file.read()
+    return service.add_artist_photo(session, user_id, file_bytes)
+
+def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
+    return service.delete_artist_photo(session, user_id, photo_url)
+
+def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]):
+    return service.reorder_artist_photos(session, user_id, photo_urls)
