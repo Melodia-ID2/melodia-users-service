@@ -1,9 +1,13 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.v1.routers.admin_router import router as admin_router
+from app.api.v1.routers.artist_router import router as artist_router
+from app.api.v1.routers.system_router import router as system_router
+from app.api.v1.routers.users_router import router as users_router
 from app.core.database import init_db
-from app.api.v1.users_router import router as users_router
-from app.api.v1.system_router import router as system_router
 from app.errors.middleware import Middleware
 
 
@@ -15,7 +19,7 @@ async def lifespan(_: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Users Service", lifespan=lifespan)
-    
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -27,6 +31,8 @@ def create_app() -> FastAPI:
     app.add_middleware(Middleware)
     app.include_router(system_router)
     app.include_router(users_router)
+    app.include_router(artist_router)
+    app.include_router(admin_router)
 
     return app
 
