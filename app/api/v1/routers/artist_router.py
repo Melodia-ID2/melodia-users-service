@@ -8,7 +8,7 @@ from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest, SocialLinksUpdateRequest
 
-router = APIRouter(prefix="/users/artist", tags=["Artists"])
+router = APIRouter(prefix="/artist", tags=["Artists"])
 
 
 @router.get("/{artist_id}", response_model=ArtistPublicProfile)
