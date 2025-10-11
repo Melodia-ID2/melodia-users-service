@@ -1,6 +1,7 @@
 from typing import List
 from uuid import UUID
-from sqlmodel import Session, func, select, delete
+
+from sqlmodel import Session, delete, func, select
 
 from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserProfile
 

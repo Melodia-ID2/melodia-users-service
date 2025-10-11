@@ -1,10 +1,11 @@
 from typing import List
 from uuid import UUID
+
+from fastapi import File, UploadFile
 from sqlmodel import Session
 
-from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfileUpdate
 import app.services.users_service as service
-from fastapi import UploadFile, File
+from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 
 def get_all_users(session: Session, page: int, page_size: int):

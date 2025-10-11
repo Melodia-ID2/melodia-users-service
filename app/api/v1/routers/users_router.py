@@ -1,15 +1,16 @@
 from typing import Union
 from uuid import UUID
-from fastapi import APIRouter, Depends, Query, status, UploadFile, File
-from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, UserProfileCreate, UserProfileResponse, UserProfileUpdate, SearchUsersResponse
-from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest
-from app.schemas.artist import SocialLinksUpdateRequest
+
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from sqlmodel import Session
+
+import app.controllers.users_controller as controller
+from app.api.v1.routers.admin_router import router as admin_router
 from app.core.database import get_session
 from app.core.security import get_current_user_id
-import app.controllers.users_controller as controller
+from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest, SocialLinksUpdateRequest
 from app.schemas.photo_profile import PhotoProfileResponse
-from app.api.v1.routers.admin_router import router as admin_router
+from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 

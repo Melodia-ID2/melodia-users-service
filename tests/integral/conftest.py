@@ -1,16 +1,17 @@
+import asyncio
 import subprocess
 import time
+
+import asyncpg
+import httpx
 import pytest
 import pytest_asyncio
-from sqlmodel import SQLModel
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
-from app.core.config import settings
-import httpx
-import asyncpg
-import asyncio
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlmodel import SQLModel
 
+from app.core.config import settings
 
 BASE_URL = "http://localhost:8002"
 engine = create_async_engine(settings.DATABASE_URL, echo=True)

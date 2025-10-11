@@ -1,27 +1,28 @@
 import time
 from typing import Any, List, Union
 from uuid import UUID, uuid4
-from pydantic import AnyUrl
-from app.errors.exceptions import NotFoundError, FileUploadError, ValidationError
-from pydantic import ValidationError as PydanticValidationError
-from app.models.user import UserProfile, UserRole
-from sqlmodel import Session
+
 import cloudinary.uploader
+from pydantic import AnyUrl
+from pydantic import ValidationError as PydanticValidationError
+from sqlmodel import Session
+
+import app.repositories.users_repository as repo
+from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
+from app.models.user import UserProfile, UserRole
+from app.schemas.artist import ArtistPublicProfile
+from app.schemas.photo_profile import PhotoProfileResponse
 from app.schemas.user import (
     ArtistProfileResponse,
     ListenerPublicProfile,
+    SearchUsersResponse,
     UserDetailedInfo,
     UserProfileCreate,
     UserProfileResponse,
     UserProfileUpdate,
     UserRoleUpdateResponse,
     UserSearchItem,
-    SearchUsersResponse,
 )
-from app.schemas.artist import ArtistPublicProfile
-from app.schemas.photo_profile import PhotoProfileResponse
-import app.repositories.users_repository as repo
-from app.errors.exceptions import UsernameTakenError, ProfileAlreadyExistsError
 
 
 def get_all_users(session: Session, page: int, page_size: int) -> dict[str, Any]:

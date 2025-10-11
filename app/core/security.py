@@ -1,12 +1,13 @@
 from typing import Any
 
-from sqlmodel import Session
-from app.core.database import get_session
-from app.errors.exceptions import AuthenticationError
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt, exceptions
+from jose import exceptions, jwt
+from sqlmodel import Session
+
 from app.core.config import settings
+from app.core.database import get_session
+from app.errors.exceptions import AuthenticationError
 from app.repositories import users_repository as user_repo
 
 security = HTTPBearer(auto_error=False)

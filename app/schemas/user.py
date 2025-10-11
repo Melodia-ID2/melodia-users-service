@@ -1,9 +1,10 @@
+from datetime import date, datetime
+from typing import List, Optional
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
-from datetime import datetime, date
 from pydantic.networks import HttpUrl
 
-from typing import Optional, List
 from app.models.user import UserGender
 
 

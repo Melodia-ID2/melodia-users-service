@@ -1,6 +1,7 @@
-from datetime import datetime, timezone, date
+from datetime import date, datetime, timezone
 from enum import Enum
 from uuid import UUID, uuid4
+
 from sqlmodel import Field, SQLModel
 
 

@@ -1,13 +1,13 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlmodel import Session
 
+import app.controllers.users_controller as controller
 from app.core.database import get_session
 from app.core.security import require_admin
 from app.errors.error_responses import error_responses
 from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserRoleUpdateResponse
-
-import app.controllers.users_controller as controller
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 

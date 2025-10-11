@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.errors.exceptions import ValidationError, NotFoundError, DatabaseError, AuthenticationError, FileUploadError
+
 from app.errors.error_responses import create_error_response
+from app.errors.exceptions import AuthenticationError, DatabaseError, FileUploadError, NotFoundError, ValidationError
 
 
 class Middleware(BaseHTTPMiddleware):

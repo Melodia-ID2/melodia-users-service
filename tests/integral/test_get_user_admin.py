@@ -1,13 +1,14 @@
+import uuid
 from datetime import date, datetime
+
 from fastapi.testclient import TestClient
-from app.main import app
-from app.core.security import require_admin
-from app.models.user import UserAccount, UserProfile
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-import uuid
 
 from app.core.config import settings
+from app.core.security import require_admin
+from app.main import app
+from app.models.user import UserAccount, UserProfile
 
 sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 
