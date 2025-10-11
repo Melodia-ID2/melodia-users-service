@@ -9,7 +9,7 @@ from app.core.security import require_admin
 from app.errors.error_responses import error_responses
 from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserRoleUpdateResponse
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+router = APIRouter(prefix="/users/admin", tags=["Admin - User Management"])
 
 
 @router.get("", response_model=GetAllUserResponse, status_code=status.HTTP_200_OK, responses=error_responses(401))
