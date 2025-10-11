@@ -7,6 +7,7 @@ from sqlmodel import Session
 import app.controllers.users_controller as controller
 from app.core.database import get_session
 from app.core.security import get_current_user_id
+from app.schemas.message import MessageResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
@@ -62,3 +63,8 @@ async def update_photo_profile(
 @router.get("/visualize/user/{user_id}", response_model=ListenerPublicProfile)
 def visualize_user(user_id: UUID, session: Session = Depends(get_session)):
     return controller.visualize_user(session, user_id)
+
+
+@router.get("/follow/{user_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+def follow_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.follow_user(session, current_user_id, user_id)

@@ -1,9 +1,9 @@
 from typing import List
 from uuid import UUID
 
-from sqlmodel import Session, delete, func, select
+from sqlmodel import Session, delete, func, select, update
 
-from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserProfile
+from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserFollows, UserProfile
 
 
 def get_user_by_id(session: Session, user_id: UUID) -> UserAccount | None:
@@ -191,3 +191,23 @@ def update_photo_position_by_url(session: Session, artist_id: UUID, photo_url: s
     if photo:
         photo.position = new_position
         session.commit()
+
+
+def toggle_follow(session: Session, follower_id: UUID, followed_id: UUID):
+    stmt = select(UserFollows).where(UserFollows.follower_id == follower_id, UserFollows.followed_id == followed_id)
+    is_following = session.exec(stmt).first()
+    if is_following:
+        session.delete(is_following)
+        _bump_counter(session, follower_id, "following_count", -1)
+        _bump_counter(session, followed_id, "followers_count", -1)
+        return False
+    else:
+        new_follow = UserFollows(follower_id=follower_id, followed_id=followed_id)
+        session.add(new_follow)
+        _bump_counter(session, follower_id, "following_count", 1)
+        _bump_counter(session, followed_id, "followers_count", 1)
+        return True
+
+
+def _bump_counter(session: Session, user_id: UUID, field: str, delta: int) -> None:
+    session.exec(update(UserProfile).where(UserProfile.id == user_id).values({field: func.greatest(getattr(UserProfile, field) + delta, 0)}))

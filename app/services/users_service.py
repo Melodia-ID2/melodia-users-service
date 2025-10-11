@@ -11,6 +11,7 @@ import app.repositories.users_repository as repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.user import UserProfile, UserRole
 from app.schemas.artist import ArtistPublicProfile
+from app.schemas.message import MessageResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -356,3 +357,24 @@ def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]
     except Exception as e:
         session.rollback()
         raise ValidationError(f"Error al reordenar fotos: {str(e)}")
+
+
+def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> MessageResponse:
+    if current_user_id == user_id:
+        raise ValidationError("No puedes seguirte a ti mismo.")
+
+    followed = repo.get_profile_by_id(session, user_id)
+    if not followed:
+        raise NotFoundError("Usuario a seguir no encontrado")
+
+    try:
+        with session.begin():
+            is_now_following = repo.toggle_follow(session, current_user_id, user_id)
+
+        if is_now_following:
+            return MessageResponse(message=f"Ahora sigues a {followed.username}")
+        else:
+            return MessageResponse(message=f"Dejaste de seguir a {followed.username}")
+
+    except Exception as e:
+        raise ValidationError(f"Error al seguir o dejar de seguir al usuario: {str(e)}")
