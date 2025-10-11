@@ -11,7 +11,7 @@ from app.schemas.message import MessageResponse
 from app.schemas.photo_profile import PhotoProfileResponse
 from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
-router = APIRouter(prefix="/users", tags=["Users (Listeners & Artists)"])
+router = APIRouter(prefix="", tags=["Users (Listeners & Artists)"])
 
 
 @router.get("/me", response_model=Union[UserProfileResponse, ArtistProfileResponse])

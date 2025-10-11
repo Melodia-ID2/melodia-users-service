@@ -34,7 +34,7 @@ def test_01_delete_user_returns_204_and_deletes_user():
         session.commit()
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.delete(f"/users/admin/{user_id}", headers=headers)
+    response = client.delete(f"/admin/{user_id}", headers=headers)
     assert response.status_code == 204
     with Session(sync_engine) as session:
         deleted_user = session.get(UserAccount, user_id)
@@ -62,7 +62,7 @@ def test_02_delete_user_with_many_tokens_deletes_all_tokens():
         session.commit()
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.delete(f"/users/admin/{user_id}", headers=headers)
+    response = client.delete(f"/admin/{user_id}", headers=headers)
     assert response.status_code == 204
     with Session(sync_engine) as session:
         deleted_user = session.get(UserAccount, user_id)
@@ -81,23 +81,23 @@ def test_03_delete_nonexistent_user_returns_404():
     user_id = uuid.uuid4()
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.delete(f"/users/admin/{user_id}", headers=headers)
+    response = client.delete(f"/admin/{user_id}", headers=headers)
     assert response.status_code == 404
-    assert response.json() == {"type": "about:blank", "title": "Resource Not Found", "status": 404, "detail": f"Usuario con id: {user_id} no encontrado", "instance": f"/users/admin/{user_id}"}
+    assert response.json() == {"type": "about:blank", "title": "Resource Not Found", "status": 404, "detail": f"Usuario con id: {user_id} no encontrado", "instance": f"/admin/{user_id}"}
     app.dependency_overrides = {}
 
 
 def test_04_delete_user_without_admin_token_returns_401():
     user_id = uuid.uuid4()
     client = TestClient(app)
-    response = client.delete(f"/users/admin/{user_id}")
+    response = client.delete(f"/admin/{user_id}")
     assert response.status_code == 401
     assert response.json() == {
         "type": "about:blank",
         "title": "Authentication Error",
         "status": 401,
         "detail": "Token de autenticación invalido o no proporcionado",
-        "instance": f"/users/admin/{user_id}",
+        "instance": f"/admin/{user_id}",
     }
 
 
@@ -106,9 +106,9 @@ def test_05_delete_user_with_non_admin_token_returns_401():
     user_id = uuid.uuid4()
     client = TestClient(app)
     headers = {"Authorization": f"Bearer {user_id}"}
-    response = client.delete(f"/users/admin/{user_id}", headers=headers)
+    response = client.delete(f"/admin/{user_id}", headers=headers)
     assert response.status_code == 401
-    assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Se requiere privilegios de administrador", "instance": f"/users/admin/{user_id}"}
+    assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Se requiere privilegios de administrador", "instance": f"/admin/{user_id}"}
     app.dependency_overrides = {}
 
 
@@ -121,10 +121,10 @@ def test_06_when_delete_user_then_the_user_request_are_invalid():
         session.commit()
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.delete(f"/users/admin/{user_id}", headers=headers)
+    response = client.delete(f"/admin/{user_id}", headers=headers)
     assert response.status_code == 204
     app.dependency_overrides[get_jwt_payload] = lambda: {"user_id": str(user_id), "role": "listener"}
-    response = client.get("/users/me", headers={"Authorization": f"Bearer {user_id}"})
+    response = client.get("/me", headers={"Authorization": f"Bearer {user_id}"})
     assert response.status_code == 401
-    assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Usuario no encontrado", "instance": "/users/me"}
+    assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Usuario no encontrado", "instance": "/me"}
     app.dependency_overrides = {}

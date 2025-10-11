@@ -27,7 +27,7 @@ def test_01_get_user_admin_returns_200_and_user_data():
         session.commit()
     client = TestClient(app)
     headers = {"Authorization": "Bearer admin_token"}
-    response = client.get(f"/users/admin/{user_id}", headers=headers)
+    response = client.get(f"/admin/{user_id}", headers=headers)
     assert response.status_code == 200
     assert response.json() == {
         "id": str(user_id),
