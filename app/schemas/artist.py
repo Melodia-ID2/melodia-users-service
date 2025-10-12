@@ -1,11 +1,9 @@
 from typing import List
 
-from pydantic import BaseModel, ConfigDict
-
-from app.schemas.user import to_camel
+from app.schemas.base import ApiBaseModel
 
 
-class ArtistPublicProfile(BaseModel):
+class ArtistPublicProfile(ApiBaseModel):
     username: str | None
     full_name: str | None
     profile_photo: str | None
@@ -15,21 +13,14 @@ class ArtistPublicProfile(BaseModel):
     photos: List[str]
     links: List[str]
 
-    model_config = ConfigDict(
-        alias_generator=to_camel,
-        populate_by_name=True,
-        extra="forbid",
-        from_attributes=True,
-    )
 
-
-class SocialLinksUpdateRequest(BaseModel):
+class SocialLinksUpdateRequest(ApiBaseModel):
     links: List[str]
 
 
-class ArtistPhotosUpdateRequest(BaseModel):
+class ArtistPhotosUpdateRequest(ApiBaseModel):
     photos: List[str]
 
 
-class DeletePhotoRequest(BaseModel):
+class DeletePhotoRequest(ApiBaseModel):
     photo_url: str
