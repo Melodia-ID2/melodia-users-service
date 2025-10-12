@@ -10,7 +10,7 @@ from sqlmodel import Session
 import app.repositories.users_repository as repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.user import UserProfile, UserRole
-from app.schemas.artist import ArtistPublicProfile
+from app.schemas.artist import ArtistProfileView
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
@@ -191,7 +191,7 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     return UserProfileResponse.model_validate(updated_profile)
 
 
-def get_artist(session, artist_id):
+def get_artist(session: Session, artist_id: UUID, current_user_id: UUID) -> ArtistProfileView:
     account = repo.get_account_by_id(session, artist_id)
     if not account or account.role != UserRole.ARTIST:
         raise NotFoundError("Artista no encontrado")
@@ -204,15 +204,15 @@ def get_artist(session, artist_id):
     photos_sorted = sorted(photos, key=lambda p: p.position)
     links = repo.get_artist_links(session, artist_id)
 
-    return ArtistPublicProfile(
+    return ArtistProfileView(
         username=profile.username,
-        full_name=profile.full_name,
         profile_photo=profile.profile_photo,
         bio=profile.bio,
         followers_count=profile.followers_count,
         following_count=profile.following_count,
         photos=[photo.url for photo in photos_sorted],
         links=[link.url for link in links],
+        is_following=repo.is_following(session, current_user_id, artist_id),
     )
 
 

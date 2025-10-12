@@ -6,14 +6,14 @@ from sqlmodel import Session
 import app.controllers.users_controller as controller
 from app.core.database import get_session
 from app.core.security import get_current_user_id
-from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistPublicProfile, DeletePhotoRequest, SocialLinksUpdateRequest
+from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistProfileView, DeletePhotoRequest, SocialLinksUpdateRequest
 
 router = APIRouter(prefix="/artist", tags=["Artists"])
 
 
-@router.get("/{artist_id}", response_model=ArtistPublicProfile)
-def get_artist(artist_id: UUID, session: Session = Depends(get_session)):
-    return controller.get_artist(session, artist_id)
+@router.get("/{artist_id}", response_model=ArtistProfileView)
+def get_artist(artist_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.get_artist(session, artist_id, current_user_id)
 
 
 @router.put("/social-links", status_code=204)
