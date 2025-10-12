@@ -47,8 +47,8 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     return service.update_me(session, user_id, data)
 
 
-def get_artist(session: Session, artist_id: UUID):
-    return service.get_artist(session, artist_id)
+def get_artist(session: Session, artist_id: UUID, current_user_id: UUID):
+    return service.get_artist(session, artist_id, current_user_id)
 
 
 def visualize_user(session: Session, user_id: UUID, current_user_id: UUID):
