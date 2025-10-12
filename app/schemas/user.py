@@ -8,7 +8,7 @@ from pydantic.networks import HttpUrl
 from app.models.user import UserGender
 
 
-def _to_camel(string: str) -> str:
+def to_camel(string: str) -> str:
     parts = string.split("_")
     return parts[0] + "".join(word.capitalize() for word in parts[1:])
 
@@ -26,7 +26,7 @@ class _UserProfilePayload(BaseModel):
     following_count: int = 0
 
     model_config = ConfigDict(
-        alias_generator=_to_camel,
+        alias_generator=to_camel,
         populate_by_name=True,
         extra="forbid",
         from_attributes=True,
@@ -43,7 +43,7 @@ class UserProfileUpdate(BaseModel):
     bio: Optional[str] = None
 
     model_config = ConfigDict(
-        alias_generator=_to_camel,
+        alias_generator=to_camel,
         populate_by_name=True,
         extra="forbid",
         from_attributes=True,
@@ -82,7 +82,7 @@ class UserDetailedInfo(UserBasicInfo):
     created_at: Optional[datetime] = None
 
     model_config = ConfigDict(
-        alias_generator=_to_camel,
+        alias_generator=to_camel,
         populate_by_name=True,
         extra="forbid",
         from_attributes=True,
@@ -110,7 +110,7 @@ class UserSearchItem(BaseModel):
     similarity_score: float
 
     model_config = ConfigDict(
-        alias_generator=_to_camel,
+        alias_generator=to_camel,
         populate_by_name=True,
         extra="forbid",
         from_attributes=True,
@@ -119,8 +119,17 @@ class UserSearchItem(BaseModel):
 
 class ListenerPublicProfile(BaseModel):
     username: str | None
-    photo_profile: str | None
+    profile_photo: str | None
     bio: str | None
+    followers_count: int
+    following_count: int
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        extra="forbid",
+        from_attributes=True,
+    )
 
 
 class SearchUsersResponse(BaseModel):

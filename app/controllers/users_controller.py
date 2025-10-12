@@ -30,9 +30,9 @@ def delete_user(session: Session, user_id: UUID):
     return None
 
 
-async def update_photo_profile(session: Session, user_id: UUID, file: UploadFile = File(...)):
+async def update_profile_picture(session: Session, user_id: UUID, file: UploadFile = File(...)):
     file_bytes = await file.read()
-    return service.update_photo_profile(session, user_id, file_bytes)
+    return service.update_profile_picture(session, user_id, file_bytes)
 
 
 def get_me(session: Session, user_id: UUID):

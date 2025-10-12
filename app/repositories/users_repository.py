@@ -34,7 +34,7 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
         cond = cond & (UserAccount.role == role)
 
     stmt = (
-        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.photo_profile, similarity_expr.label("similarity_score"))
+        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.profile_photo, similarity_expr.label("similarity_score"))
         .join(UserAccount, UserProfile.id == UserAccount.id)
         .where(cond)
         .order_by(similarity_expr.desc(), UserProfile.username.asc())
@@ -83,12 +83,12 @@ def delete_user_account(session: Session, account: UserAccount) -> None:
     return None
 
 
-def update_photo_profile(session: Session, user_id: UUID, photo_url: str) -> UserProfile | None:
+def update_profile_picture(session: Session, user_id: UUID, photo_url: str) -> UserProfile | None:
     user_profile = session.get(UserProfile, user_id)
     if not user_profile:
         return None
 
-    user_profile.photo_profile = photo_url
+    user_profile.profile_photo = photo_url
     session.add(user_profile)
     session.commit()
     session.refresh(user_profile)

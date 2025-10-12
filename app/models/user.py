@@ -42,7 +42,7 @@ class UserProfile(SQLModel, table=True):
     gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)
     phone_number: str | None = Field(default=None)
     address: str | None = Field(default=None)
-    photo_profile: str | None = Field(default=None)
+    profile_photo: str | None = Field(default=None)
     bio: str | None = Field(default=None)
     following_count: int = Field(default=0, nullable=False)
     followers_count: int = Field(default=0, nullable=False)
