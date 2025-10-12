@@ -12,7 +12,7 @@ from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlready
 from app.models.user import UserProfile, UserRole
 from app.schemas.artist import ArtistPublicProfile
 from app.schemas.message import MessageResponse
-from app.schemas.photo_profile import PhotoProfileResponse
+from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
     ListenerPublicProfile,
@@ -54,7 +54,7 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
         birthdate=None if not user_profile else user_profile.birthdate,
         last_login=user.last_login,
         created_at=user.created_at,
-        profile_photo=None if not user_profile else user_profile.photo_profile,
+        profile_photo=None if not user_profile else user_profile.profile_photo,
     )
 
 
@@ -88,22 +88,22 @@ def delete_user(session: Session, user_id: UUID):
     if not account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user_profile = repo.get_profile_by_id(session, user_id)
-    if user_profile and user_profile.photo_profile:
+    if user_profile and user_profile.profile_photo:
         cloudinary.uploader.destroy(public_id=f"user-photo-profile/{user_id}")
 
     repo.delete_user_account(session, account)
     return None
 
 
-def update_photo_profile(session: Session, user_id: UUID, photo_file_bytes: bytes) -> PhotoProfileResponse:
+def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
     uploaded_url = cloudinary.uploader.upload(photo_file_bytes, folder="user-photo-profile", public_id=str(user_id), overwrite=True)["secure_url"]
 
     if not uploaded_url:
         raise FileUploadError("Error al guardar la foto de perfil")
-    if not repo.update_photo_profile(session, user_id, uploaded_url):
+    if not repo.update_profile_picture(session, user_id, uploaded_url):
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
 
-    return PhotoProfileResponse(photo_profile=uploaded_url)
+    return ProfilePhotoResponse(profile_photo=uploaded_url)
 
 
 def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, ArtistProfileResponse]:
@@ -123,7 +123,7 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         "gender": profile.gender,
         "phone_number": profile.phone_number,
         "address": profile.address,
-        "profile_photo": profile.photo_profile,
+        "profile_photo": profile.profile_photo,
         "bio": profile.bio,
         "followers_count": profile.followers_count,
         "following_count": profile.following_count,
@@ -148,7 +148,7 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
 def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> SearchUsersResponse:
     users = repo.search_users(session, query, role, page, page_size)
     return SearchUsersResponse(
-        users=[UserSearchItem(id=str(u.id), role=u.role, username=u.username, profile_photo=u.photo_profile, similarity_score=u.similarity_score) for u in users],
+        users=[UserSearchItem(id=str(u.id), role=u.role, username=u.username, profile_photo=u.profile_photo, similarity_score=u.similarity_score) for u in users],
     )
 
 
@@ -207,8 +207,10 @@ def get_artist(session, artist_id):
     return ArtistPublicProfile(
         username=profile.username,
         full_name=profile.full_name,
-        photo_profile=profile.photo_profile,
+        profile_photo=profile.profile_photo,
         bio=profile.bio,
+        followers_count=profile.followers_count,
+        following_count=profile.following_count,
         photos=[photo.url for photo in photos_sorted],
         links=[link.url for link in links],
     )
@@ -223,8 +225,10 @@ def visualize_user(session, user_id):
         raise NotFoundError("Usuario no encontrado")
     return ListenerPublicProfile(
         username=profile.username,
-        photo_profile=profile.photo_profile,
+        profile_photo=profile.profile_photo,
         bio=profile.bio,
+        followers_count=profile.followers_count,
+        following_count=profile.following_count,
     )
 
 
