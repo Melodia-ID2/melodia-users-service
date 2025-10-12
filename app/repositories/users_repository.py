@@ -189,6 +189,11 @@ def update_photo_position_by_url(session: Session, artist_id: UUID, photo_url: s
         session.commit()
 
 
+def is_following(session: Session, follower_id: UUID, followed_id: UUID) -> bool:
+    stmt = select(UserFollows).where(UserFollows.follower_id == follower_id, UserFollows.followed_id == followed_id)
+    return session.exec(stmt).first() is not None
+
+
 def toggle_follow(session: Session, follower_id: UUID, followed_id: UUID):
     stmt = select(UserFollows).where(UserFollows.follower_id == follower_id, UserFollows.followed_id == followed_id)
     is_following = session.exec(stmt).first()
