@@ -65,6 +65,6 @@ def visualize_user(user_id: UUID, session: Session = Depends(get_session)):
     return controller.visualize_user(session, user_id)
 
 
-@router.get("/follow/{user_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+@router.post("/{user_id}/follow", response_model=MessageResponse, status_code=status.HTTP_200_OK)
 def follow_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
     return controller.follow_user(session, current_user_id, user_id)
