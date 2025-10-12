@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict
 from app.schemas.user import to_camel
 
 
-
 class ArtistPublicProfile(BaseModel):
     username: str | None
     full_name: str | None
