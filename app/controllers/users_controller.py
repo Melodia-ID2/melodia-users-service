@@ -51,8 +51,8 @@ def get_artist(session: Session, artist_id: UUID):
     return service.get_artist(session, artist_id)
 
 
-def visualize_user(session: Session, user_id: UUID):
-    return service.visualize_user(session, user_id)
+def visualize_user(session: Session, user_id: UUID, current_user_id: UUID):
+    return service.visualize_user(session, user_id, current_user_id)
 
 
 def update_artist_social_links(session: Session, user_id: UUID, data: Any):

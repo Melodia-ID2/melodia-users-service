@@ -15,7 +15,7 @@ from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
-    ListenerPublicProfile,
+    ListenerProfileView,
     SearchUsersResponse,
     UserDetailedInfo,
     UserProfileCreate,
@@ -216,19 +216,21 @@ def get_artist(session, artist_id):
     )
 
 
-def visualize_user(session, user_id):
+def visualize_user(session: Session, user_id: UUID, current_user_id: UUID) -> ListenerProfileView:
     account = repo.get_account_by_id(session, user_id)
     if not account or account.role != UserRole.LISTENER:
         raise NotFoundError("Usuario oyente no encontrado")
     profile = repo.get_profile_by_id(session, user_id)
     if not profile:
         raise NotFoundError("Usuario no encontrado")
-    return ListenerPublicProfile(
+    is_following = repo.is_following(session, current_user_id, user_id)
+    return ListenerProfileView(
         username=profile.username,
         profile_photo=profile.profile_photo,
         bio=profile.bio,
         followers_count=profile.followers_count,
         following_count=profile.following_count,
+        is_following=is_following,
     )
 
 
