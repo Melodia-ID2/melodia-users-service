@@ -84,6 +84,7 @@ class UserSearchItem(ApiBaseModel):
 
 
 class UserProfilePublic(ApiBaseModel):
+    id: str
     username: str | None
     profile_photo: str | None
     bio: str | None

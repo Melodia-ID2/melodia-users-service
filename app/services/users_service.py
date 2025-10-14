@@ -205,6 +205,7 @@ def get_artist(session: Session, artist_id: UUID, current_user_id: UUID) -> Arti
     links = repo.get_artist_links(session, artist_id)
 
     return ArtistProfileView(
+        id=str(artist_id),
         username=profile.username,
         profile_photo=profile.profile_photo,
         bio=profile.bio,
@@ -225,6 +226,7 @@ def visualize_user(session: Session, user_id: UUID, current_user_id: UUID) -> Li
         raise NotFoundError("Usuario no encontrado")
     is_following = repo.is_following(session, current_user_id, user_id)
     return ListenerProfileView(
+        id=str(user_id),
         username=profile.username,
         profile_photo=profile.profile_photo,
         bio=profile.bio,
