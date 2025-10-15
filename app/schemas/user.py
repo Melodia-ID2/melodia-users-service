@@ -108,4 +108,4 @@ class FollowItem(ApiBaseModel):
 
 
 class FollowsListResponse(ApiBaseModel):
-    followers: list[FollowItem]
+    follows: list[FollowItem]
