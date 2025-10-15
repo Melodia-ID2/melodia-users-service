@@ -15,6 +15,7 @@ from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
+    FollowsListResponse,
     ListenerProfileView,
     SearchUsersResponse,
     UserDetailedInfo,
@@ -389,3 +390,9 @@ def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> Messa
     except Exception as e:
         session.rollback()
         raise ValidationError(f"Error al seguir o dejar de seguir al usuario: {str(e)}")
+
+
+def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
+    followers = repo.get_followers(session, user_id) # id, username, profile_photo, followers_count
+    # por cada uno, ver si current_user_id lo sigue
+    return FollowsListResponse(followers=followers)

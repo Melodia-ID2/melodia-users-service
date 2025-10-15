@@ -212,3 +212,13 @@ def toggle_follow(session: Session, follower_id: UUID, followed_id: UUID):
 
 def _bump_counter(session: Session, user_id: UUID, field: str, delta: int) -> None:
     session.exec(update(UserProfile).where(UserProfile.id == user_id).values({field: func.greatest(getattr(UserProfile, field) + delta, 0)}))
+
+
+def get_followers(session: Session, user_id: UUID):
+    stmt = (
+        select(UserProfile.id, UserProfile.username, UserProfile.profile_photo, UserProfile.followers_count)
+        .join(UserFollows, UserFollows.follower_id == UserProfile.id)
+        .where(UserFollows.followed_id == user_id)
+        .order_by(UserProfile.username)
+    )
+    return session.exec(stmt).all()
