@@ -73,3 +73,8 @@ def follow_user(user_id: UUID, session: Session = Depends(get_session), current_
 @router.get("/{user_id}/followers", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
 def get_followers(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
     return controller.get_followers(session, user_id, current_user_id)
+
+
+@router.get("/{user_id}/following", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
+def get_following(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.get_following(session, user_id, current_user_id)

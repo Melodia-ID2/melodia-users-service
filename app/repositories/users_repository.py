@@ -222,3 +222,13 @@ def get_followers(session: Session, user_id: UUID):
         .order_by(UserProfile.username)
     )
     return session.exec(stmt).all()
+
+
+def get_following(session: Session, user_id: UUID):
+    stmt = (
+        select(UserProfile.id, UserProfile.username, UserProfile.profile_photo, UserProfile.followers_count)
+        .join(UserFollows, UserFollows.followed_id == UserProfile.id)
+        .where(UserFollows.follower_id == user_id)
+        .order_by(UserProfile.username)
+    )
+    return session.exec(stmt).all()

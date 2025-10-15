@@ -78,3 +78,7 @@ def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> Messa
 
 def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
     return service.get_followers(session, user_id, current_user_id)
+
+
+def get_following(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
+    return service.get_following(session, user_id, current_user_id)
