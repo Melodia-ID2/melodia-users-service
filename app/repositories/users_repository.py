@@ -224,7 +224,7 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
             UserProfile.username,
             UserProfile.profile_photo,
             UserProfile.followers_count,
-            (FollowsCheck.follower_id is not None).label("is_following"),
+            (FollowsCheck.follower_id != None).label("is_following"),
         )
         .join(UserFollows, UserFollows.follower_id == UserProfile.id)
         .join(
@@ -250,7 +250,7 @@ def get_following(session: Session, user_id: UUID, current_user_id: UUID):
             UserProfile.username,
             UserProfile.profile_photo,
             UserProfile.followers_count,
-            (FollowsCheck.follower_id is not None).label("is_following"),
+            (FollowsCheck.follower_id != None).label("is_following"),
         )
         .join(UserFollows, UserFollows.followed_id == UserProfile.id)
         .join(
