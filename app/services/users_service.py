@@ -393,10 +393,10 @@ def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> Messa
 
 
 def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
-    followers = repo.get_followers(session, user_id)
+    followers = repo.get_followers(session, user_id, current_user_id)
     return FollowsListResponse(follows=followers)
 
 
 def get_following(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
-    following = repo.get_following(session, user_id)
+    following = repo.get_following(session, user_id, current_user_id)
     return FollowsListResponse(follows=following)

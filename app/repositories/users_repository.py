@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from sqlmodel import Session, delete, func, select, update
+from sqlmodel import Session, delete, exists, func, select, update
 
 from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserFollows, UserProfile
 
@@ -214,9 +214,15 @@ def _bump_counter(session: Session, user_id: UUID, field: str, delta: int) -> No
     session.exec(update(UserProfile).where(UserProfile.id == user_id).values({field: func.greatest(getattr(UserProfile, field) + delta, 0)}))
 
 
-def get_followers(session: Session, user_id: UUID):
+def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
     stmt = (
-        select(UserProfile.id, UserProfile.username, UserProfile.profile_photo, UserProfile.followers_count)
+        select(
+            UserProfile.id,
+            UserProfile.username,
+            UserProfile.profile_photo,
+            UserProfile.followers_count,
+            exists().where(UserFollows.follower_id == current_user_id, UserFollows.followed_id == UserProfile.id).label("is_following"),
+        )
         .join(UserFollows, UserFollows.follower_id == UserProfile.id)
         .where(UserFollows.followed_id == user_id)
         .order_by(UserProfile.username)
@@ -224,9 +230,15 @@ def get_followers(session: Session, user_id: UUID):
     return session.exec(stmt).all()
 
 
-def get_following(session: Session, user_id: UUID):
+def get_following(session: Session, user_id: UUID, current_user_id: UUID):
     stmt = (
-        select(UserProfile.id, UserProfile.username, UserProfile.profile_photo, UserProfile.followers_count)
+        select(
+            UserProfile.id,
+            UserProfile.username,
+            UserProfile.profile_photo,
+            UserProfile.followers_count,
+            exists().where(UserFollows.follower_id == current_user_id, UserFollows.followed_id == UserProfile.id).label("is_following"),
+        )
         .join(UserFollows, UserFollows.followed_id == UserProfile.id)
         .where(UserFollows.follower_id == user_id)
         .order_by(UserProfile.username)
