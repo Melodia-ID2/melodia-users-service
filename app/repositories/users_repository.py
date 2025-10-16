@@ -1,7 +1,8 @@
 from typing import List
 from uuid import UUID
 
-from sqlmodel import Session, delete, exists, func, select, update
+from sqlalchemy.orm import aliased
+from sqlmodel import Session, and_, delete, func, select, update
 
 from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserFollows, UserProfile
 
@@ -215,15 +216,25 @@ def _bump_counter(session: Session, user_id: UUID, field: str, delta: int) -> No
 
 
 def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
+    FollowsCheck = aliased(UserFollows)
+
     stmt = (
         select(
             UserProfile.id,
             UserProfile.username,
             UserProfile.profile_photo,
             UserProfile.followers_count,
-            exists().where(UserFollows.follower_id == current_user_id, UserFollows.followed_id == UserProfile.id).label("is_following"),
+            (FollowsCheck.follower_id is not None).label("is_following"),
         )
         .join(UserFollows, UserFollows.follower_id == UserProfile.id)
+        .join(
+            FollowsCheck,
+            and_(
+                FollowsCheck.follower_id == current_user_id,
+                FollowsCheck.followed_id == UserProfile.id,
+            ),
+            isouter=True,
+        )
         .where(UserFollows.followed_id == user_id)
         .order_by(UserProfile.username)
     )
@@ -231,16 +242,27 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
 
 
 def get_following(session: Session, user_id: UUID, current_user_id: UUID):
+    FollowsCheck = aliased(UserFollows)
+
     stmt = (
         select(
             UserProfile.id,
             UserProfile.username,
             UserProfile.profile_photo,
             UserProfile.followers_count,
-            exists().where(UserFollows.follower_id == current_user_id, UserFollows.followed_id == UserProfile.id).label("is_following"),
+            (FollowsCheck.follower_id is not None).label("is_following"),
         )
         .join(UserFollows, UserFollows.followed_id == UserProfile.id)
+        .join(
+            FollowsCheck,
+            and_(
+                FollowsCheck.follower_id == current_user_id,
+                FollowsCheck.followed_id == UserProfile.id,
+            ),
+            isouter=True,
+        )
         .where(UserFollows.follower_id == user_id)
         .order_by(UserProfile.username)
     )
+
     return session.exec(stmt).all()
