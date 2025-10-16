@@ -9,7 +9,7 @@ from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
-from app.schemas.user import ArtistProfileResponse, ListenerProfileView, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
+from app.schemas.user import ArtistProfileResponse, FollowsListResponse, ListenerProfileView, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 router = APIRouter(prefix="", tags=["Users (Listeners & Artists)"])
 
@@ -68,3 +68,13 @@ def visualize_user(user_id: UUID, session: Session = Depends(get_session), curre
 @router.post("/{user_id}/follow", response_model=MessageResponse, status_code=status.HTTP_200_OK)
 def follow_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
     return controller.follow_user(session, current_user_id, user_id)
+
+
+@router.get("/{user_id}/followers", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
+def get_followers(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.get_followers(session, user_id, current_user_id)
+
+
+@router.get("/{user_id}/following", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
+def get_following(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.get_following(session, user_id, current_user_id)

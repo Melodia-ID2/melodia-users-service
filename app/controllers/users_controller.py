@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 import app.services.users_service as service
 from app.schemas.message import MessageResponse
-from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfileUpdate
+from app.schemas.user import FollowsListResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 
 def get_all_users(session: Session, page: int, page_size: int):
@@ -74,3 +74,11 @@ def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]
 
 def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> MessageResponse:
     return service.follow_user(session, current_user_id, user_id)
+
+
+def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
+    return service.get_followers(session, user_id, current_user_id)
+
+
+def get_following(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
+    return service.get_following(session, user_id, current_user_id)

@@ -98,3 +98,15 @@ class ListenerProfileView(UserProfilePublic):
 
 class SearchUsersResponse(ApiBaseModel):
     users: list[UserSearchItem]
+
+
+class FollowItem(ApiBaseModel):
+    id: UUID
+    username: str | None = None
+    profile_photo: str | None = None
+    followers_count: int
+    is_following: bool = False
+
+
+class FollowsListResponse(ApiBaseModel):
+    follows: list[FollowItem]
