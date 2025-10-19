@@ -8,8 +8,8 @@ import app.controllers.users_controller as controller
 from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.message import MessageResponse
-from app.schemas.photo_profile import PhotoProfileResponse
-from app.schemas.user import ArtistProfileResponse, ListenerPublicProfile, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
+from app.schemas.profile_photo import ProfilePhotoResponse
+from app.schemas.user import ArtistProfileResponse, FollowsListResponse, ListenerProfileView, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 router = APIRouter(prefix="", tags=["Users (Listeners & Artists)"])
 
@@ -51,20 +51,30 @@ def create_user_profile(
     return controller.create_user_profile(session, user_id, profile_data)
 
 
-@router.post("/photo-profile", response_model=PhotoProfileResponse)
-async def update_photo_profile(
+@router.post("/photo-profile", response_model=ProfilePhotoResponse)
+async def update_profile_picture(
     file: UploadFile = File(...),
     current_user_id: UUID = Depends(get_current_user_id),
     session: Session = Depends(get_session),
 ):
-    return await controller.update_photo_profile(session, current_user_id, file)
+    return await controller.update_profile_picture(session, current_user_id, file)
 
 
-@router.get("/visualize/user/{user_id}", response_model=ListenerPublicProfile)
-def visualize_user(user_id: UUID, session: Session = Depends(get_session)):
-    return controller.visualize_user(session, user_id)
+@router.get("/{user_id}/profile", response_model=ListenerProfileView)
+def visualize_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.visualize_user(session, user_id, current_user_id)
 
 
-@router.get("/follow/{user_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+@router.post("/{user_id}/follow", response_model=MessageResponse, status_code=status.HTTP_200_OK)
 def follow_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
     return controller.follow_user(session, current_user_id, user_id)
+
+
+@router.get("/{user_id}/followers", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
+def get_followers(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.get_followers(session, user_id, current_user_id)
+
+
+@router.get("/{user_id}/following", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
+def get_following(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return controller.get_following(session, user_id, current_user_id)

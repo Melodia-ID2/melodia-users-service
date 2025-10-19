@@ -1,7 +1,8 @@
 from typing import List
 from uuid import UUID
 
-from sqlmodel import Session, delete, func, select, update
+from sqlalchemy.orm import aliased
+from sqlmodel import Session, and_, delete, func, select, update
 
 from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserFollows, UserProfile
 
@@ -34,7 +35,7 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
         cond = cond & (UserAccount.role == role)
 
     stmt = (
-        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.photo_profile, similarity_expr.label("similarity_score"))
+        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.profile_photo, similarity_expr.label("similarity_score"))
         .join(UserAccount, UserProfile.id == UserAccount.id)
         .where(cond)
         .order_by(similarity_expr.desc(), UserProfile.username.asc())
@@ -83,12 +84,12 @@ def delete_user_account(session: Session, account: UserAccount) -> None:
     return None
 
 
-def update_photo_profile(session: Session, user_id: UUID, photo_url: str) -> UserProfile | None:
+def update_profile_picture(session: Session, user_id: UUID, photo_url: str) -> UserProfile | None:
     user_profile = session.get(UserProfile, user_id)
     if not user_profile:
         return None
 
-    user_profile.photo_profile = photo_url
+    user_profile.profile_photo = photo_url
     session.add(user_profile)
     session.commit()
     session.refresh(user_profile)
@@ -189,6 +190,11 @@ def update_photo_position_by_url(session: Session, artist_id: UUID, photo_url: s
         session.commit()
 
 
+def is_following(session: Session, follower_id: UUID, followed_id: UUID) -> bool:
+    stmt = select(UserFollows).where(UserFollows.follower_id == follower_id, UserFollows.followed_id == followed_id)
+    return session.exec(stmt).first() is not None
+
+
 def toggle_follow(session: Session, follower_id: UUID, followed_id: UUID):
     stmt = select(UserFollows).where(UserFollows.follower_id == follower_id, UserFollows.followed_id == followed_id)
     is_following = session.exec(stmt).first()
@@ -207,3 +213,56 @@ def toggle_follow(session: Session, follower_id: UUID, followed_id: UUID):
 
 def _bump_counter(session: Session, user_id: UUID, field: str, delta: int) -> None:
     session.exec(update(UserProfile).where(UserProfile.id == user_id).values({field: func.greatest(getattr(UserProfile, field) + delta, 0)}))
+
+
+def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
+    FollowsCheck = aliased(UserFollows)
+
+    stmt = (
+        select(
+            UserProfile.id,
+            UserProfile.username,
+            UserProfile.profile_photo,
+            UserProfile.followers_count,
+            (FollowsCheck.follower_id != None).label("is_following"),
+        )
+        .join(UserFollows, UserFollows.follower_id == UserProfile.id)
+        .join(
+            FollowsCheck,
+            and_(
+                FollowsCheck.follower_id == current_user_id,
+                FollowsCheck.followed_id == UserProfile.id,
+            ),
+            isouter=True,
+        )
+        .where(UserFollows.followed_id == user_id)
+        .order_by(UserProfile.username)
+    )
+    return session.exec(stmt).all()
+
+
+def get_following(session: Session, user_id: UUID, current_user_id: UUID):
+    FollowsCheck = aliased(UserFollows)
+
+    stmt = (
+        select(
+            UserProfile.id,
+            UserProfile.username,
+            UserProfile.profile_photo,
+            UserProfile.followers_count,
+            (FollowsCheck.follower_id != None).label("is_following"),
+        )
+        .join(UserFollows, UserFollows.followed_id == UserProfile.id)
+        .join(
+            FollowsCheck,
+            and_(
+                FollowsCheck.follower_id == current_user_id,
+                FollowsCheck.followed_id == UserProfile.id,
+            ),
+            isouter=True,
+        )
+        .where(UserFollows.follower_id == user_id)
+        .order_by(UserProfile.username)
+    )
+
+    return session.exec(stmt).all()

@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 import app.services.users_service as service
 from app.schemas.message import MessageResponse
-from app.schemas.user import UserProfileCreate, UserProfileResponse, UserProfileUpdate
+from app.schemas.user import FollowsListResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 
 def get_all_users(session: Session, page: int, page_size: int):
@@ -30,9 +30,9 @@ def delete_user(session: Session, user_id: UUID):
     return None
 
 
-async def update_photo_profile(session: Session, user_id: UUID, file: UploadFile = File(...)):
+async def update_profile_picture(session: Session, user_id: UUID, file: UploadFile = File(...)):
     file_bytes = await file.read()
-    return service.update_photo_profile(session, user_id, file_bytes)
+    return service.update_profile_picture(session, user_id, file_bytes)
 
 
 def get_me(session: Session, user_id: UUID):
@@ -47,12 +47,12 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
     return service.update_me(session, user_id, data)
 
 
-def get_artist(session: Session, artist_id: UUID):
-    return service.get_artist(session, artist_id)
+def get_artist(session: Session, artist_id: UUID, current_user_id: UUID):
+    return service.get_artist(session, artist_id, current_user_id)
 
 
-def visualize_user(session: Session, user_id: UUID):
-    return service.visualize_user(session, user_id)
+def visualize_user(session: Session, user_id: UUID, current_user_id: UUID):
+    return service.visualize_user(session, user_id, current_user_id)
 
 
 def update_artist_social_links(session: Session, user_id: UUID, data: Any):
@@ -74,3 +74,11 @@ def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]
 
 def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> MessageResponse:
     return service.follow_user(session, current_user_id, user_id)
+
+
+def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
+    return service.get_followers(session, user_id, current_user_id)
+
+
+def get_following(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
+    return service.get_following(session, user_id, current_user_id)

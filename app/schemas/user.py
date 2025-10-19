@@ -2,18 +2,13 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
 from pydantic.networks import HttpUrl
 
 from app.models.user import UserGender
+from app.schemas.base import ApiBaseModel
 
 
-def _to_camel(string: str) -> str:
-    parts = string.split("_")
-    return parts[0] + "".join(word.capitalize() for word in parts[1:])
-
-
-class _UserProfilePayload(BaseModel):
+class _UserProfilePayload(ApiBaseModel):
     username: Optional[str] = None
     full_name: str
     birthdate: date | None = None
@@ -25,15 +20,8 @@ class _UserProfilePayload(BaseModel):
     followers_count: int = 0
     following_count: int = 0
 
-    model_config = ConfigDict(
-        alias_generator=_to_camel,
-        populate_by_name=True,
-        extra="forbid",
-        from_attributes=True,
-    )
 
-
-class UserProfileUpdate(BaseModel):
+class UserProfileUpdate(ApiBaseModel):
     username: Optional[str] = None
     full_name: Optional[str] = None
     birthdate: Optional[date] = None
@@ -41,13 +29,6 @@ class UserProfileUpdate(BaseModel):
     phone_number: Optional[str] = None
     address: Optional[str] = None
     bio: Optional[str] = None
-
-    model_config = ConfigDict(
-        alias_generator=_to_camel,
-        populate_by_name=True,
-        extra="forbid",
-        from_attributes=True,
-    )
 
 
 class UserProfileCreate(_UserProfilePayload):
@@ -58,13 +39,12 @@ class UserProfileResponse(_UserProfilePayload):
     id: UUID
 
 
-class ArtistProfileResponse(_UserProfilePayload):
-    id: UUID
+class ArtistProfileResponse(UserProfileResponse):
     photos: List[str] = []
     links: List[str] = []
 
 
-class UserBasicInfo(BaseModel):
+class UserBasicInfo(ApiBaseModel):
     id: str
     email: str
     username: str | None = None
@@ -81,20 +61,13 @@ class UserDetailedInfo(UserBasicInfo):
     last_login: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
-    model_config = ConfigDict(
-        alias_generator=_to_camel,
-        populate_by_name=True,
-        extra="forbid",
-        from_attributes=True,
-    )
 
-
-class UserRoleUpdateResponse(BaseModel):
+class UserRoleUpdateResponse(ApiBaseModel):
     id: str
     role: str
 
 
-class GetAllUserResponse(BaseModel):
+class GetAllUserResponse(ApiBaseModel):
     users: list[UserBasicInfo]
     total: int
     page: int
@@ -102,26 +75,38 @@ class GetAllUserResponse(BaseModel):
     total_pages: int
 
 
-class UserSearchItem(BaseModel):
+class UserSearchItem(ApiBaseModel):
     id: str
     role: str
     username: str | None = None
     profile_photo: str | None = None
     similarity_score: float
 
-    model_config = ConfigDict(
-        alias_generator=_to_camel,
-        populate_by_name=True,
-        extra="forbid",
-        from_attributes=True,
-    )
 
-
-class ListenerPublicProfile(BaseModel):
+class UserProfilePublic(ApiBaseModel):
+    id: str
     username: str | None
-    photo_profile: str | None
+    profile_photo: str | None
     bio: str | None
+    followers_count: int
+    following_count: int
 
 
-class SearchUsersResponse(BaseModel):
+class ListenerProfileView(UserProfilePublic):
+    is_following: bool = False
+
+
+class SearchUsersResponse(ApiBaseModel):
     users: list[UserSearchItem]
+
+
+class FollowItem(ApiBaseModel):
+    id: UUID
+    username: str | None = None
+    profile_photo: str | None = None
+    followers_count: int
+    is_following: bool = False
+
+
+class FollowsListResponse(ApiBaseModel):
+    follows: list[FollowItem]

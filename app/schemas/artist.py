@@ -1,24 +1,22 @@
 from typing import List
 
-from pydantic import BaseModel
+from app.schemas.base import ApiBaseModel
+from app.schemas.user import UserProfilePublic
 
 
-class ArtistPublicProfile(BaseModel):
-    username: str | None
-    full_name: str | None
-    photo_profile: str | None
-    bio: str | None
+class ArtistProfileView(UserProfilePublic):
+    is_following: bool = False
     photos: List[str]
     links: List[str]
 
 
-class SocialLinksUpdateRequest(BaseModel):
+class SocialLinksUpdateRequest(ApiBaseModel):
     links: List[str]
 
 
-class ArtistPhotosUpdateRequest(BaseModel):
+class ArtistPhotosUpdateRequest(ApiBaseModel):
     photos: List[str]
 
 
-class DeletePhotoRequest(BaseModel):
+class DeletePhotoRequest(ApiBaseModel):
     photo_url: str
