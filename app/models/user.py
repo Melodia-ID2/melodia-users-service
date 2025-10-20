@@ -1,6 +1,7 @@
 from datetime import date, datetime, timezone
 from enum import Enum
 from uuid import UUID, uuid4
+from app.models.regions import Country
 
 from sqlmodel import Field, SQLModel
 
@@ -31,6 +32,7 @@ class UserAccount(SQLModel, table=True):
     last_login: datetime | None = Field(default=None)
     role: UserRole = Field(default=UserRole.LISTENER, nullable=False)
     status: UserAccountStatus = Field(default=UserAccountStatus.ACTIVE, nullable=False)
+    country: Country = Field(default=Country.AR, nullable=False)
     is_profile_completed: bool = Field(default=False)
 
 
