@@ -5,7 +5,7 @@ services:
       target: dev
     container_name: users-service
     ports:
-      - "${PORT}:8080"
+      - "${PORT}:${PORT}"
     environment:
       - PORT=8080
       - HOST=0.0.0.0
