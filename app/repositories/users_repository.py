@@ -28,15 +28,8 @@ def get_all_users(session: Session, page: int, page_size: int):
 
 
 def search_users(session: Session, query: str, role: str | None, page: int, page_size: int):
-    contains_boost = case(
-        (UserProfile.username.ilike(f"%{query}%"), 0.3),
-        else_=0
-    )
-
-    prefix_boost = case(
-        (UserProfile.username.ilike(f"{query}%"), 0.2),
-        else_=0
-    )
+    contains_boost = case((UserProfile.username.ilike(f"%{query}%"), 0.3), else_=0)
+    prefix_boost = case((UserProfile.username.ilike(f"{query}%"), 0.2), else_=0)
 
     similarity_expr = func.similarity(UserProfile.username, query) + contains_boost + prefix_boost
 

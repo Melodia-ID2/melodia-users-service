@@ -11,13 +11,16 @@ class UserAccountStatus(str, Enum):
     ACTIVE = "active"
     BLOCKED = "blocked"
 
+
 class UserRole(str, Enum):
     LISTENER = "listener"
     ARTIST = "artist"
 
+
 class AccountProvider(str, Enum):
     LOCAL = "local"
     GOOGLE = "google"
+
 
 class UserAccount(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
