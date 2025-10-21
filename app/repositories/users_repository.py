@@ -2,9 +2,10 @@ from typing import List
 from uuid import UUID
 
 from sqlalchemy.orm import aliased
-from sqlmodel import Session, and_, delete, func, select, update
+from sqlmodel import Session, and_, case, delete, func, select, update
 
-from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserFollows, UserProfile
+from app.models.useraccount import UserAccount
+from app.models.userprofile import ArtistPhoto, SocialLink, UserFollows, UserProfile
 
 
 def get_all_users(session: Session, page: int, page_size: int):
@@ -27,21 +28,21 @@ def get_all_users(session: Session, page: int, page_size: int):
 
 
 def search_users(session: Session, query: str, role: str | None, page: int, page_size: int):
-    SIMILARITY_THRESHOLD = 0.1
+    contains_boost = case((UserProfile.username.ilike(f"%{query}%"), 0.3), else_=0)
+    prefix_boost = case((UserProfile.username.ilike(f"{query}%"), 0.2), else_=0)
 
-    similarity_expr = func.similarity(UserProfile.username, query)
-    cond = (UserProfile.username.ilike(f"%{query}%")) | (similarity_expr > SIMILARITY_THRESHOLD)
-    if role:
-        cond = cond & (UserAccount.role == role)
+    similarity_expr = func.similarity(UserProfile.username, query) + contains_boost + prefix_boost
 
     stmt = (
         select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.profile_photo, similarity_expr.label("similarity_score"))
         .join(UserAccount, UserProfile.id == UserAccount.id)
-        .where(cond)
         .order_by(similarity_expr.desc(), UserProfile.username.asc())
         .offset((page - 1) * page_size)
         .limit(page_size)
     )
+
+    if role:
+        stmt = stmt.where(UserAccount.role == role)
 
     return session.exec(stmt).all()
 

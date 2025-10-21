@@ -2,9 +2,8 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic.networks import HttpUrl
-
-from app.models.user import UserGender
+from app.models.regions import Country
+from app.models.userprofile import UserGender
 from app.schemas.base import ApiBaseModel
 
 
@@ -15,8 +14,9 @@ class _UserProfilePayload(ApiBaseModel):
     gender: UserGender
     phone_number: str | None = None
     address: str | None = None
-    profile_photo: HttpUrl | None = None
+    profile_photo: str | None = None
     bio: str | None = None
+    country: Country | None = None
     followers_count: int = 0
     following_count: int = 0
 
@@ -56,6 +56,7 @@ class UserDetailedInfo(UserBasicInfo):
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
+    country: Optional[Country] = None
     birthdate: date | None = None
     profile_photo: str | None = None
     last_login: Optional[datetime] = None

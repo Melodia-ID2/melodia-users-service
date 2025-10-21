@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.security import get_jwt_payload, require_admin
 from app.main import app
-from app.models.user import UserAccount
+from app.models.useraccount import UserAccount
 
 sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 

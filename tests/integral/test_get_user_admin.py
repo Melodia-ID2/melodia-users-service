@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.security import require_admin
 from app.main import app
-from app.models.user import UserAccount, UserProfile
+from app.models.useraccount import UserAccount
+from app.models.userprofile import UserProfile
 
 sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 

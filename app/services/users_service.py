@@ -9,7 +9,8 @@ from sqlmodel import Session
 
 import app.repositories.users_repository as repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
-from app.models.user import UserProfile, UserRole
+from app.models.useraccount import UserRole
+from app.models.userprofile import UserProfile
 from app.schemas.artist import ArtistProfileView
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
@@ -52,6 +53,7 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
         full_name=None if not user_profile else user_profile.full_name,
         phone_number=None if not user_profile else user_profile.phone_number,
         address=None if not user_profile else user_profile.address,
+        country=user.country,
         birthdate=None if not user_profile else user_profile.birthdate,
         last_login=user.last_login,
         created_at=user.created_at,
@@ -124,6 +126,7 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         "gender": profile.gender,
         "phone_number": profile.phone_number,
         "address": profile.address,
+        "country": user_account.country,
         "profile_photo": profile.profile_photo,
         "bio": profile.bio,
         "followers_count": profile.followers_count,

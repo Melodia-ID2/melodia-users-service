@@ -6,6 +6,7 @@ ruff==0.12.12
 
 # ORM + DB
 sqlmodel==0.0.24
+sqlalchemy
 psycopg[binary]==3.2.*
 alembic==1.13.2
 
