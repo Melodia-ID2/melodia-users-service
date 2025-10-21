@@ -12,6 +12,7 @@ class UserGender(str, Enum):
     OTHER = "other"
     PREFER_NOT_TO_SAY = "prefer_not_to_say"
 
+
 class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")
     username: str | None = Field(index=True, nullable=True, default=None)

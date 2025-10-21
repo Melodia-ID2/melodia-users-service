@@ -1,12 +1,13 @@
 from enum import Enum
 
+
 class Country(str, Enum):
     # América del Norte
     US = "US"  # United States
     CA = "CA"  # Canada
     MX = "MX"  # Mexico
     GL = "GL"  # Greenland
-    
+
     # América Central
     GT = "GT"  # Guatemala
     HN = "HN"  # Honduras
@@ -15,7 +16,7 @@ class Country(str, Enum):
     CR = "CR"  # Costa Rica
     PA = "PA"  # Panama
     BZ = "BZ"  # Belize
-    
+
     # América del Sur
     BR = "BR"  # Brazil
     AR = "AR"  # Argentina
@@ -30,7 +31,7 @@ class Country(str, Enum):
     GY = "GY"  # Guyana
     SR = "SR"  # Suriname
     GF = "GF"  # French Guiana
-    
+
     # Europa Occidental
     GB = "GB"  # United Kingdom
     IE = "IE"  # Ireland
@@ -46,14 +47,14 @@ class Country(str, Enum):
     LI = "LI"  # Liechtenstein
     MC = "MC"  # Monaco
     AD = "AD"  # Andorra
-    
+
     # Europa del Norte
     SE = "SE"  # Sweden
     NO = "NO"  # Norway
     DK = "DK"  # Denmark
     FI = "FI"  # Finland
     IS = "IS"  # Iceland
-    
+
     # Europa Oriental
     RU = "RU"  # Russia
     PL = "PL"  # Poland
@@ -68,7 +69,7 @@ class Country(str, Enum):
     LV = "LV"  # Latvia
     EE = "EE"  # Estonia
     MD = "MD"  # Moldova
-    
+
     # Europa del Sur
     IT = "IT"  # Italy
     GR = "GR"  # Greece
@@ -83,7 +84,7 @@ class Country(str, Enum):
     CY = "CY"  # Cyprus
     SM = "SM"  # San Marino
     VA = "VA"  # Vatican City
-    
+
     # Asia Oriental
     CN = "CN"  # China
     JP = "JP"  # Japan
@@ -93,7 +94,7 @@ class Country(str, Enum):
     TW = "TW"  # Taiwan
     HK = "HK"  # Hong Kong
     MO = "MO"  # Macau
-    
+
     # Sudeste Asiático
     ID = "ID"  # Indonesia
     PH = "PH"  # Philippines
@@ -106,7 +107,7 @@ class Country(str, Enum):
     LA = "LA"  # Laos
     BN = "BN"  # Brunei
     TL = "TL"  # East Timor
-    
+
     # Asia del Sur
     IN = "IN"  # India
     PK = "PK"  # Pakistan
@@ -116,7 +117,7 @@ class Country(str, Enum):
     BT = "BT"  # Bhutan
     MV = "MV"  # Maldives
     AF = "AF"  # Afghanistan
-    
+
     # Asia Occidental / Medio Oriente
     TR = "TR"  # Turkey
     IR = "IR"  # Iran
@@ -135,7 +136,7 @@ class Country(str, Enum):
     GE = "GE"  # Georgia
     AM = "AM"  # Armenia
     AZ = "AZ"  # Azerbaijan
-    
+
     # África del Norte
     EG = "EG"  # Egypt
     LY = "LY"  # Libya
@@ -144,7 +145,7 @@ class Country(str, Enum):
     MA = "MA"  # Morocco
     SD = "SD"  # Sudan
     SS = "SS"  # South Sudan
-    
+
     # África Occidental
     NG = "NG"  # Nigeria
     GH = "GH"  # Ghana
@@ -163,7 +164,7 @@ class Country(str, Enum):
     GW = "GW"  # Guinea-Bissau
     CV = "CV"  # Cape Verde
     ST = "ST"  # São Tomé and Príncipe
-    
+
     # África Oriental
     KE = "KE"  # Kenya
     TZ = "TZ"  # Tanzania
@@ -178,7 +179,7 @@ class Country(str, Enum):
     MU = "MU"  # Mauritius
     SC = "SC"  # Seychelles
     KM = "KM"  # Comoros
-    
+
     # África Central
     CD = "CD"  # Democratic Republic of Congo
     CG = "CG"  # Republic of Congo
@@ -187,7 +188,7 @@ class Country(str, Enum):
     CM = "CM"  # Cameroon
     GQ = "GQ"  # Equatorial Guinea
     GA = "GA"  # Gabon
-    
+
     # África del Sur
     ZA = "ZA"  # South Africa
     ZW = "ZW"  # Zimbabwe
@@ -199,7 +200,7 @@ class Country(str, Enum):
     AO = "AO"  # Angola
     LS = "LS"  # Lesotho
     SZ = "SZ"  # Eswatini
-    
+
     # Oceanía
     AU = "AU"  # Australia
     NZ = "NZ"  # New Zealand
@@ -217,16 +218,17 @@ class Country(str, Enum):
     NR = "NR"  # Nauru
     CK = "CK"  # Cook Islands
 
+
 def get_country_from_name(country_name: str) -> Country | None:
     """
     Convierte un código ISO alpha-2 al enum Country
-    
+
     Args:
         country_name: Código ISO alpha-2 (ej: "AR", "US", "MX")
-    
+
     Returns:
         Country enum o None si no se encuentra
-    
+
     Examples:
         get_country_from_name("AR") -> Country.AR
         get_country_from_name("US") -> Country.US
@@ -238,13 +240,14 @@ def get_country_from_name(country_name: str) -> Country | None:
             return Country(country_name)
         except ValueError:
             pass
-    
+
     return None
+
 
 def get_all_countries() -> list[Country]:
     """
     Obtiene una lista de todos los países disponibles
-    
+
     Returns:
         Lista de todos los países como enums Country
     """
