@@ -4,8 +4,8 @@ from uuid import UUID
 
 from pydantic.networks import HttpUrl
 
-from app.models.user import UserGender
 from app.models.regions import Country
+from app.models.userprofile import UserGender
 from app.schemas.base import ApiBaseModel
 
 

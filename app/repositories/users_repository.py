@@ -4,7 +4,8 @@ from uuid import UUID
 from sqlalchemy.orm import aliased
 from sqlmodel import Session, and_, case, delete, func, select, update
 
-from app.models.user import ArtistPhoto, SocialLink, UserAccount, UserFollows, UserProfile
+from app.models.useraccount import UserAccount
+from app.models.userprofile import ArtistPhoto, SocialLink, UserFollows, UserProfile
 
 
 def get_all_users(session: Session, page: int, page_size: int):

@@ -9,7 +9,8 @@ from sqlmodel import Session
 
 import app.repositories.users_repository as repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
-from app.models.user import UserProfile, UserRole
+from app.models.useraccount import UserRole
+from app.models.userprofile import UserProfile
 from app.schemas.artist import ArtistProfileView
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse

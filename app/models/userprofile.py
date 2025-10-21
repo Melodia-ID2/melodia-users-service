@@ -1,40 +1,16 @@
 from datetime import date, datetime, timezone
 from enum import Enum
 from uuid import UUID, uuid4
-from app.models.regions import Country
 
 from sqlmodel import Field, SQLModel
 
 
-class UserRole(str, Enum):
-    LISTENER = "listener"
-    ARTIST = "artist"
-
-
-class UserGender(Enum):
+class UserGender(str, Enum):
     FEMALE = "female"
     MALE = "male"
     NON_BINARY = "non_binary"
     OTHER = "other"
     PREFER_NOT_TO_SAY = "prefer_not_to_say"
-
-
-class UserAccountStatus(str, Enum):
-    ACTIVE = "active"
-    BLOCKED = "blocked"
-
-
-class UserAccount(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    email: str = Field(index=True, unique=True, nullable=False)
-    password: str = Field(nullable=False)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    last_login: datetime | None = Field(default=None)
-    role: UserRole = Field(default=UserRole.LISTENER, nullable=False)
-    status: UserAccountStatus = Field(default=UserAccountStatus.ACTIVE, nullable=False)
-    country: Country = Field(default=Country.AR, nullable=False)
-    is_profile_completed: bool = Field(default=False)
-
 
 class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")
@@ -62,7 +38,7 @@ class ArtistPhoto(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     artist_id: UUID = Field(foreign_key="useraccount.id", nullable=False, index=True)
     url: str = Field(nullable=False)
-    position: int = Field(nullable=False)  # 0 a 4, por ejemplo
+    position: int = Field(nullable=False)
     uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
