@@ -37,6 +37,7 @@ def test_01_get_user_admin_returns_200_and_user_data():
         "role": "listener",
         "status": "active",
         "fullName": None,
+        "country": "AR",
         "birthdate": "2000-01-01",
         "phoneNumber": None,
         "address": None,
