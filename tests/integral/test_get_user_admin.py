@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.security import require_admin
 from app.main import app
 from app.models.useraccount import UserAccount
+from app.models.usercredential import UserCredential
 from app.models.userprofile import UserProfile
 
 sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
@@ -21,9 +22,11 @@ def test_01_get_user_admin_returns_200_and_user_data():
     custom_last_login = datetime(2025, 6, 1, 12, 0, 0)
     custom_birthdate = date(2000, 1, 1)
     with Session(sync_engine) as session:
-        user = UserAccount(id=user_id, email="test@example.com", password="password", last_login=custom_last_login, created_at=custom_created_at)
+        user = UserAccount(id=user_id, last_login=custom_last_login, created_at=custom_created_at)
+        user_credential = UserCredential(user_id=user_id, email="test@example.com", password="password")
         user_profile = UserProfile(id=user_id, birthdate=custom_birthdate)
         session.add(user)
+        session.add(user_credential)
         session.add(user_profile)
         session.commit()
     client = TestClient(app)
