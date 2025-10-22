@@ -7,6 +7,7 @@ from pydantic import AnyUrl
 from pydantic import ValidationError as PydanticValidationError
 from sqlmodel import Session
 
+from app.repositories import credentials_repository as credentials_repo
 import app.repositories.users_repository as repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.useraccount import UserRole
@@ -17,6 +18,7 @@ from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
     FollowsListResponse,
+    GetAllUserResponse,
     ListenerProfileView,
     SearchUsersResponse,
     UserDetailedInfo,
@@ -28,15 +30,15 @@ from app.schemas.user import (
 )
 
 
-def get_all_users(session: Session, page: int, page_size: int) -> dict[str, Any]:
+def get_all_users(session: Session, page: int, page_size: int) -> GetAllUserResponse:
     users, total = repo.get_all_users(session, page, page_size)
-    return {
-        "users": [{"id": str(u[0]), "username": u[1], "email": u[2], "role": u[3], "status": u[4]} for u in users],
-        "total": total,
-        "page": page,
-        "page_size": page_size,
-        "total_pages": (total + page_size - 1) // page_size,
-    }
+    return GetAllUserResponse(
+        users=[{"id": str(u.id), "username": u.username, "email": u.email or "", "role": u.role, "status": u.status} for u in users],
+        total=total or 0,
+        page=page,
+        page_size=page_size,
+        total_pages=(total + page_size - 1) // page_size if total else 0,
+    )
 
 
 def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
@@ -47,7 +49,7 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
     return UserDetailedInfo(
         id=str(user.id),
         username=None if not user_profile else user_profile.username,
-        email=user.email,
+        email=credentials_repo.get_primary_email_by_user_id(session, user_id) or "",
         role=user.role,
         status=user.status,
         full_name=None if not user_profile else user_profile.full_name,
@@ -74,7 +76,7 @@ def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfi
     return UserProfileResponse.model_validate(new_profile)
 
 
-def update_user_role(session: Session, user_id: UUID) -> UserDetailedInfo:
+def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateResponse:
     user = repo.get_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))

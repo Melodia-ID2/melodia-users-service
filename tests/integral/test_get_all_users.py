@@ -11,27 +11,30 @@ from app.core.config import settings
 from app.core.security import get_jwt_payload, require_admin
 from app.main import app
 from app.models.useraccount import UserAccount
+from app.models.usercredential import UserCredential
 from app.models.userprofile import UserProfile
 from tests.integral.conftest import BASE_URL
 
 sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 
 
-def insert_n_users(n) -> list[uuid.UUID]:
-    user_ids = []
+def insert_n_users(n: int) -> list[uuid.UUID]:
+    user_ids: list[uuid.UUID] = []
     with Session(sync_engine) as session:
         for i in range(1, n + 1):
             user_id = uuid.uuid4()
             user_ids.append(user_id)
-            user = UserAccount(id=user_id, email=f"email{i}@example.com", password="password")
+            user = UserAccount(id=user_id)
+            user_credentials = UserCredential(user_id=user_id, email=f"email{i}@example.com", password="password")
             user_profile = UserProfile(id=user_id)
             session.add(user)
+            session.add(user_credentials)
             session.add(user_profile)
         session.commit()
     return user_ids
 
 
-def assert_n_users_in_response(response, n, user_ids):
+def assert_n_users_in_response(response: httpx.Response, n: int, user_ids: list[uuid.UUID]):
     assert response.status_code == 200
     data = response.json()
     assert "users" in data
@@ -107,14 +110,15 @@ async def test_05_get_all_without_admin_role_returns_401():
 def test_06_get_all_with_existent_account_and_non_exist_profile_returns_200():
     app.dependency_overrides[require_admin] = override_require_admin
     user_id = uuid.uuid4()
-    user = UserAccount(id=user_id, email="test@example.com", password="password")
+    user = UserAccount(id=user_id)
+    user_credentials = UserCredential(user_id=user_id, email="test@example.com", password="password")
     with Session(sync_engine) as session:
         session.add(user)
+        session.add(user_credentials)
         session.commit()
         user_id_str = str(user.id)
-        user_email = user.email
     response = make_request()
 
     assert response.status_code == 200
-    assert response.json()["users"] == [{"id": user_id_str, "email": user_email, "username": None, "role": "listener", "status": "active"}]
+    assert response.json()["users"] == [{"id": user_id_str, "email": "test@example.com", "username": None, "role": "listener", "status": "active"}]
     app.dependency_overrides = {}
