@@ -27,10 +27,8 @@ async def truncate_tables():
     async with engine.connect() as conn:
         try:
             await conn.execute(text("SET session_replication_role = 'replica'"))
-
             await conn.execute(text("TRUNCATE TABLE userprofile RESTART IDENTITY CASCADE"))
             await conn.execute(text("TRUNCATE TABLE useraccount RESTART IDENTITY CASCADE"))
-
             await conn.execute(text("SET session_replication_role = 'origin'"))
             await conn.commit()
         except Exception as e:
@@ -38,6 +36,11 @@ async def truncate_tables():
             print(f"Error al limpiar tablas: {e}")
             raise
 
+async def drop_database():
+    async with engine.begin() as conn:
+        await conn.execute(text("DROP SCHEMA public CASCADE"))
+        await conn.execute(text("CREATE SCHEMA public"))
+        await conn.commit()
 
 async def wait_for_db():
     for _ in range(30):
@@ -57,6 +60,7 @@ async def wait_for_db():
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def prepare_db():
+    await drop_database()
     await create_tables()
     yield
 
