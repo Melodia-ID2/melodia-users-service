@@ -9,16 +9,15 @@ from app.api.v1.routers.system_router import router as system_router
 from app.api.v1.routers.users_router import router as users_router
 from app.core.database import init_db
 from app.errors.middleware import Middleware
-
-_db_initialized = False
-
+from sqlalchemy.exc import ProgrammingError
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    global _db_initialized
-    if not _db_initialized:
+    try:
         init_db()
-        _db_initialized = True
+    except ProgrammingError as e:
+        if "DuplicatePreparedStatement" not in str(e):
+            raise
     yield
 
 
