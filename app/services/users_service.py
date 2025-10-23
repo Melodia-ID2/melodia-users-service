@@ -1,4 +1,3 @@
-from app.schemas.user import UserSearchIndex
 import time
 from typing import List, Union
 from uuid import UUID, uuid4
@@ -8,15 +7,12 @@ from pydantic import AnyUrl
 from pydantic import ValidationError as PydanticValidationError
 from sqlmodel import Session
 
-from app.models.useraccount import UserStatus
-from app.services.search_service import search_service
-
-from app.repositories import credentials_repository as credentials_repo
 import app.repositories.users_repository as repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
-from app.models.useraccount import UserRole
+from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
-from app.schemas.artist import ArtistProfileView
+from app.repositories import credentials_repository as credentials_repo
+from app.schemas.artist import ArtistProfileView, SocialLinksUpdateRequest
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
@@ -30,8 +26,10 @@ from app.schemas.user import (
     UserProfileResponse,
     UserProfileUpdate,
     UserRoleUpdateResponse,
+    UserSearchIndex,
     UserSearchItem,
 )
+from app.services.search_service import search_service
 
 
 def get_all_users(session: Session, page: int, page_size: int) -> GetAllUserResponse:
@@ -83,7 +81,7 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     if user_account:
         search_data = UserSearchIndex(
             id=str(user_id),
-            name=new_profile.username,
+            name=new_profile.username or "",
             role=user_account.role,
             image_url=new_profile.profile_photo,
             is_blocked=False
@@ -105,7 +103,7 @@ async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateRes
     if user_profile:
         search_data = UserSearchIndex(
             id=str(user_id),
-            name=user_profile.username,
+            name=user_profile.username or "",
             role=user_account.role,
             image_url=user_profile.profile_photo,
             is_blocked=user_account.status == UserStatus.BLOCKED
@@ -120,7 +118,7 @@ async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateRes
     )
 
 
-async def delete_user(session: Session, user_id: UUID):
+async def delete_user(session: Session, user_id: UUID) -> None:
     account = repo.get_account_by_id(session, user_id)
     if not account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
@@ -150,7 +148,7 @@ async def update_profile_picture(session: Session, user_id: UUID, photo_file_byt
     if user_account:
         search_data = UserSearchIndex(
             id=str(user_id),
-            name=user_profile.username,
+            name=user_profile.username or "",
             role=user_account.role,
             image_url=user_profile.profile_photo,
             is_blocked=user_account.status == UserStatus.BLOCKED
@@ -244,12 +242,14 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
             raise UsernameTakenError("El nombre de usuario ya está en uso")
 
     updated_profile = repo.update_user_profile(session, user_id, update_data)
+    if not updated_profile:
+        raise NotFoundError("Perfil no encontrado")
 
     user_account = repo.get_account_by_id(session, user_id)
     if user_account:
         search_data = UserSearchIndex(
             id=str(user_id),
-            name=updated_profile.username,
+            name=updated_profile.username or "",
             role=user_account.role,
             image_url=updated_profile.profile_photo,
             is_blocked=user_account.status == UserStatus.BLOCKED
@@ -305,7 +305,7 @@ def visualize_user(session: Session, user_id: UUID, current_user_id: UUID) -> Li
     )
 
 
-def update_artist_social_links(session, user_id, data):
+def update_artist_social_links(session: Session, user_id: UUID, data: SocialLinksUpdateRequest) -> None:
     account = repo.get_account_by_id(session, user_id)
     if not account or account.role != UserRole.ARTIST:
         raise NotFoundError("Solo los artistas pueden modificar sus redes sociales")
@@ -324,7 +324,7 @@ def update_artist_social_links(session, user_id, data):
     return None
 
 
-def add_artist_photo(session: Session, user_id: UUID, photo_file_bytes: bytes):
+def add_artist_photo(session: Session, user_id: UUID, photo_file_bytes: bytes) -> dict[str, str | int]:
     """
     Agrega una foto al perfil del artista.
     Máximo 5 fotos permitidas.
@@ -364,7 +364,7 @@ def add_artist_photo(session: Session, user_id: UUID, photo_file_bytes: bytes):
         raise FileUploadError(f"Error al subir la foto: {str(e)}")
 
 
-def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
+def delete_artist_photo(session: Session, user_id: UUID, photo_url: str) -> dict[str, str | int]:
     user_account = repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Usuario no encontrado")
@@ -410,7 +410,7 @@ def delete_artist_photo(session: Session, user_id: UUID, photo_url: str):
         raise FileUploadError(f"Error al eliminar la foto: {str(e)}")
 
 
-def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]):
+def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: List[str]) -> dict[str, str | list[str]]:
     user_account = repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Usuario no encontrado")
