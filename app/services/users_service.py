@@ -1,3 +1,4 @@
+from app.schemas.user import UserSearchIndex
 import time
 from typing import List, Union
 from uuid import UUID, uuid4
