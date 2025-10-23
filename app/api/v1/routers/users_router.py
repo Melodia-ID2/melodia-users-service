@@ -43,12 +43,12 @@ def search_users(
 
 
 @router.post("/profile", status_code=status.HTTP_201_CREATED)
-def create_user_profile(
+async def create_user_profile(
     profile_data: UserProfileCreate,
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),
 ):
-    return controller.create_user_profile(session, user_id, profile_data)
+    return await controller.create_user_profile(session, user_id, profile_data)
 
 
 @router.post("/photo-profile", response_model=ProfilePhotoResponse)

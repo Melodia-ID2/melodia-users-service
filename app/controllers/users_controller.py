@@ -17,16 +17,16 @@ def get_user(session: Session, user_id: UUID):
     return service.get_user(session, user_id)
 
 
-def create_user_profile(session: Session, id: UUID, data: UserProfileCreate):
-    return service.create_user_profile(session, id, data)
+async def create_user_profile(session: Session, id: UUID, data: UserProfileCreate):
+    return await service.create_user_profile(session, id, data)
 
 
 def update_user_role(session: Session, user_id: UUID):
     return service.update_user_role(session, user_id)
 
 
-def delete_user(session: Session, user_id: UUID):
-    service.delete_user(session, user_id)
+async def delete_user(session: Session, user_id: UUID):
+    await service.delete_user(session, user_id)
     return None
 
 

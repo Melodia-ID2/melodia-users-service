@@ -1,11 +1,13 @@
 import time
-from typing import Any, List, Union
+from typing import List, Union
 from uuid import UUID, uuid4
 
 import cloudinary.uploader
 from pydantic import AnyUrl
 from pydantic import ValidationError as PydanticValidationError
 from sqlmodel import Session
+
+from app.services.search_service import search_service
 
 from app.repositories import credentials_repository as credentials_repo
 import app.repositories.users_repository as repo
@@ -63,7 +65,7 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
     )
 
 
-def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfileCreate) -> UserProfileResponse:
+async def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfileCreate) -> UserProfileResponse:
     existing_profile = repo.get_profile_by_id(session, user_id)
     if existing_profile:
         raise ProfileAlreadyExistsError("El perfil ya existe")
@@ -71,8 +73,21 @@ def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfi
         existing_username = repo.get_profile_by_username(session, profile_data.username)
         if existing_username:
             raise UsernameTakenError("El nombre de usuario ya está en uso")
+    
     new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     new_profile = repo.create_user_profile(session, new_profile)
+    
+    user_account = repo.get_account_by_id(session, user_id)    
+    if user_account:
+        search_data = UserSearchIndex(
+            id=str(user_id),
+            name=new_profile.username,
+            role=user_account.role,
+            image_url=new_profile.profile_photo
+        )
+        import asyncio
+        asyncio.create_task(search_service.index_user(search_data))
+    
     return UserProfileResponse.model_validate(new_profile)
 
 
@@ -88,14 +103,18 @@ def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateResponse:
     )
 
 
-def delete_user(session: Session, user_id: UUID):
+async def delete_user(session: Session, user_id: UUID):
     account = repo.get_account_by_id(session, user_id)
     if not account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
+        
     user_profile = repo.get_profile_by_id(session, user_id)
     if user_profile and user_profile.profile_photo:
         cloudinary.uploader.destroy(public_id=f"user-photo-profile/{user_id}")
 
+    import asyncio
+    asyncio.create_task(search_service.delete_user(account.role, user_id))
+    
     repo.delete_user_account(session, account)
     return None
 

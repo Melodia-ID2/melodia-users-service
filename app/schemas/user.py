@@ -111,3 +111,10 @@ class FollowItem(ApiBaseModel):
 
 class FollowsListResponse(ApiBaseModel):
     follows: list[FollowItem]
+
+
+class UserSearchIndex(ApiBaseModel):
+    id: str
+    name: str | None = None
+    role: UserRole
+    image_url: str | None = None
