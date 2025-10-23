@@ -96,6 +96,9 @@ async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateRes
     user = repo.get_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
+    
+    import asyncio
+    asyncio.create_task(search_service.delete_user(user.role, user_id))
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
     user_account = repo.create_user_account(session, user)
 
@@ -108,7 +111,6 @@ async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateRes
             image_url=user_profile.profile_photo,
             is_blocked=user_account.status == UserStatus.BLOCKED
         )
-        import asyncio
         asyncio.create_task(search_service.index_user(search_data))
 
 
@@ -139,8 +141,8 @@ async def update_profile_picture(session: Session, user_id: UUID, photo_file_byt
 
     if not uploaded_url:
         raise FileUploadError("Error al guardar la foto de perfil")
-    
-    user_profile = repo.get_profile_by_id(session, user_id)
+
+    user_profile = repo.update_profile_picture(session, user_id, uploaded_url)
     if not user_profile:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
 
