@@ -10,10 +10,15 @@ from app.api.v1.routers.users_router import router as users_router
 from app.core.database import init_db
 from app.errors.middleware import Middleware
 
+_db_initialized = False
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    init_db()
+    global _db_initialized
+    if not _db_initialized:
+        init_db()
+        _db_initialized = True
     yield
 
 
