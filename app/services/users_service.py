@@ -8,6 +8,7 @@ from pydantic import AnyUrl
 from pydantic import ValidationError as PydanticValidationError
 from sqlmodel import Session
 
+from app.models.useraccount import UserStatus
 from app.services.search_service import search_service
 
 from app.repositories import credentials_repository as credentials_repo
@@ -93,12 +94,26 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     return UserProfileResponse.model_validate(new_profile)
 
 
-def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateResponse:
+async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateResponse:
     user = repo.get_account_by_id(session, user_id)
     if not user:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
-    _ = repo.create_user_account(session, user)
+    user_account = repo.create_user_account(session, user)
+
+    user_profile = repo.get_profile_by_id(session, user_id)
+    if user_profile:
+        search_data = UserSearchIndex(
+            id=str(user_id),
+            name=user_profile.username,
+            role=user_account.role,
+            image_url=user_profile.profile_photo,
+            is_blocked=user_account.status == UserStatus.BLOCKED
+        )
+        import asyncio
+        asyncio.create_task(search_service.index_user(search_data))
+
+
     return UserRoleUpdateResponse(
         id=str(user.id),
         role=user.role,
@@ -121,13 +136,27 @@ async def delete_user(session: Session, user_id: UUID):
     return None
 
 
-def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
+async def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
     uploaded_url = cloudinary.uploader.upload(photo_file_bytes, folder="user-photo-profile", public_id=str(user_id), overwrite=True)["secure_url"]
 
     if not uploaded_url:
         raise FileUploadError("Error al guardar la foto de perfil")
-    if not repo.update_profile_picture(session, user_id, uploaded_url):
+    
+    user_profile = repo.get_profile_by_id(session, user_id)
+    if not user_profile:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
+
+    user_account = repo.get_account_by_id(session, user_id)    
+    if user_account:
+        search_data = UserSearchIndex(
+            id=str(user_id),
+            name=user_profile.username,
+            role=user_account.role,
+            image_url=user_profile.profile_photo,
+            is_blocked=user_account.status == UserStatus.BLOCKED
+        )
+        import asyncio
+        asyncio.create_task(search_service.index_user(search_data))
 
     return ProfilePhotoResponse(profile_photo=uploaded_url)
 
@@ -179,7 +208,7 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
     )
 
 
-def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
+async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     profile = repo.get_user_profile_by_user_id(session, user_id)
     if not profile:
         raise NotFoundError("Perfil no encontrado")
@@ -215,6 +244,19 @@ def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserP
             raise UsernameTakenError("El nombre de usuario ya está en uso")
 
     updated_profile = repo.update_user_profile(session, user_id, update_data)
+
+    user_account = repo.get_account_by_id(session, user_id)
+    if user_account:
+        search_data = UserSearchIndex(
+            id=str(user_id),
+            name=updated_profile.username,
+            role=user_account.role,
+            image_url=updated_profile.profile_photo,
+            is_blocked=user_account.status == UserStatus.BLOCKED
+        )
+        import asyncio
+        asyncio.create_task(search_service.index_user(search_data))
+
     return UserProfileResponse.model_validate(updated_profile)
 
 
