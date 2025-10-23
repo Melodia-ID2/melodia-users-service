@@ -116,5 +116,6 @@ class FollowsListResponse(ApiBaseModel):
 class UserSearchIndex(ApiBaseModel):
     id: str
     name: str | None = None
-    role: str
     image_url: str | None = None
+    role: str
+    is_blocked: bool

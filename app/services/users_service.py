@@ -84,7 +84,8 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
             id=str(user_id),
             name=new_profile.username,
             role=user_account.role,
-            image_url=new_profile.profile_photo
+            image_url=new_profile.profile_photo,
+            is_blocked=False
         )
         import asyncio
         asyncio.create_task(search_service.index_user(search_data))
