@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from sqlmodel import Session
 
-import app.controllers.users_controller as controller
+import app.services.users_service as service
 from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.message import MessageResponse
@@ -19,16 +19,16 @@ def get_me(
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),
 ):
-    return controller.get_me(session, user_id)
+    return service.get_me(session, user_id)
 
 
 @router.put("/me", response_model=UserProfileResponse)
-def update_me(
+async def update_me(
     data: UserProfileUpdate,
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),
 ):
-    return controller.update_me(session, user_id, data)
+    return await service.update_me(session, user_id, data)
 
 
 @router.get("/search", response_model=SearchUsersResponse, status_code=status.HTTP_200_OK)
@@ -39,16 +39,16 @@ def search_users(
     page_size: int = Query(20, ge=1, le=100),
     session: Session = Depends(get_session),
 ):
-    return controller.search_users(session, query, role, page, page_size)
+    return service.search_users(session, query, role, page, page_size)
 
 
 @router.post("/profile", status_code=status.HTTP_201_CREATED)
-def create_user_profile(
+async def create_user_profile(
     profile_data: UserProfileCreate,
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),
 ):
-    return controller.create_user_profile(session, user_id, profile_data)
+    return await service.create_user_profile(session, user_id, profile_data)
 
 
 @router.post("/photo-profile", response_model=ProfilePhotoResponse)
@@ -57,24 +57,25 @@ async def update_profile_picture(
     current_user_id: UUID = Depends(get_current_user_id),
     session: Session = Depends(get_session),
 ):
-    return await controller.update_profile_picture(session, current_user_id, file)
+    file_bytes = await file.read()
+    return await service.update_profile_picture(session, current_user_id, file_bytes)
 
 
 @router.get("/{user_id}/profile", response_model=ListenerProfileView)
 def visualize_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return controller.visualize_user(session, user_id, current_user_id)
+    return service.visualize_user(session, user_id, current_user_id)
 
 
 @router.post("/{user_id}/follow", response_model=MessageResponse, status_code=status.HTTP_200_OK)
 def follow_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return controller.follow_user(session, current_user_id, user_id)
+    return service.follow_user(session, current_user_id, user_id)
 
 
 @router.get("/{user_id}/followers", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
 def get_followers(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return controller.get_followers(session, user_id, current_user_id)
+    return service.get_followers(session, user_id, current_user_id)
 
 
 @router.get("/{user_id}/following", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
 def get_following(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return controller.get_following(session, user_id, current_user_id)
+    return service.get_following(session, user_id, current_user_id)

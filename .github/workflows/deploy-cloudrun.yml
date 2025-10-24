@@ -77,5 +77,5 @@ jobs:
             --platform managed \
             --timeout 600s \
             --allow-unauthenticated \
-            --set-env-vars "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }},CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }},CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }},CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }},DATABASE_HOST=${{ secrets.DATABASE_HOST }},DATABASE_NAME=${{ secrets.DATABASE_NAME }},DATABASE_USER=${{ secrets.DATABASE_USER }},DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }},DATABASE_PORT=${{ secrets.DATABASE_PORT }},ENVIRONMENT=production,AUTH_SECRET=${{ secrets.AUTH_SECRET }}" \
+            --set-env-vars "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }},CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }},CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }},CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }},DATABASE_HOST=${{ secrets.DATABASE_HOST }},DATABASE_NAME=${{ secrets.DATABASE_NAME }},DATABASE_USER=${{ secrets.DATABASE_USER }},DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }},DATABASE_PORT=${{ secrets.DATABASE_PORT }},ENVIRONMENT=production,AUTH_SECRET=${{ secrets.AUTH_SECRET }},SEARCH_SERVICE_URL=${{ secrets.SEARCH_SERVICE_URL }}" \
             --project "${PROJECT_ID}"

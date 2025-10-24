@@ -2,6 +2,8 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
+from pydantic import BaseModel
+
 from app.models.regions import Country
 from app.models.userprofile import UserGender
 from app.schemas.base import ApiBaseModel
@@ -111,3 +113,11 @@ class FollowItem(ApiBaseModel):
 
 class FollowsListResponse(ApiBaseModel):
     follows: list[FollowItem]
+
+
+class UserSearchIndex(BaseModel):
+    id: str
+    name: str
+    image_url: str | None = None
+    role: str
+    is_blocked: bool

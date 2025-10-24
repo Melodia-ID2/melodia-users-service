@@ -9,7 +9,6 @@ from app.models.usercredential import UserCredential
 from app.models.userprofile import ArtistPhoto, SocialLink, UserFollows, UserProfile
 
 
-
 def get_all_users(session: Session, page: int, page_size: int):
     # Subquery: get one credential per user, preferring local provider
     subq = (

@@ -4,5 +4,5 @@ lint.select = [
     "F", # Pyflakes (errores lógicos y sintaxis)
     "E", # pycodestyle (errores de estilo PEP8)
     "I", # isort (ordenación de importaciones)
-    # "ANN", # flake8-annotations (reglas de anotación de tipos)
+    "ANN", # flake8-annotations (reglas de anotación de tipos)
 ]
