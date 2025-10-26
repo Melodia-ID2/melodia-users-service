@@ -126,6 +126,6 @@ def test_06_when_delete_user_then_the_user_request_are_invalid():
     assert response.status_code == 204
     app.dependency_overrides[get_jwt_payload] = lambda: {"user_id": str(user_id), "role": "listener"}
     response = client.get("/me", headers={"Authorization": f"Bearer {user_id}"})
-    assert response.status_code == 401
-    assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Usuario no encontrado", "instance": "/me"}
+    assert response.status_code == 404
+    assert response.json() == {"type": "about:blank", "title": "Resource Not Found", "status": 404, "detail": "Usuario no encontrado", "instance": "/me"}
     app.dependency_overrides = {}

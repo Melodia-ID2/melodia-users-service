@@ -12,13 +12,13 @@ AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_co
 
 
 async def create_tables() -> None:
-    """Crea todas las tablas en la base de datos."""
+    """Create all tables in the database."""
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
 
 async def drop_database() -> None:
-    """Elimina todas las tablas de la base de datos."""
+    """Drop all tables from the database."""
     async with engine.begin() as conn:
         await conn.execute(text("DROP SCHEMA public CASCADE"))
         await conn.execute(text("CREATE SCHEMA public"))
@@ -26,7 +26,7 @@ async def drop_database() -> None:
 
 
 async def truncate_tables() -> None:
-    """Limpia todas las tablas manteniendo el esquema."""
+    """Truncate all tables while keeping the schema intact."""
     async with engine.connect() as conn:
         try:
             await conn.execute(text("SET session_replication_role = 'replica'"))
@@ -44,7 +44,7 @@ async def truncate_tables() -> None:
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def prepare_db() -> AsyncGenerator[None, None]:
-    """Fixture para preparar la base de datos antes de la suite de tests."""
+    """Fixture to prepare the database before the test suite runs."""
     await drop_database()
     await create_tables()
     yield
@@ -52,7 +52,7 @@ async def prepare_db() -> AsyncGenerator[None, None]:
 
 @pytest_asyncio.fixture(autouse=True)
 async def clean_tables_fixture() -> AsyncGenerator[None, None]:
-    """Fixture para limpiar las tablas antes de cada test."""
+    """Fixture to clean tables before each test."""
     await truncate_tables()
     yield
 

@@ -6,7 +6,7 @@ from tests.integral.fixtures.factories import TestArtist, TestUser
 
 @pytest_asyncio.fixture
 async def test_listener_full(session: AsyncSession, test_listener_full_data: TestUser):
-    """Crea y persiste un usuario oyente completo."""
+    """Create and persist a complete listener user."""
     session.add(test_listener_full_data.account)
     session.add(test_listener_full_data.credentials)
     session.add(test_listener_full_data.profile)
@@ -17,7 +17,7 @@ async def test_listener_full(session: AsyncSession, test_listener_full_data: Tes
 
 @pytest_asyncio.fixture
 async def test_listener_minimal(session: AsyncSession, test_listener_minimal_data: TestUser):
-    """Crea y persiste un usuario oyente mínimo."""
+    """Create and persist a minimal listener user."""
     session.add(test_listener_minimal_data.account)
     session.add(test_listener_minimal_data.credentials)
     session.add(test_listener_minimal_data.profile)
@@ -28,7 +28,7 @@ async def test_listener_minimal(session: AsyncSession, test_listener_minimal_dat
 
 @pytest_asyncio.fixture
 async def test_artist_full(session: AsyncSession, test_artist_full_data: TestArtist):
-    """Crea y persiste un artista completo, con fotos y links."""
+    """Create and persist a complete artist with photos and links."""
     session.add(test_artist_full_data.account)
     session.add(test_artist_full_data.credentials)
     session.add(test_artist_full_data.profile)

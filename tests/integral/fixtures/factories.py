@@ -26,7 +26,7 @@ class TestArtist(TestUser):
 
 @pytest.fixture
 def test_listener_minimal_data():
-    """Datos de prueba para crear un usuario oyente mínimo."""
+    """Test data to create a minimal listener user."""
     id = uuid.uuid4()
     account = UserAccount(
         id=id,
@@ -53,7 +53,7 @@ def test_listener_minimal_data():
 
 @pytest.fixture
 def test_listener_full_data():
-    """Datos de prueba para crear un usuario oyente completo."""
+    """Test data to create a complete listener user."""
     id = uuid.uuid4()
     account = UserAccount(
         id=id,
@@ -87,7 +87,7 @@ def test_listener_full_data():
 
 @pytest.fixture
 def test_artist_full_data():
-    """Datos de prueba para crear un artista completo."""
+    """Test data to create a complete artist."""
     id = uuid.uuid4()
     account = UserAccount(
         id=id,

@@ -25,7 +25,7 @@ SERVER_POLL_INTERVAL = 0.5
 
 
 async def wait_for_db() -> None:
-    """Espera a que la base de datos esté lista para aceptar conexiones."""
+    """Wait for the database to be ready to accept connections."""
     start_time = time.monotonic()
     last_error: Optional[Exception] = None
     
@@ -53,7 +53,7 @@ async def wait_for_db() -> None:
 
 
 async def wait_for_server() -> None:
-    """Espera a que el servidor esté listo para aceptar conexiones."""
+    """Wait for the server to be ready to accept connections."""
     start_time = time.monotonic()
     
     while time.monotonic() - start_time < SERVER_START_TIMEOUT:
@@ -72,7 +72,7 @@ async def wait_for_server() -> None:
 
 @asynccontextmanager
 async def server_process() -> AsyncGenerator[None, None]:
-    """Context manager para el proceso del servidor de pruebas."""
+    """Context manager for the test server process."""
     process = await asyncio.create_subprocess_exec(
         "uvicorn",
         "app.main:app",
@@ -97,7 +97,7 @@ async def server_process() -> AsyncGenerator[None, None]:
 
 @pytest_asyncio.fixture(scope="session")
 async def server():
-    """Fixture de sesión que maneja el ciclo de vida del servidor de pruebas."""
+    """Session-scoped fixture that manages the test server lifecycle."""
     await wait_for_db()
     
     async with server_process():
@@ -106,6 +106,6 @@ async def server():
 
 @pytest_asyncio.fixture
 async def async_client(server) -> AsyncGenerator[httpx.AsyncClient, None]:
-    """Proporciona un cliente HTTP asíncrono para las pruebas."""
+    """Provide an asynchronous HTTP client for tests."""
     async with httpx.AsyncClient(base_url=TEST_BASE_URL) as client:
         yield client

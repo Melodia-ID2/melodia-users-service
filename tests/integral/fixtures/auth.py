@@ -1,15 +1,15 @@
 from datetime import datetime, timezone, timedelta
+from uuid import UUID
 from jose import jwt
 
-from tests.integral.fixtures.factories import TestArtist, TestUser
 from app.core.config import settings
 
 
-def _access_token(user: TestUser | TestArtist, role: str) -> str:
+def _access_token(user_id: UUID, role: str) -> str:
     """Generate an access token for the test user with given role."""
     return jwt.encode(
         {
-            "user_id": str(user.id),
+            "user_id": str(user_id),
             "role": role,
             "status": "active",
             "iat": int(datetime.now(timezone.utc).timestamp()),
@@ -22,6 +22,6 @@ def _access_token(user: TestUser | TestArtist, role: str) -> str:
     )
 
 
-def auth_headers(user: TestUser | TestArtist, role: str) -> dict[str, str]:
-    """Headers de autenticación para el usuario de prueba."""
-    return {"Authorization": f"Bearer {_access_token(user, role)}"}
+def auth_headers(user_id: UUID, role: str) -> dict[str, str]:
+    """Authentication headers for the test user."""
+    return {"Authorization": f"Bearer {_access_token(user_id, role)}"}

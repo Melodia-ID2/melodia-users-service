@@ -1,4 +1,5 @@
 from typing import Any
+import uuid
 from httpx import AsyncClient
 import pytest
 from fastapi import status
@@ -8,11 +9,11 @@ from tests.integral.conftest import TEST_BASE_URL, TestArtist, TestUser, auth_he
 
 @pytest.mark.asyncio
 class TestGetCurrentUser:
-    """Pruebas para el endpoint GET /me"""
+    """Tests for the GET /me endpoint."""
 
     async def test_get_me_authenticated_with_complete_profile_listener(self, async_client: AsyncClient, test_listener_full: TestUser) -> None:
-        """Obtener perfil del usuario autenticado exitosamente"""
-        response = await async_client.get(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_full, role='listener'))
+        """Successfully retrieve the authenticated user's profile."""
+        response = await async_client.get(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_full.id, role='listener'))
 
         assert response.status_code == status.HTTP_200_OK, \
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
@@ -39,8 +40,8 @@ class TestGetCurrentUser:
                 f"Mismatch in field '{field}': expected {expected_value}, got {response_data[field]}"
 
     async def test_get_me_authenticated_with_complete_profile_artist(self, async_client: AsyncClient, test_artist_full: TestArtist) -> None:
-        """Obtener perfil del usuario autenticado exitosamente"""
-        response = await async_client.get(f"{TEST_BASE_URL}/me", headers=auth_headers(test_artist_full, role='artist'))
+        """Successfully retrieve the authenticated user's profile."""
+        response = await async_client.get(f"{TEST_BASE_URL}/me", headers=auth_headers(test_artist_full.id, role='artist'))
 
         assert response.status_code == status.HTTP_200_OK, \
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
@@ -69,8 +70,8 @@ class TestGetCurrentUser:
                 f"Mismatch in field '{field}': expected {expected_value}, got {response_data[field]}"    
 
     async def test_get_me_authenticated_with_minimal_profile_listener(self, async_client: AsyncClient, test_listener_minimal: TestUser) -> None:
-        """Obtener perfil del usuario autenticado exitosamente"""
-        response = await async_client.get(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_minimal, role='listener'))
+        """Successfully retrieve the authenticated user's profile."""
+        response = await async_client.get(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_minimal.id, role='listener'))
 
         assert response.status_code == status.HTTP_200_OK, \
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
@@ -95,3 +96,30 @@ class TestGetCurrentUser:
             assert field in response_data, f"Field '{field}' not found in response"
             assert response_data[field] == expected_value, \
                 f"Mismatch in field '{field}': expected {expected_value}, got {response_data[field]}"
+    
+    async def test_get_me_unauthenticated(self, async_client: AsyncClient) -> None:
+        """Attempting to retrieve a profile without authentication should fail."""
+        response = await async_client.get(f"{TEST_BASE_URL}/me")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {
+            "type": "about:blank",
+            "title": "Authentication Error",
+            "status": 401,
+            "detail": "Token de autenticación invalido o no proporcionado",
+            "instance": "/me"
+        }
+    
+
+    async def test_get_me_unknown_user(self, async_client: AsyncClient) -> None:
+        """Attempting to retrieve a profile for a non-existent user should fail."""
+        response = await async_client.get(f"{TEST_BASE_URL}/me", headers=auth_headers(uuid.uuid4(), role='listener'))
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {
+            "type": "about:blank",
+            "title": "Resource Not Found",
+            "status": 404,
+            "detail": "Usuario no encontrado",
+            "instance": "/me"
+        }
