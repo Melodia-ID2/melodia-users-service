@@ -167,8 +167,6 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         raise NotFoundError("Perfil no encontrado")
 
     user_account = repo.get_account_by_id(session, user_id)
-    if user_account and user_account.role == UserRole.LISTENER:
-        return UserProfileResponse.model_validate(profile)
 
     response_data = {
         "id": profile.id,
@@ -178,7 +176,7 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         "gender": profile.gender,
         "phone_number": profile.phone_number,
         "address": profile.address,
-        "country": user_account.country,
+        "country": user_account.country if user_account else None,
         "profile_photo": profile.profile_photo,
         "bio": profile.bio,
         "followers_count": profile.followers_count,
@@ -248,18 +246,33 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
         raise NotFoundError("Perfil no encontrado")
 
     user_account = repo.get_account_by_id(session, user_id)
-    if user_account:
-        search_data = UserSearchIndex(
-            id=str(user_id),
-            name=updated_profile.username or "",
-            role=user_account.role,
-            image_url=updated_profile.profile_photo,
-            is_blocked=user_account.status == UserStatus.BLOCKED
-        )
-        import asyncio
-        asyncio.create_task(search_service.index_user(search_data))
+    if not user_account:
+        raise NotFoundError("Cuenta de usuario no encontrada")
 
-    return UserProfileResponse.model_validate(updated_profile)
+    search_data = UserSearchIndex(
+        id=str(user_id),
+        name=updated_profile.username or "",
+        role=user_account.role,
+        image_url=updated_profile.profile_photo,
+        is_blocked=user_account.status == UserStatus.BLOCKED
+    )
+    import asyncio
+    asyncio.create_task(search_service.index_user(search_data))
+
+    return UserProfileResponse(
+        id=updated_profile.id,
+        username=updated_profile.username,
+        full_name=updated_profile.full_name,
+        birthdate=updated_profile.birthdate,
+        gender=updated_profile.gender,
+        phone_number=updated_profile.phone_number,
+        address=updated_profile.address,
+        profile_photo=updated_profile.profile_photo,
+        bio=updated_profile.bio,
+        country=user_account.country,
+        followers_count=updated_profile.followers_count,
+        following_count=updated_profile.following_count,
+    )
 
 
 def get_artist(session: Session, artist_id: UUID, current_user_id: UUID) -> ArtistProfileView:
