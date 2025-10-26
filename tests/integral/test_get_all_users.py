@@ -1,8 +1,7 @@
 import uuid
 
-import httpx
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient, Response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -13,7 +12,6 @@ from app.main import app
 from app.models.useraccount import UserAccount
 from app.models.usercredential import UserCredential
 from app.models.userprofile import UserProfile
-from tests.integral.conftest import TEST_BASE_URL
 
 sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 
@@ -34,7 +32,7 @@ def insert_n_users(n: int) -> list[uuid.UUID]:
     return user_ids
 
 
-def assert_n_users_in_response(response: httpx.Response, n: int, user_ids: list[uuid.UUID]):
+def assert_n_users_in_response(response: Response, n: int, user_ids: list[uuid.UUID]):
     assert response.status_code == 200
     data = response.json()
     assert "users" in data
@@ -56,58 +54,52 @@ def override_get_jwt_payload():
     return {"role": "listener"}
 
 
-def make_request():
-    client = TestClient(app)
-    headers = {"Authorization": "Bearer admin_token"}
-    return client.get("/admin", headers=headers)
-
-
 @pytest.mark.asyncio
-async def test_01_get_all_without_admin_token_returns_401():
-    async with httpx.AsyncClient(base_url=TEST_BASE_URL) as client:
-        r = await client.get("/admin")
+async def test_01_get_all_without_admin_token_returns_401(async_client: AsyncClient):
+    r = await async_client.get("/admin")
     assert r.status_code == 401
     assert r.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Token de autenticación invalido o no proporcionado", "instance": "/admin"}
 
 
 @pytest.mark.asyncio
-async def test_02_get_all_with_admin_token_and_no_users_returns_empty_list():
+async def test_02_get_all_with_admin_token_and_no_users_returns_empty_list(async_client: AsyncClient):
     app.dependency_overrides[require_admin] = override_require_admin
-    response = make_request()
+    response = await async_client.get("/admin", headers={"Authorization": "Bearer admin_token"})
     assert response.status_code == 200
     assert response.json()["users"] == []
     app.dependency_overrides = {}
 
 
 @pytest.mark.asyncio
-async def test_03_get_all_with_admin_token_and_one():
+async def test_03_get_all_with_admin_token_and_one(async_client: AsyncClient):
     user_ids = insert_n_users(1)
     app.dependency_overrides[require_admin] = override_require_admin
-    response = make_request()
+    response = await async_client.get("/admin", headers={"Authorization": "Bearer admin_token"})
     assert_n_users_in_response(response, 1, user_ids)
     app.dependency_overrides = {}
 
 
 @pytest.mark.asyncio
-async def test_04_get_all_with_admin_token_and_multiple():
+async def test_04_get_all_with_admin_token_and_multiple(async_client: AsyncClient):
     n = 5
     user_ids = insert_n_users(n)
     app.dependency_overrides[require_admin] = override_require_admin
-    response = make_request()
+    response = await async_client.get("/admin", headers={"Authorization": "Bearer admin_token"})
     assert_n_users_in_response(response, n, user_ids)
     app.dependency_overrides = {}
 
 
 @pytest.mark.asyncio
-async def test_05_get_all_without_admin_role_returns_401():
+async def test_05_get_all_without_admin_role_returns_401(async_client: AsyncClient):
     app.dependency_overrides[get_jwt_payload] = override_get_jwt_payload
-    response = make_request()
+    response = await async_client.get("/admin", headers={"Authorization": "Bearer admin_token"})
     assert response.status_code == 401
     assert response.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Se requiere privilegios de administrador", "instance": "/admin"}
     app.dependency_overrides = {}
 
 
-def test_06_get_all_with_existent_account_and_non_exist_profile_returns_200():
+@pytest.mark.asyncio
+async def test_06_get_all_with_existent_account_and_non_exist_profile_returns_200(async_client: AsyncClient):
     app.dependency_overrides[require_admin] = override_require_admin
     user_id = uuid.uuid4()
     user = UserAccount(id=user_id)
@@ -117,7 +109,7 @@ def test_06_get_all_with_existent_account_and_non_exist_profile_returns_200():
         session.add(user_credentials)
         session.commit()
         user_id_str = str(user.id)
-    response = make_request()
+    response = await async_client.get("/admin", headers={"Authorization": "Bearer admin_token"})
 
     assert response.status_code == 200
     assert response.json()["users"] == [{"id": user_id_str, "email": "test@example.com", "username": None, "role": "listener", "status": "active"}]
