@@ -13,7 +13,7 @@ from app.main import app
 from app.models.useraccount import UserAccount
 from app.models.usercredential import UserCredential
 from app.models.userprofile import UserProfile
-from tests.integral.conftest import BASE_URL
+from tests.integral.conftest import TEST_BASE_URL
 
 sync_engine = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
 
@@ -64,7 +64,7 @@ def make_request():
 
 @pytest.mark.asyncio
 async def test_01_get_all_without_admin_token_returns_401():
-    async with httpx.AsyncClient(base_url=BASE_URL) as client:
+    async with httpx.AsyncClient(base_url=TEST_BASE_URL) as client:
         r = await client.get("/admin")
     assert r.status_code == 401
     assert r.json() == {"type": "about:blank", "title": "Authentication Error", "status": 401, "detail": "Token de autenticación invalido o no proporcionado", "instance": "/admin"}
