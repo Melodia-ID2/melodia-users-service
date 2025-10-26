@@ -7,7 +7,7 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from app.core.database import get_session
-from app.errors.exceptions import AuthenticationError
+from app.errors.exceptions import AuthenticationError, NotFoundError
 from app.repositories import users_repository as user_repo
 
 security = HTTPBearer(auto_error=False)
@@ -58,7 +58,7 @@ def get_current_user_id(payload: dict[str, Any] = Depends(get_jwt_payload), sess
         raise AuthenticationError("ID de usuario no encontrado en el token")
     user = user_repo.get_account_by_id(session, user_id)
     if not user:
-        raise AuthenticationError("Usuario no encontrado")
+        raise NotFoundError("Usuario no encontrado")
     if user.status != "active":
         raise AuthenticationError("El usuario está bloqueado")
     if payload.get("role") != user.role:
