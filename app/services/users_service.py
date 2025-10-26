@@ -216,6 +216,7 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
         if existing_username:
             raise UsernameTakenError("El nombre de usuario ya está en uso")
 
+    update_data = data.model_dump(exclude_unset=True)
     updated_profile = repo.update_user_profile(session, user_id, update_data)
     if not updated_profile:
         raise NotFoundError("Perfil no encontrado")
