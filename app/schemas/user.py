@@ -11,7 +11,7 @@ from app.schemas.base import ApiBaseModel
 
 class _UserProfilePayload(ApiBaseModel):
     username: Optional[str] = None
-    full_name: str
+    full_name: str | None = None
     birthdate: date | None = None
     gender: UserGender
     phone_number: str | None = None
