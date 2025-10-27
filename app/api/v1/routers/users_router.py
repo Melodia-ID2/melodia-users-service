@@ -32,7 +32,7 @@ async def update_me(
 
 
 
-@router.post("/profile", response_model=UserProfileResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/me", response_model=UserProfileResponse, status_code=status.HTTP_201_CREATED)
 async def create_user_profile(
     profile_data: UserProfileCreate,
     session: Session = Depends(get_session),

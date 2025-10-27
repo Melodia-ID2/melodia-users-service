@@ -10,7 +10,7 @@ from tests.integral.fixtures.server import TEST_BASE_URL
 
 @pytest.mark.asyncio
 class TestPostUserProfile:
-    """Tests for the POST /profile endpoint."""
+    """Tests for the POST /me endpoint."""
 
     async def test_create_profile_full(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
         """Successfully create a user profile with full data."""
@@ -20,7 +20,7 @@ class TestPostUserProfile:
         user_profile = test_listener_full.profile
         payload = user_profile.model_dump(mode='json')
         payload.pop("id", None)
-        response = await async_client.post(f"{TEST_BASE_URL}/profile", headers=auth_headers(test_listener_full.id, 'listener'), json=payload)
+        response = await async_client.post(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_full.id, 'listener'), json=payload)
 
         assert response.status_code == status.HTTP_201_CREATED, \
             f"Expected status code 201, got {response.status_code}. Response: {response.text}"
@@ -53,7 +53,7 @@ class TestPostUserProfile:
         user_profile = test_listener_minimal.profile
         payload = user_profile.model_dump(mode='json')
         payload.pop("id", None)
-        response = await async_client.post(f"{TEST_BASE_URL}/profile", headers=auth_headers(test_listener_minimal.id, 'listener'), json=payload)
+        response = await async_client.post(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_minimal.id, 'listener'), json=payload)
 
         assert response.status_code == status.HTTP_201_CREATED, \
             f"Expected status code 201, got {response.status_code}. Response: {response.text}"
@@ -83,14 +83,14 @@ class TestPostUserProfile:
         user_profile = test_listener_full.profile
         payload = user_profile.model_dump(mode='json')
         payload.pop("id", None)
-        response = await async_client.post(f"{TEST_BASE_URL}/profile", headers=auth_headers(test_listener_full.id, 'listener'), json=payload)
+        response = await async_client.post(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_full.id, 'listener'), json=payload)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST, \
             f"Expected status code 400, got {response.status_code}. Response: {response.text}"
         
         assert response.json() == {
             "detail": "El perfil ya existe",
-            "instance": "/profile",
+            "instance": "/me",
             "status": status.HTTP_400_BAD_REQUEST,
             "title": "Bad request error",
             "type": "about:blank"
@@ -105,14 +105,14 @@ class TestPostUserProfile:
         payload = user_profile.model_dump(mode='json')
         payload.pop("id", None)
         payload["username"] = test_artist_full.profile.username
-        response = await async_client.post(f"{TEST_BASE_URL}/profile", headers=auth_headers(test_listener_full.id, 'listener'), json=payload)
+        response = await async_client.post(f"{TEST_BASE_URL}/me", headers=auth_headers(test_listener_full.id, 'listener'), json=payload)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST, \
             f"Expected status code 400, got {response.status_code}. Response: {response.text}"
         
         assert response.json() == {
             "detail": "El nombre de usuario ya está en uso",
-            "instance": "/profile",
+            "instance": "/me",
             "status": status.HTTP_400_BAD_REQUEST,
             "title": "Bad request error",
             "type": "about:blank"
