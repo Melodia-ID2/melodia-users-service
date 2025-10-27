@@ -42,23 +42,23 @@ def get_all_users(session: Session, page: int, page_size: int) -> GetAllUserResp
 
 
 def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
-    user = repo.get_account_by_id(session, user_id)
-    if not user:
+    user_account = repo.get_account_by_id(session, user_id)
+    if not user_account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
     user_profile = repo.get_profile_by_id(session, user_id)
     return UserDetailedInfo(
-        id=str(user.id),
+        id=str(user_account.id),
         username=None if not user_profile else user_profile.username,
         email=credentials_repo.get_primary_email_by_user_id(session, user_id) or "",
-        role=user.role,
-        status=user.status,
+        role=user_account.role,
+        status=user_account.status,
         full_name=None if not user_profile else user_profile.full_name,
         phone_number=None if not user_profile else user_profile.phone_number,
         address=None if not user_profile else user_profile.address,
-        country=user.country,
+        country=user_account.country,
         birthdate=None if not user_profile else user_profile.birthdate,
-        last_login=user.last_login,
-        created_at=user.created_at,
+        last_login=user_account.last_login,
+        created_at=user_account.created_at,
         profile_photo=None if not user_profile else user_profile.profile_photo,
     )
 
@@ -174,7 +174,6 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         "gender": profile.gender,
         "phone_number": profile.phone_number,
         "address": profile.address,
-        "country": user_account.country if user_account else None,
         "profile_photo": profile.profile_photo,
         "bio": profile.bio,
         "followers_count": profile.followers_count,
@@ -237,7 +236,6 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
         address=updated_profile.address,
         profile_photo=updated_profile.profile_photo,
         bio=updated_profile.bio,
-        country=user_account.country,
         followers_count=updated_profile.followers_count,
         following_count=updated_profile.following_count,
     )

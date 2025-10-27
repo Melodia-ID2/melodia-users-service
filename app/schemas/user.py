@@ -18,7 +18,6 @@ class _UserProfilePayload(ApiBaseModel):
     address: str | None = None
     profile_photo: str | None = None
     bio: str | None = None
-    country: Country | None = None
     followers_count: int = 0
     following_count: int = 0
 
@@ -58,7 +57,7 @@ class UserDetailedInfo(UserBasicInfo):
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
-    country: Optional[Country] = None
+    country: Country
     birthdate: date | None = None
     profile_photo: str | None = None
     last_login: Optional[datetime] = None

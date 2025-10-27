@@ -40,7 +40,6 @@ class TestUpdateCurrentUser:
             'address': update_data['address'],
             'profilePhoto': test_listener_full.profile.profile_photo,
             'bio': update_data['bio'],
-            'country': test_listener_full.account.country.value,
             'followersCount': test_listener_full.profile.followers_count,
             'followingCount': test_listener_full.profile.following_count,
         }
@@ -72,7 +71,6 @@ class TestUpdateCurrentUser:
             'address': test_artist_full.profile.address,
             'profilePhoto': test_artist_full.profile.profile_photo,
             'bio': test_artist_full.profile.bio,
-            'country': test_artist_full.account.country.value,
             'followersCount': test_artist_full.profile.followers_count,
             'followingCount': test_artist_full.profile.following_count,
         }
