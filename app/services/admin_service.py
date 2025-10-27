@@ -32,11 +32,11 @@ def get_all_users(session: Session, page: int, page_size: int) -> GetAllUserResp
 def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
     user_account = users_repo.get_account_by_id(session, user_id)
     if not user_account:
-        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
+        raise NotFoundError(f"Cuenta de usuario con id: {user_id} no encontrada")
 
     user_profile = users_repo.get_profile_by_id(session, user_id)
     if not user_profile:
-        raise NotFoundError("Perfil de usuario con id: {} no encontrado".format(user_id))
+        raise NotFoundError(f"Perfil de usuario con id: {user_id} no encontrado")
 
     return UserDetailedInfo(
         id=str(user_account.id),
@@ -58,7 +58,7 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
 async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateResponse:
     user = users_repo.get_account_by_id(session, user_id)
     if not user:
-        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
+        raise NotFoundError(f"Cuenta de usuario con id: {user_id} no encontrada")
     
     asyncio.create_task(search_service.delete_user(user.role, user_id))
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
