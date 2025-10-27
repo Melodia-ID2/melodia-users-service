@@ -50,25 +50,6 @@ def get_all_users(session: Session, page: int, page_size: int):
     return users, total
 
 
-def search_users(session: Session, query: str, role: str | None, page: int, page_size: int):
-    contains_boost = case((UserProfile.username.ilike(f"%{query}%"), 0.3), else_=0)
-    prefix_boost = case((UserProfile.username.ilike(f"{query}%"), 0.2), else_=0)
-
-    similarity_expr = func.similarity(UserProfile.username, query) + contains_boost + prefix_boost
-
-    stmt = (
-        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.profile_photo, similarity_expr.label("similarity_score"))
-        .join(UserAccount, UserProfile.id == UserAccount.id)
-        .order_by(similarity_expr.desc(), UserProfile.username.asc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
-
-    if role:
-        stmt = stmt.where(UserAccount.role == role)
-
-    return session.exec(stmt).all()
-
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
     return session.get(UserProfile, user_id)

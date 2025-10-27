@@ -78,13 +78,6 @@ class GetAllUserResponse(ApiBaseModel):
     total_pages: int
 
 
-class UserSearchItem(ApiBaseModel):
-    id: str
-    role: str
-    username: str | None = None
-    profile_photo: str | None = None
-    similarity_score: float
-
 
 class UserProfilePublic(ApiBaseModel):
     id: str
@@ -98,9 +91,6 @@ class UserProfilePublic(ApiBaseModel):
 class ListenerProfileView(UserProfilePublic):
     is_following: bool = False
 
-
-class SearchUsersResponse(ApiBaseModel):
-    users: list[UserSearchItem]
 
 
 class FollowItem(ApiBaseModel):

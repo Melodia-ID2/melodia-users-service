@@ -1,7 +1,7 @@
 from typing import Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from sqlmodel import Session
 
 import app.services.users_service as service
@@ -9,7 +9,7 @@ from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
-from app.schemas.user import ArtistProfileResponse, FollowsListResponse, ListenerProfileView, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
+from app.schemas.user import ArtistProfileResponse, FollowsListResponse, ListenerProfileView, UserProfileCreate, UserProfileResponse, UserProfileUpdate
 
 router = APIRouter(prefix="", tags=["Users (Listeners & Artists)"])
 
@@ -30,16 +30,6 @@ async def update_me(
 ):
     return await service.update_me(session, user_id, data)
 
-
-@router.get("/search", response_model=SearchUsersResponse, status_code=status.HTTP_200_OK)
-def search_users(
-    query: str = Query(..., min_length=1),
-    role: str | None = Query(None),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    session: Session = Depends(get_session),
-):
-    return service.search_users(session, query, role, page, page_size)
 
 
 @router.post("/profile", status_code=status.HTTP_201_CREATED)
