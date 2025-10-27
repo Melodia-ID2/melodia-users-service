@@ -45,21 +45,25 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
     user_account = repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
+
     user_profile = repo.get_profile_by_id(session, user_id)
+    if not user_profile:
+        raise NotFoundError("Perfil de usuario con id: {} no encontrado".format(user_id))
+
     return UserDetailedInfo(
         id=str(user_account.id),
-        username=None if not user_profile else user_profile.username,
+        username=user_profile.username,
         email=credentials_repo.get_primary_email_by_user_id(session, user_id) or "",
         role=user_account.role,
         status=user_account.status,
-        full_name=None if not user_profile else user_profile.full_name,
-        phone_number=None if not user_profile else user_profile.phone_number,
-        address=None if not user_profile else user_profile.address,
+        full_name=user_profile.full_name,
+        phone_number=user_profile.phone_number,
+        address=user_profile.address,
         country=user_account.country,
-        birthdate=None if not user_profile else user_profile.birthdate,
+        birthdate=user_profile.birthdate,
         last_login=user_account.last_login,
         created_at=user_account.created_at,
-        profile_photo=None if not user_profile else user_profile.profile_photo,
+        profile_photo=user_profile.profile_photo,
     )
 
 
@@ -67,10 +71,10 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     existing_profile = repo.get_profile_by_id(session, user_id)
     if existing_profile:
         raise ProfileAlreadyExistsError("El perfil ya existe")
-    if profile_data.username and profile_data.username.strip():
-        existing_username = repo.get_profile_by_username(session, profile_data.username)
-        if existing_username:
-            raise UsernameTakenError("El nombre de usuario ya está en uso")
+
+    existing_username = repo.get_profile_by_username(session, profile_data.username)
+    if existing_username:
+        raise UsernameTakenError("El nombre de usuario ya está en uso")
     
     new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     new_profile = repo.create_user_profile(session, new_profile)
@@ -79,7 +83,7 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     if user_account:
         search_data = UserSearchIndex(
             id=str(user_id),
-            name=new_profile.username or "",
+            name=new_profile.username,
             role=user_account.role,
             image_url=new_profile.profile_photo,
             is_blocked=False
