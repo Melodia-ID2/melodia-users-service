@@ -56,7 +56,7 @@ def get_public_profile(user_id: UUID, session: Session = Depends(get_session), c
     return service.get_public_profile(session, user_id, current_user_id)
 
 
-@router.post("/{user_id}/follow", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+@router.put("/me/following/{user_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK)
 def follow_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
     return service.follow_user(session, current_user_id, user_id)
 

@@ -415,18 +415,11 @@ def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> Messa
     if not followed:
         raise NotFoundError("Usuario a seguir no encontrado")
 
-    try:
-        is_now_following = repo.toggle_follow(session, current_user_id, user_id)
-        session.commit()
-
-        if is_now_following:
-            return MessageResponse(message=f"Ahora sigues a {followed.username}")
-        else:
-            return MessageResponse(message=f"Dejaste de seguir a {followed.username}")
-
-    except Exception as e:
-        session.rollback()
-        raise ValidationError(f"Error al seguir o dejar de seguir al usuario: {str(e)}")
+    is_now_following = repo.toggle_follow(session, current_user_id, user_id)
+    if is_now_following:
+        return MessageResponse(message=f"Ahora sigues a {followed.username}")
+    else:
+        return MessageResponse(message=f"Dejaste de seguir a {followed.username}")
 
 
 def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
