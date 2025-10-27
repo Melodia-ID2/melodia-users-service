@@ -48,17 +48,17 @@ class ArtistProfileResponse(UserProfileResponse):
 class UserBasicInfo(ApiBaseModel):
     id: str
     email: str
-    username: str | None = None
+    username: str
     role: str
     status: str
 
 
 class UserDetailedInfo(UserBasicInfo):
-    full_name: Optional[str] = None
+    full_name: str
     phone_number: Optional[str] = None
     address: Optional[str] = None
     country: Country
-    birthdate: date | None = None
+    birthdate: date
     profile_photo: str | None = None
     last_login: Optional[datetime] = None
     created_at: Optional[datetime] = None
