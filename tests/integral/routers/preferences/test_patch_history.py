@@ -24,6 +24,7 @@ def test_01_patch_history_preferences_to_enabled_returns_200():
     assert response.json() == {"message": "Historial activado exitosamente."}
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
+        assert user is not None
         assert user.preferences & 0b1 == 0b1
     app.dependency_overrides = {}
 
@@ -41,6 +42,7 @@ def test_02_patch_history_preferences_to_disabled_returns_200():
     assert response.json() == {"message": "Historial desactivado exitosamente."}
     with Session(sync_engine) as session:
         user = session.get(UserAccount, user_id)
+        assert user is not None
         assert user.preferences & 0b1 == 0b0
     app.dependency_overrides = {}
 
