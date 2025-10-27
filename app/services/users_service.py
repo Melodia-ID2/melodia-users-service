@@ -1,5 +1,5 @@
 import time
-from typing import List, Union
+from typing import Any, List, Union
 from uuid import UUID, uuid4
 
 import cloudinary.uploader
@@ -169,8 +169,10 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         raise NotFoundError("Perfil no encontrado")
 
     user_account = repo.get_account_by_id(session, user_id)
+    if not user_account:
+        raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: user profile exists only if account exists (foreign key)
 
-    response_data = {
+    response_data: dict[str, Any] = {
         "id": profile.id,
         "username": profile.username,
         "full_name": profile.full_name,
@@ -185,19 +187,12 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
     }
 
     if user_account.role == UserRole.ARTIST:
-        try:
-            photos = repo.get_artist_photos(session, user_id)
-            photos_sorted = sorted(photos, key=lambda p: p.position)
-            links = repo.get_artist_links(session, user_id)
-
-            artist_data = {**response_data, "photos": [photo.url for photo in photos_sorted], "links": [link.url for link in links]}
-            return ArtistProfileResponse(**artist_data)
-        except Exception as e:
-            print(f"Error obteniendo datos de artista: {e}")
-            artist_data = {**response_data, "photos": [], "links": []}
-            return ArtistProfileResponse(**artist_data)
+        photos = repo.get_artist_photos(session, user_id)
+        links = repo.get_artist_links(session, user_id)
+        response_data = response_data | {"photos": [photo.url for photo in photos], "links": [link.url for link in links]}
+        return ArtistProfileResponse(**response_data)
     else:
-        return UserProfileResponse(**response_data)  # Oyente
+        return UserProfileResponse(**response_data)
 
 
 
