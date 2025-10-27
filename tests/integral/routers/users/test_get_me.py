@@ -79,9 +79,9 @@ class TestGetCurrentUser:
         response_data = response.json()
         expected_data: dict[str, Any] = {
             'id': str(test_listener_minimal.id),
-            'username': None,
-            'fullName': None,
-            'birthdate': None,
+            'username': test_listener_minimal.profile.username,
+            'fullName': test_listener_minimal.profile.full_name,
+            'birthdate': test_listener_minimal.profile.birthdate.isoformat(),
             'gender': test_listener_minimal.profile.gender.value,
             'phoneNumber': None,
             'address': None,

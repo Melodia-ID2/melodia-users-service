@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 
 from fastapi.testclient import TestClient
@@ -25,8 +26,8 @@ def test_01_delete_user_returns_204_and_deletes_user():
     app.dependency_overrides[require_admin] = override_require_admin
     user_id = uuid.uuid4()
     with Session(sync_engine) as session:
-        user = UserAccount(id=user_id, email="test@example.com", password="password")
-        user_profile = UserProfile(id=user_id)
+        user = UserAccount(id=user_id)
+        user_profile = UserProfile(id=user_id, username="to_delete", full_name="To Delete", birthdate=datetime.fromisoformat("2000-01-01").date())
         refresh_token = RefreshToken(user_id=user_id, token="sometoken")
         session.add(user)
         session.commit()
@@ -51,8 +52,8 @@ def test_02_delete_user_with_many_tokens_deletes_all_tokens():
     app.dependency_overrides[require_admin] = override_require_admin
     user_id = uuid.uuid4()
     with Session(sync_engine) as session:
-        user = UserAccount(id=user_id, email="test@example.com", password="password")
-        user_profile = UserProfile(id=user_id)
+        user = UserAccount(id=user_id)
+        user_profile = UserProfile(id=user_id, username="to_delete2", full_name="To Delete 2", birthdate=datetime.fromisoformat("2000-01-01").date())
         refresh_token1 = RefreshToken(user_id=user_id, token="token1")
         refresh_token2 = RefreshToken(user_id=user_id, token="token2")
         session.add(user)
@@ -117,7 +118,7 @@ def test_06_when_delete_user_then_the_user_request_are_invalid():
     app.dependency_overrides[require_admin] = override_require_admin
     user_id = uuid.uuid4()
     with Session(sync_engine) as session:
-        user = UserAccount(id=user_id, email="test@example.com", password="password")
+        user = UserAccount(id=user_id)
         session.add(user)
         session.commit()
     client = TestClient(app)

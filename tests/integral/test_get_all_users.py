@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 
 import pytest
@@ -24,7 +25,7 @@ def insert_n_users(n: int) -> list[uuid.UUID]:
             user_ids.append(user_id)
             user = UserAccount(id=user_id)
             user_credentials = UserCredential(user_id=user_id, email=f"email{i}@example.com", password="password")
-            user_profile = UserProfile(id=user_id)
+            user_profile = UserProfile(id=user_id, username=f"username{i}", full_name=f"Full Name {i}", birthdate=datetime.fromisoformat("2000-01-01").date())
             session.add(user)
             session.add(user_credentials)
             session.add(user_profile)
@@ -41,7 +42,7 @@ def assert_n_users_in_response(response: Response, n: int, user_ids: list[uuid.U
         user = data["users"][i]
         assert user["id"] == str(user_ids[i])
         assert user["email"] == f"email{i + 1}@example.com"
-        assert user["username"] is None
+        assert user["username"] == f"username{i + 1}"
         assert user["role"] == "listener"
         assert user["status"] == "active"
 

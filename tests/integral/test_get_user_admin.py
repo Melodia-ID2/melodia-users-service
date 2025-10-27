@@ -21,10 +21,12 @@ def test_01_get_user_admin_returns_200_and_user_data():
     custom_created_at = datetime(2025, 1, 1, 12, 0, 0)
     custom_last_login = datetime(2025, 6, 1, 12, 0, 0)
     custom_birthdate = date(2000, 1, 1)
+    custom_username = "admin_test_user"
+    custom_full_name = "Admin Test User"
     with Session(sync_engine) as session:
         user = UserAccount(id=user_id, last_login=custom_last_login, created_at=custom_created_at)
         user_credential = UserCredential(user_id=user_id, email="test@example.com", password="password")
-        user_profile = UserProfile(id=user_id, birthdate=custom_birthdate)
+        user_profile = UserProfile(id=user_id, username=custom_username, full_name=custom_full_name, birthdate=custom_birthdate)
         session.add(user)
         session.add(user_credential)
         session.add(user_profile)
@@ -36,10 +38,10 @@ def test_01_get_user_admin_returns_200_and_user_data():
     assert response.json() == {
         "id": str(user_id),
         "email": "test@example.com",
-        "username": None,
+        "username": custom_username,
         "role": "listener",
         "status": "active",
-        "fullName": None,
+        "fullName": custom_full_name,
         "country": "AR",
         "birthdate": "2000-01-01",
         "phoneNumber": None,

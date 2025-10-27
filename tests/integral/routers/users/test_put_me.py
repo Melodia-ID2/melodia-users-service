@@ -84,7 +84,7 @@ class TestUpdateCurrentUser:
     
     async def test_update_profile_username_taken(self, async_client: AsyncClient, test_listener_full: TestUser, test_artist_full: TestArtist) -> None:
         """Fail to update profile when username is already taken."""
-        update_data: dict[str, str] = {
+        update_data: dict[str, Any] = {
             "username": test_artist_full.profile.username,
         }
 

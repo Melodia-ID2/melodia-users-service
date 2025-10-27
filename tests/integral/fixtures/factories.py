@@ -39,6 +39,9 @@ def test_listener_minimal_data():
     )
     profile = UserProfile(
         id=id,
+        username=f"user_{id.hex[:8]}",
+        full_name="Test User",
+        birthdate=datetime.fromisoformat("2000-01-01").date(),
         gender=UserGender.OTHER,
         following_count=0,
         followers_count=0,
