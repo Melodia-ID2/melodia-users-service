@@ -22,7 +22,7 @@ def get_me(
     return service.get_me(session, user_id)
 
 
-@router.put("/me", response_model=UserProfileResponse)
+@router.patch("/me", response_model=UserProfileResponse)
 async def update_me(
     data: UserProfileUpdate,
     session: Session = Depends(get_session),
@@ -41,7 +41,7 @@ async def create_user_profile(
     return await service.create_user_profile(session, user_id, profile_data)
 
 
-@router.post("/photo-profile", response_model=ProfilePhotoResponse)
+@router.patch("/me/profile-photo", response_model=ProfilePhotoResponse)
 async def update_profile_picture(
     file: UploadFile = File(...),
     current_user_id: UUID = Depends(get_current_user_id),
