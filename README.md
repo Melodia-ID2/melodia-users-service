@@ -1,5 +1,7 @@
 # Melodia - users
 
+[![codecov](https://codecov.io/gh/Melodia-ID2/melodia-users-service/graph/badge.svg?token=F0QLFB8HQ2)](https://codecov.io/gh/Melodia-ID2/melodia-users-service)
+
 ## Ambiente de desarrollo
 
 primero se requiere levantar la infraestructura, luego de ese paso:

@@ -2,21 +2,16 @@ name: Run Integral Tests
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
   pull_request:
-    branches:
-      - main
-      - develop
 
 jobs:
   integral-tests:
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, ci ]
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -35,10 +30,26 @@ jobs:
         docker compose -f compose.test.yml up \
           --abort-on-container-exit \
           --exit-code-from users-integral-tests \
+          --force-recreate --remove-orphans \
           users-test-db users-integral-tests
       env:
         DATABASE_URL: postgresql+asyncpg://postgres:postgres@users-test-db:5432/melodia_test
-    
+
+    - name: Copy coverage report from container
+      if: always()
+      run: |
+        mkdir -p coverage_reports
+        docker cp users-integral-tests:/app/coverage_reports/coverage.xml coverage_reports/coverage.xml || echo "No coverage file found"
+
+    - name: Upload coverage to Codecov
+      if: always()
+      uses: codecov/codecov-action@v5
+      with:
+        files: coverage_reports/coverage.xml
+        flags: integral-tests
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+
     - name: Upload test logs on failure
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4 
