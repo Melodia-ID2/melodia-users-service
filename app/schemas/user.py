@@ -38,6 +38,7 @@ class UserProfileCreate(_UserProfilePayload):
 
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
+    preferences: int = 1
 
 
 class ArtistProfileResponse(UserProfileResponse):

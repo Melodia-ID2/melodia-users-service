@@ -47,6 +47,7 @@ class TestPatchUser:
             'bio': update_data['bio'],
             'followersCount': test_listener_full.profile.followers_count,
             'followingCount': test_listener_full.profile.following_count,
+            'preferences': test_listener_full.account.preferences
         }
 
         for field, expected_value in expected_data.items():
@@ -78,6 +79,7 @@ class TestPatchUser:
             'bio': test_artist_full.profile.bio,
             'followersCount': test_artist_full.profile.followers_count,
             'followingCount': test_artist_full.profile.following_count,
+            'preferences': test_artist_full.account.preferences
         }
 
         for field, expected_value in expected_data.items():
