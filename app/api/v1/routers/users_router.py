@@ -9,7 +9,7 @@ from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
-from app.schemas.user import ArtistProfileResponse, FollowsListResponse, ListenerProfileView, UserProfileCreate, UserProfileResponse, UserProfileUpdate
+from app.schemas.user import ArtistProfileResponse, FollowsListResponse, UserProfileCreate, UserProfilePublic, UserProfileResponse, UserProfileUpdate
 
 router = APIRouter(prefix="", tags=["Users (Listeners & Artists)"])
 
@@ -51,9 +51,9 @@ async def update_profile_picture(
     return await service.update_profile_picture(session, current_user_id, file_bytes)
 
 
-@router.get("/{user_id}/profile", response_model=ListenerProfileView)
-def visualize_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return service.visualize_user(session, user_id, current_user_id)
+@router.get("/{user_id}", response_model=UserProfilePublic)
+def get_public_profile(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return service.get_public_profile(session, user_id, current_user_id)
 
 
 @router.post("/{user_id}/follow", response_model=MessageResponse, status_code=status.HTTP_200_OK)

@@ -34,9 +34,9 @@ def create_app() -> FastAPI:
 
     app.add_middleware(Middleware)
     app.include_router(system_router)
-    app.include_router(users_router)
-    app.include_router(artist_router)
     app.include_router(admin_router)
+    app.include_router(artist_router)
+    app.include_router(users_router)
 
     return app
 

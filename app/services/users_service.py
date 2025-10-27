@@ -12,14 +12,14 @@ from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlready
 from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.repositories import credentials_repository as credentials_repo
-from app.schemas.artist import ArtistProfileView, SocialLinksUpdateRequest
+from app.schemas.artist import SocialLinksUpdateRequest
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
     FollowsListResponse,
     GetAllUserResponse,
-    ListenerProfileView,
+    UserProfilePublic,
     UserDetailedInfo,
     UserProfileCreate,
     UserProfileResponse,
@@ -243,48 +243,32 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
     )
 
 
-def get_artist(session: Session, artist_id: UUID, current_user_id: UUID) -> ArtistProfileView:
-    account = repo.get_account_by_id(session, artist_id)
-    if not account or account.role != UserRole.ARTIST:
-        raise NotFoundError("Artista no encontrado")
-
-    profile = repo.get_profile_by_id(session, artist_id)
-    if not profile:
-        raise NotFoundError("Perfil de artista no encontrado")
-
-    photos = repo.get_artist_photos(session, artist_id)
-    photos_sorted = sorted(photos, key=lambda p: p.position)
-    links = repo.get_artist_links(session, artist_id)
-
-    return ArtistProfileView(
-        id=str(artist_id),
-        username=profile.username,
-        profile_photo=profile.profile_photo,
-        bio=profile.bio,
-        followers_count=profile.followers_count,
-        following_count=profile.following_count,
-        photos=[photo.url for photo in photos_sorted],
-        links=[link.url for link in links],
-        is_following=repo.is_following(session, current_user_id, artist_id),
-    )
-
-
-def visualize_user(session: Session, user_id: UUID, current_user_id: UUID) -> ListenerProfileView:
+def get_public_profile(session: Session, user_id: UUID, current_user_id: UUID) -> UserProfilePublic:
     account = repo.get_account_by_id(session, user_id)
-    if not account or account.role != UserRole.LISTENER:
-        raise NotFoundError("Usuario oyente no encontrado")
+    if not account:
+        raise NotFoundError("Cuenta de usuario no encontrada")
+
     profile = repo.get_profile_by_id(session, user_id)
     if not profile:
-        raise NotFoundError("Usuario no encontrado")
-    is_following = repo.is_following(session, current_user_id, user_id)
-    return ListenerProfileView(
+        raise NotFoundError("Perfil de usuario no encontrado")
+
+    photos_list: list[str] = []
+    links_list: list[str] = []
+    if account.role == UserRole.ARTIST:
+        photos_list = [photo.url for photo in repo.get_artist_photos(session, user_id)]
+        links_list = [link.url for link in repo.get_artist_links(session, user_id)]
+
+    return UserProfilePublic(
         id=str(user_id),
+        role=account.role,
         username=profile.username,
         profile_photo=profile.profile_photo,
         bio=profile.bio,
         followers_count=profile.followers_count,
         following_count=profile.following_count,
-        is_following=is_following,
+        is_following=repo.is_following(session, current_user_id, user_id),
+        photos=photos_list,
+        links=links_list,
     )
 
 

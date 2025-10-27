@@ -80,16 +80,15 @@ class GetAllUserResponse(ApiBaseModel):
 
 class UserProfilePublic(ApiBaseModel):
     id: str
+    role: str
     username: str | None
     profile_photo: str | None
     bio: str | None
     followers_count: int
     following_count: int
-
-
-class ListenerProfileView(UserProfilePublic):
     is_following: bool = False
-
+    photos: list[str] = []
+    links: list[str] = []
 
 
 class FollowItem(ApiBaseModel):
