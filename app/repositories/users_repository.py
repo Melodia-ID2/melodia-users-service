@@ -1,11 +1,10 @@
-from typing import List
 from uuid import UUID
 
 from sqlalchemy.orm import aliased
-from sqlmodel import Session, and_, delete, func, select, update
+from sqlmodel import Session, and_, func, select, update
 
 from app.models.useraccount import UserAccount
-from app.models.userprofile import ArtistPhoto, SocialLink, UserFollows, UserProfile
+from app.models.userprofile import UserFollows, UserProfile
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
@@ -67,83 +66,6 @@ def update_user_profile(session: Session, user_id: UUID, data: dict):
     session.commit()
     session.refresh(profile)
     return profile
-
-
-def search_profiles(session: Session, query: str, role: str | None, page: int, page_size: int):
-    stmt = select(UserProfile).outerjoin(UserAccount, UserAccount.id == UserProfile.id)
-    if query:
-        q = f"%{query}%"
-        stmt = stmt.where((UserProfile.full_name.ilike(q)) | (UserProfile.username.ilike(q)))
-    if role:
-        stmt = stmt.where(UserAccount.role == role)
-    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
-    results = session.exec(stmt).all()
-    return results
-
-
-def get_artist_photos(session: Session, artist_id: UUID):
-    return session.exec(select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id).order_by(ArtistPhoto.position)).all()
-
-
-def get_artist_links(session: Session, artist_id: UUID):
-    return session.exec(select(SocialLink).where(SocialLink.artist_id == artist_id)).all()
-
-
-def update_artist_social_links(session: Session, artist_id: UUID, urls: List[str]):
-    try:
-        stmt = delete(SocialLink).where(SocialLink.artist_id == artist_id)
-        session.exec(stmt)
-
-        for url in urls:
-            link = SocialLink(artist_id=artist_id, url=url)
-            session.add(link)
-
-        session.commit()
-
-    except Exception as e:
-        session.rollback()
-        raise e
-
-
-def delete_artist_photos(session: Session, artist_id: UUID):
-    session.exec(select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id)).delete(synchronize_session=False)
-    session.commit()
-
-
-def add_artist_photo(session: Session, artist_id: UUID, url: str, position: int):
-    """Agregar una foto de artista"""
-    photo = ArtistPhoto(artist_id=artist_id, url=url, position=position)
-    session.add(photo)
-    session.commit()
-    session.refresh(photo)
-    return photo
-
-
-def get_artist_photo_by_url(session: Session, artist_id: UUID, photo_url: str):
-    stmt = select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id, ArtistPhoto.url == photo_url)
-    return session.exec(stmt).first()
-
-
-def delete_artist_photo(session: Session, artist_id: UUID, photo_url: str):
-    stmt = delete(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id, ArtistPhoto.url == photo_url)
-    session.exec(stmt)
-    session.commit()
-
-
-def update_photo_position(session: Session, photo_id: UUID, new_position: int):
-    stmt = select(ArtistPhoto).where(ArtistPhoto.id == photo_id)
-    photo = session.exec(stmt).first()
-    if photo:
-        photo.position = new_position
-        session.commit()
-
-
-def update_photo_position_by_url(session: Session, artist_id: UUID, photo_url: str, new_position: int):
-    stmt = select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id, ArtistPhoto.url == photo_url)
-    photo = session.exec(stmt).first()
-    if photo:
-        photo.position = new_position
-        session.commit()
 
 
 def is_following(session: Session, follower_id: UUID, followed_id: UUID) -> bool:

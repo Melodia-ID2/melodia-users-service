@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlmodel import Session
 
-import app.services.users_service as service
+import app.services.artist_service as service
 from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.artist import ArtistPhotosUpdateRequest, DeletePhotoRequest, SocialLinksUpdateRequest
