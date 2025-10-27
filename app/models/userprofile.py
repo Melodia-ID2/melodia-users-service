@@ -37,7 +37,7 @@ class RefreshToken(SQLModel, table=True):
 
 class ArtistPhoto(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    artist_id: UUID = Field(foreign_key="useraccount.id", nullable=False, index=True)
+    artist_id: UUID = Field(foreign_key="useraccount.id", ondelete="CASCADE", nullable=False, index=True)
     url: str = Field(nullable=False)
     position: int = Field(nullable=False)
     uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -45,7 +45,7 @@ class ArtistPhoto(SQLModel, table=True):
 
 class SocialLink(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    artist_id: UUID = Field(foreign_key="useraccount.id", nullable=False, index=True)
+    artist_id: UUID = Field(foreign_key="useraccount.id", ondelete="CASCADE", nullable=False, index=True)
     url: str = Field(nullable=False)
 
 
