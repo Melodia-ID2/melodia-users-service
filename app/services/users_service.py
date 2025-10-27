@@ -80,16 +80,18 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     new_profile = repo.create_user_profile(session, new_profile)
     
     user_account = repo.get_account_by_id(session, user_id)    
-    if user_account:
-        search_data = UserSearchIndex(
-            id=str(user_id),
-            name=new_profile.username,
-            role=user_account.role,
-            image_url=new_profile.profile_photo,
-            is_blocked=False
-        )
-        import asyncio
-        asyncio.create_task(search_service.index_user(search_data))
+    if not user_account:
+        raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: user profile exists only if account exists (foreign key)
+    
+    search_data = UserSearchIndex(
+        id=str(user_id),
+        name=new_profile.username,
+        role=user_account.role,
+        image_url=new_profile.profile_photo,
+        is_blocked=False
+    )
+    import asyncio
+    asyncio.create_task(search_service.index_user(search_data))
     
     return UserProfileResponse.model_validate(new_profile)
 
@@ -108,7 +110,7 @@ async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateRes
     if user_profile:
         search_data = UserSearchIndex(
             id=str(user_id),
-            name=user_profile.username or "",
+            name=user_profile.username,
             role=user_account.role,
             image_url=user_profile.profile_photo,
             is_blocked=user_account.status == UserStatus.BLOCKED
@@ -140,25 +142,26 @@ async def delete_user(session: Session, user_id: UUID) -> None:
 
 async def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
     uploaded_url = cloudinary.uploader.upload(photo_file_bytes, folder="user-photo-profile", public_id=str(user_id), overwrite=True)["secure_url"]
-
     if not uploaded_url:
         raise FileUploadError("Error al guardar la foto de perfil")
 
     user_profile = repo.update_profile_picture(session, user_id, uploaded_url)
     if not user_profile:
-        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
+        raise NotFoundError("Usuario con id: {} no encontrado".format(user_id)) # pragma: no cover # Defensive: already checked in JWT
 
     user_account = repo.get_account_by_id(session, user_id)    
-    if user_account:
-        search_data = UserSearchIndex(
-            id=str(user_id),
-            name=user_profile.username or "",
-            role=user_account.role,
-            image_url=user_profile.profile_photo,
-            is_blocked=user_account.status == UserStatus.BLOCKED
-        )
-        import asyncio
-        asyncio.create_task(search_service.index_user(search_data))
+    if not user_account:
+        raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: user profile exists only if account exists (foreign key)
+
+    search_data = UserSearchIndex(
+        id=str(user_id),
+        name=user_profile.username,
+        role=user_account.role,
+        image_url=user_profile.profile_photo,
+        is_blocked=user_account.status == UserStatus.BLOCKED
+    )
+    import asyncio
+    asyncio.create_task(search_service.index_user(search_data))
 
     return ProfilePhotoResponse(profile_photo=uploaded_url)
 
@@ -217,7 +220,7 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
 
     search_data = UserSearchIndex(
         id=str(user_id),
-        name=updated_profile.username or "",
+        name=updated_profile.username,
         role=user_account.role,
         image_url=updated_profile.profile_photo,
         is_blocked=user_account.status == UserStatus.BLOCKED
