@@ -15,9 +15,9 @@ class UserGender(str, Enum):
 
 class UserProfile(SQLModel, table=True):
     id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True, ondelete="CASCADE")
-    username: str | None = Field(index=True, nullable=True, default=None)
-    full_name: str | None = Field(default=None)
-    birthdate: date | None = Field(default=None)
+    username: str = Field(index=True, nullable=False)
+    full_name: str = Field(nullable=False)
+    birthdate: date = Field(nullable=False)
     gender: UserGender = Field(default=UserGender.PREFER_NOT_TO_SAY, nullable=False)
     phone_number: str | None = Field(default=None)
     address: str | None = Field(default=None)

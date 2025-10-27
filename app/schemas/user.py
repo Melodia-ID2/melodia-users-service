@@ -10,9 +10,9 @@ from app.schemas.base import ApiBaseModel
 
 
 class _UserProfilePayload(ApiBaseModel):
-    username: Optional[str] = None
-    full_name: str | None = None
-    birthdate: date | None = None
+    username: str
+    full_name: str
+    birthdate: date
     gender: UserGender
     phone_number: str | None = None
     address: str | None = None

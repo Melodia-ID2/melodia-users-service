@@ -209,7 +209,7 @@ def search_users(session: Session, query: str, role: str | None, page: int, page
 async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     profile = repo.get_user_profile_by_user_id(session, user_id)
     if not profile:
-        raise NotFoundError("Perfil no encontrado")
+        raise NotFoundError("Perfil no encontrado") # pragma: no cover # Defensive: already checked in JWT
 
     if data.username and data.username.strip() and data.username != profile.username:
         existing_username = repo.get_profile_by_username(session, data.username)
@@ -219,11 +219,11 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
     update_data = data.model_dump(exclude_unset=True)
     updated_profile = repo.update_user_profile(session, user_id, update_data)
     if not updated_profile:
-        raise NotFoundError("Perfil no encontrado")
+        raise NotFoundError("Perfil no encontrado") # pragma: no cover # Defensive: already checked above
 
     user_account = repo.get_account_by_id(session, user_id)
     if not user_account:
-        raise NotFoundError("Cuenta de usuario no encontrada")
+        raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: user profile exists only if account exists (foreign key)
 
     search_data = UserSearchIndex(
         id=str(user_id),
