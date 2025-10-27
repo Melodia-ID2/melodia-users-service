@@ -6,7 +6,6 @@ from app.models.userprofile import UserProfile
 
 
 def get_all_users(session: Session, page: int, page_size: int):
-    # Subquery: get one credential per user, preferring local provider
     subq = (
         select(
             UserCredential.email,
@@ -25,7 +24,6 @@ def get_all_users(session: Session, page: int, page_size: int):
 
     filtered_subq = select(subq).where(subq.c.rn == 1).subquery()
 
-    # Main query
     stmt = (
         select(
             UserAccount.id,
