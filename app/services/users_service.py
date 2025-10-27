@@ -187,6 +187,7 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
         "bio": profile.bio,
         "followers_count": profile.followers_count,
         "following_count": profile.following_count,
+        "preferences": user_account.preferences,
     }
 
     if user_account.role == UserRole.ARTIST:
@@ -240,6 +241,7 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
         bio=updated_profile.bio,
         followers_count=updated_profile.followers_count,
         following_count=updated_profile.following_count,
+        preferences=user_account.preferences,
     )
 
 
