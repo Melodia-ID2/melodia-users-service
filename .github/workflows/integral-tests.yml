@@ -30,6 +30,7 @@ jobs:
         docker compose -f compose.test.yml up \
           --abort-on-container-exit \
           --exit-code-from users-integral-tests \
+          --force-recreate --remove-orphans \
           users-test-db users-integral-tests
       env:
         DATABASE_URL: postgresql+asyncpg://postgres:postgres@users-test-db:5432/melodia_test

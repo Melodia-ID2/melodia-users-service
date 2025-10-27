@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 from sqlmodel import Session
 
-import app.services.users_service as service
+import app.services.admin_service as service
 from app.core.database import get_session
 from app.core.security import require_admin
 from app.errors.error_responses import error_responses

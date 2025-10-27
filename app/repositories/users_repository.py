@@ -2,53 +2,10 @@ from typing import List
 from uuid import UUID
 
 from sqlalchemy.orm import aliased
-from sqlmodel import Session, and_, case, delete, func, select, update
+from sqlmodel import Session, and_, delete, func, select, update
 
-from app.models.useraccount import AccountProvider, UserAccount
-from app.models.usercredential import UserCredential
+from app.models.useraccount import UserAccount
 from app.models.userprofile import ArtistPhoto, SocialLink, UserFollows, UserProfile
-
-
-def get_all_users(session: Session, page: int, page_size: int):
-    # Subquery: get one credential per user, preferring local provider
-    subq = (
-        select(
-            UserCredential.email,
-            UserCredential.provider,
-            UserCredential.user_id,
-            case((UserCredential.provider == AccountProvider.LOCAL, 1), else_=0).label("is_local"),
-            func.row_number()
-            .over(
-                partition_by=UserCredential.user_id,
-                order_by=case((UserCredential.provider == AccountProvider.LOCAL, 1), else_=0).desc(),
-            )
-            .label("rn"),
-        )
-        .subquery()
-    )
-
-    filtered_subq = select(subq).where(subq.c.rn == 1).subquery()
-
-    # Main query
-    stmt = (
-        select(
-            UserAccount.id,
-            UserProfile.username,
-            filtered_subq.c.email,
-            UserAccount.role,
-            UserAccount.status,
-        )
-        .outerjoin(UserProfile, UserAccount.id == UserProfile.id)
-        .outerjoin(filtered_subq, UserAccount.id == filtered_subq.c.user_id)
-        .order_by(UserAccount.created_at)
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
-
-    users = session.exec(stmt).all()
-    total = session.scalar(select(func.count()).select_from(UserAccount))
-    return users, total
-
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
@@ -81,12 +38,6 @@ def create_user_account(session: Session, user: UserAccount) -> UserAccount:
     session.commit()
     session.refresh(user)
     return user
-
-
-def delete_user_account(session: Session, account: UserAccount) -> None:
-    session.delete(account)
-    session.commit()
-    return None
 
 
 def update_profile_picture(session: Session, user_id: UUID, photo_url: str) -> UserProfile | None:
