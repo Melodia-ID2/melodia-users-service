@@ -30,3 +30,4 @@ class UserAccount(SQLModel, table=True):
     status: UserStatus = Field(default=UserStatus.ACTIVE, nullable=False)
     country: Country = Field(default=Country.AR, nullable=False)
     is_profile_completed: bool = Field(default=False)
+    preferences: int = Field(default=1, nullable=False)  # Bitmask para user preferences, Primer bit de History

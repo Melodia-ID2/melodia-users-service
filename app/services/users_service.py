@@ -430,3 +430,10 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> Fol
 def get_following(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
     following = repo.get_following(session, user_id, current_user_id)
     return FollowsListResponse(follows=following)
+
+def change_history_preferences(session: Session, user_id: UUID) -> MessageResponse:
+    account = repo.change_history_preferences(session, user_id)
+    if not account:
+        raise NotFoundError("Cuenta de usuario no encontrada")
+    status = "activado" if account.preferences & 0b1 else "desactivado"
+    return MessageResponse(message=f"Historial {status} exitosamente.")
