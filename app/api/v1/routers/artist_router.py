@@ -3,17 +3,12 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlmodel import Session
 
-import app.services.users_service as service
+import app.services.artist_service as service
 from app.core.database import get_session
 from app.core.security import get_current_user_id
-from app.schemas.artist import ArtistPhotosUpdateRequest, ArtistProfileView, DeletePhotoRequest, SocialLinksUpdateRequest
+from app.schemas.artist import ArtistPhotosUpdateRequest, DeletePhotoRequest, SocialLinksUpdateRequest
 
 router = APIRouter(prefix="/artist", tags=["Artists"])
-
-
-@router.get("/{artist_id}", response_model=ArtistProfileView)
-def get_artist(artist_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return service.get_artist(session, artist_id, current_user_id)
 
 
 @router.put("/social-links", status_code=204)

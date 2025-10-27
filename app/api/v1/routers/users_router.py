@@ -1,7 +1,7 @@
 from typing import Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from sqlmodel import Session
 
 import app.services.users_service as service
@@ -9,7 +9,7 @@ from app.core.database import get_session
 from app.core.security import get_current_user_id
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
-from app.schemas.user import ArtistProfileResponse, FollowsListResponse, ListenerProfileView, SearchUsersResponse, UserProfileCreate, UserProfileResponse, UserProfileUpdate
+from app.schemas.user import ArtistProfileResponse, FollowsListResponse, UserProfileCreate, UserProfilePublic, UserProfileResponse, UserProfileUpdate
 
 router = APIRouter(prefix="", tags=["Users (Listeners & Artists)"])
 
@@ -22,7 +22,7 @@ def get_me(
     return service.get_me(session, user_id)
 
 
-@router.put("/me", response_model=UserProfileResponse)
+@router.patch("/me", response_model=UserProfileResponse)
 async def update_me(
     data: UserProfileUpdate,
     session: Session = Depends(get_session),
@@ -31,18 +31,8 @@ async def update_me(
     return await service.update_me(session, user_id, data)
 
 
-@router.get("/search", response_model=SearchUsersResponse, status_code=status.HTTP_200_OK)
-def search_users(
-    query: str = Query(..., min_length=1),
-    role: str | None = Query(None),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    session: Session = Depends(get_session),
-):
-    return service.search_users(session, query, role, page, page_size)
 
-
-@router.post("/profile", status_code=status.HTTP_201_CREATED)
+@router.post("/me", response_model=UserProfileResponse, status_code=status.HTTP_201_CREATED)
 async def create_user_profile(
     profile_data: UserProfileCreate,
     session: Session = Depends(get_session),
@@ -51,7 +41,7 @@ async def create_user_profile(
     return await service.create_user_profile(session, user_id, profile_data)
 
 
-@router.post("/photo-profile", response_model=ProfilePhotoResponse)
+@router.patch("/me/profile-photo", response_model=ProfilePhotoResponse)
 async def update_profile_picture(
     file: UploadFile = File(...),
     current_user_id: UUID = Depends(get_current_user_id),
@@ -61,12 +51,12 @@ async def update_profile_picture(
     return await service.update_profile_picture(session, current_user_id, file_bytes)
 
 
-@router.get("/{user_id}/profile", response_model=ListenerProfileView)
-def visualize_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return service.visualize_user(session, user_id, current_user_id)
+@router.get("/{user_id}", response_model=UserProfilePublic)
+def get_public_profile(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
+    return service.get_public_profile(session, user_id, current_user_id)
 
 
-@router.post("/{user_id}/follow", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+@router.put("/me/following/{user_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK)
 def follow_user(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
     return service.follow_user(session, current_user_id, user_id)
 
