@@ -20,14 +20,12 @@ from app.schemas.user import (
     FollowsListResponse,
     GetAllUserResponse,
     ListenerProfileView,
-    SearchUsersResponse,
     UserDetailedInfo,
     UserProfileCreate,
     UserProfileResponse,
     UserProfileUpdate,
     UserRoleUpdateResponse,
     UserSearchIndex,
-    UserSearchItem,
 )
 from app.services.search_service import search_service
 
@@ -198,12 +196,6 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
     else:
         return UserProfileResponse(**response_data)  # Oyente
 
-
-def search_users(session: Session, query: str, role: str | None, page: int, page_size: int) -> SearchUsersResponse:
-    users = repo.search_users(session, query, role, page, page_size)
-    return SearchUsersResponse(
-        users=[UserSearchItem(id=str(u.id), role=u.role, username=u.username, profile_photo=u.profile_photo, similarity_score=u.similarity_score) for u in users],
-    )
 
 
 async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
