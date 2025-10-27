@@ -31,6 +31,7 @@ class TestGetCurrentUser:
             'bio': test_listener_full.profile.bio,
             'followersCount': test_listener_full.profile.followers_count,
             'followingCount': test_listener_full.profile.following_count,
+            'preferences': test_listener_full.account.preferences
         }
         
         for field, expected_value in expected_data.items():
@@ -60,6 +61,7 @@ class TestGetCurrentUser:
             'followingCount': test_artist_full.profile.following_count,
             'photos': [photo.url for photo in sorted(test_artist_full.photos, key=lambda p: p.position)],
             'links': [link.url for link in test_artist_full.links],
+            'preferences': test_artist_full.account.preferences
         }
         
         for field, expected_value in expected_data.items():
@@ -87,6 +89,7 @@ class TestGetCurrentUser:
             'bio': None,
             'followersCount': 0,
             'followingCount': 0,
+            'preferences': test_listener_minimal.account.preferences
         }
         
         for field, expected_value in expected_data.items():

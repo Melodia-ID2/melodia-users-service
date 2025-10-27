@@ -38,6 +38,7 @@ class TestPostUserProfile:
             'bio': user_profile.bio,
             'followersCount': user_profile.followers_count,
             'followingCount': user_profile.following_count,
+            'preferences': test_listener_full.account.preferences
         }
 
         for field, expected_value in expected_data.items():
@@ -71,6 +72,7 @@ class TestPostUserProfile:
             'bio': None,
             'followersCount': 0,
             'followingCount': 0,
+            'preferences': test_listener_minimal.account.preferences    
         }
 
         for field, expected_value in expected_data.items():
