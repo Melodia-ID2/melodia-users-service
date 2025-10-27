@@ -222,3 +222,14 @@ def get_following(session: Session, user_id: UUID, current_user_id: UUID):
     )
 
     return session.exec(stmt).all()
+
+def change_history_preferences(session: Session, user_id: UUID):
+    account = session.get(UserAccount, user_id)
+    if not account:
+        return None
+
+    account.preferences ^= 0b1
+    session.commit()
+    session.refresh(account)
+
+    return account
