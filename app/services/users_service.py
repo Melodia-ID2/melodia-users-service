@@ -6,10 +6,12 @@ from sqlmodel import Session
 
 import app.repositories.artist_repository as artists_repo
 import app.repositories.users_repository as users_repo
+from app.constants.notification_flags import NotificationPreferences
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.schemas.message import MessageResponse
+from app.schemas.notifications import NotificationPreferencesResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -216,3 +218,12 @@ def change_history_preferences(session: Session, user_id: UUID) -> MessageRespon
         raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: already checked in JWT
     status = "activado" if account.preferences & 0b1 else "desactivado"
     return MessageResponse(message=f"Historial {status} exitosamente.")
+
+
+def get_notification_preferences(session: Session, user_id: UUID) -> NotificationPreferencesResponse:
+    prefs_value = users_repo.get_user_preferences(session, user_id)
+    if prefs_value is None:
+        raise NotFoundError("Cuenta de usuario no encontrada")  # pragma: no cover # Defensive: already checked in JWT
+
+    prefs = NotificationPreferences(prefs_value)
+    return NotificationPreferencesResponse(**prefs.as_dict())

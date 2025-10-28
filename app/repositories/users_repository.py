@@ -155,3 +155,8 @@ def change_history_preferences(session: Session, user_id: UUID):
     session.refresh(account)
 
     return account
+
+
+def get_user_preferences(session: Session, user_id: UUID) -> int | None:
+    stmt = select(UserAccount.preferences).where(UserAccount.id == user_id)
+    return session.exec(stmt).one_or_none()
