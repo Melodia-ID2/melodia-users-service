@@ -11,7 +11,7 @@ from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlready
 from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.schemas.message import MessageResponse
-from app.schemas.notifications import NotificationPreferencesResponse
+from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -227,3 +227,13 @@ def get_notification_preferences(session: Session, user_id: UUID) -> Notificatio
 
     prefs = NotificationPreferences(prefs_value)
     return NotificationPreferencesResponse(**prefs.as_dict())
+
+
+def update_notification_preferences(session: Session, user_id: UUID, data: NotificationPreferencesUpdate) -> NotificationPreferencesResponse:
+    new_prefs_value = NotificationPreferences.from_dict(data.model_dump())
+    account = users_repo.update_notification_preferences(session, user_id, new_prefs_value)
+    if not account:
+        raise NotFoundError("Cuenta de usuario no encontrada")  # pragma: no cover
+
+    updated_prefs = NotificationPreferences(account.preferences)
+    return NotificationPreferencesResponse(**updated_prefs.as_dict())

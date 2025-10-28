@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import aliased
 from sqlmodel import Session, and_, func, select, update
 
+from app.constants.notification_flags import NOTIFICATION_BITS_MASK
 from app.models.useraccount import UserAccount
 from app.models.userprofile import UserFollows, UserProfile
 
@@ -160,3 +161,17 @@ def change_history_preferences(session: Session, user_id: UUID):
 def get_user_preferences(session: Session, user_id: UUID) -> int | None:
     stmt = select(UserAccount.preferences).where(UserAccount.id == user_id)
     return session.exec(stmt).one_or_none()
+
+
+def update_notification_preferences(session: Session, user_id: UUID, new_preferences: int) -> UserAccount | None:
+    account = session.get(UserAccount, user_id)
+    if not account:
+        return None
+
+    account.preferences = (account.preferences & ~NOTIFICATION_BITS_MASK) | (new_preferences & NOTIFICATION_BITS_MASK)
+
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+
+    return account
