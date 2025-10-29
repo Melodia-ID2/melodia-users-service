@@ -130,3 +130,33 @@ def test_artist_full_data():
     ]
     credentials = UserCredential(user_id=id, email=f"test_{id.hex}@example.com", password="password")
     return TestArtist(id=id, account=account, profile=profile, credentials=credentials, photos=photos, links=links)
+
+
+@pytest.fixture
+def test_artist_minimal_data():
+    """Test data to create a minimal artist (for testing multiple artists)."""
+    id = uuid.uuid4()
+    account = UserAccount(
+        id=id,
+        created_at=datetime.fromisoformat("2025-01-01T00:00:00"),
+        last_login=datetime.fromisoformat("2025-01-01T00:00:00"),
+        role=UserRole.ARTIST,
+        status=UserStatus.ACTIVE,
+        country=Country.AR,
+        is_profile_completed=True,
+    )
+    profile = UserProfile(
+        id=id,
+        username=f"artist_{id.hex[:8]}",
+        full_name="Test Artist",
+        birthdate=datetime.fromisoformat("1995-01-01").date(),
+        gender=UserGender.OTHER,
+        following_count=5,
+        followers_count=5,
+    )
+    credentials = UserCredential(
+        user_id=id,
+        email=f"artist_{id.hex}@example.com",
+        password="password",
+    )
+    return TestUser(id=id, account=account, profile=profile, credentials=credentials)
