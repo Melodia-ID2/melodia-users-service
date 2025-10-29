@@ -12,7 +12,7 @@ from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.schemas.message import MessageResponse
 from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
-from app.schemas.muted_artists import MutedArtistsListResponse
+from app.schemas.muted_artists import MuteArtistRequest, MuteArtistResponse, MutedArtistsListResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -257,3 +257,8 @@ def update_notification_preferences(session: Session, user_id: UUID, data: Notif
 def list_muted_artists(session: Session, user_id: UUID) -> MutedArtistsListResponse:
     artists = muted_repo.list_muted_artists(session, user_id)
     return MutedArtistsListResponse(muted_artists=artists)
+
+
+def mute_artist(session: Session, user_id: UUID, artist_id: UUID) -> MuteArtistResponse:
+    muted = muted_repo.mute_artist(session, user_id, artist_id)
+    return MuteArtistResponse(artist_id=muted.artist_id)
