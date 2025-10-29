@@ -12,7 +12,7 @@ from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.schemas.message import MessageResponse
 from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
-from app.schemas.muted_artists import MuteArtistRequest, MuteArtistResponse, MutedArtistsListResponse
+from app.schemas.muted_artists import MuteArtistResponse, MutedArtistsListResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
