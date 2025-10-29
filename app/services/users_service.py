@@ -12,6 +12,7 @@ from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.schemas.message import MessageResponse
 from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
+from app.schemas.muted_artists import MutedArtistsListResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -23,6 +24,7 @@ from app.schemas.user import (
     UserSearchIndex,
 )
 from app.services.search_service import search_service
+import app.repositories.muted_artists_repository as muted_repo
 
 
 async def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfileCreate) -> UserProfileResponse:
@@ -250,3 +252,8 @@ def update_notification_preferences(session: Session, user_id: UUID, data: Notif
 
     updated_prefs = NotificationPreferences(account.preferences)
     return NotificationPreferencesResponse(**updated_prefs.as_dict())
+
+
+def list_muted_artists(session: Session, user_id: UUID) -> MutedArtistsListResponse:
+    artists = muted_repo.list_muted_artists(session, user_id)
+    return MutedArtistsListResponse(muted_artists=artists)
