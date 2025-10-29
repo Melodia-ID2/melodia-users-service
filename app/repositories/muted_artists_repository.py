@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 
 from app.models.user_muted_artist import UserMutedArtist
 
@@ -21,3 +21,12 @@ def mute_artist(session: Session, user_id: UUID, artist_id: UUID) -> UserMutedAr
     session.commit()
     session.refresh(muted)
     return muted
+
+
+def unmute_artist(session: Session, user_id: UUID, artist_id: UUID) -> None:
+    stmt = delete(UserMutedArtist).where(
+        UserMutedArtist.user_id == user_id,
+        UserMutedArtist.artist_id == artist_id,
+    )
+    session.exec(stmt)
+    session.commit()

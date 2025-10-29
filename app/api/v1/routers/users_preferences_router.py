@@ -57,3 +57,12 @@ def mute_artist(
     user_id: UUID = Depends(get_current_user_id),
 ):
     return service.mute_artist(session, user_id, data.artist_id)
+
+
+@router.delete("/notifications/muted-artists/{artist_id}", status_code=status.HTTP_204_NO_CONTENT)
+def unmute_artist(
+    artist_id: UUID,
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    service.unmute_artist(session, user_id, artist_id)

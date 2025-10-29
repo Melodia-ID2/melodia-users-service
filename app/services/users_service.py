@@ -266,3 +266,11 @@ def mute_artist(session: Session, user_id: UUID, artist_id: UUID) -> MuteArtistR
 
     muted = muted_repo.mute_artist(session, user_id, artist_id)
     return MuteArtistResponse(artist_id=muted.artist_id)
+
+
+def unmute_artist(session: Session, user_id: UUID, artist_id: UUID) -> None:
+    target = users_repo.get_account_by_id(session, artist_id)
+    if not target or target.role != UserRole.ARTIST:
+        raise NotFoundError("Artista no encontrado")
+
+    muted_repo.unmute_artist(session, user_id, artist_id)
