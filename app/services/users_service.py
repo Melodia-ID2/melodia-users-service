@@ -6,10 +6,12 @@ from sqlmodel import Session
 
 import app.repositories.artist_repository as artists_repo
 import app.repositories.users_repository as users_repo
+from app.constants.notification_flags import NotificationPreferences
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.schemas.message import MessageResponse
+from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -34,8 +36,8 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     
     new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     new_profile = users_repo.create_user_profile(session, new_profile)
-    
-    user_account = users_repo.get_account_by_id(session, user_id)    
+
+    user_account = users_repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: user profile exists only if account exists (foreign key)
     
@@ -49,7 +51,20 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     import asyncio
     asyncio.create_task(search_service.index_user(search_data))
     
-    return UserProfileResponse.model_validate(new_profile)
+    return UserProfileResponse(
+        id=new_profile.id,
+        username=new_profile.username,
+        full_name=new_profile.full_name,
+        birthdate=new_profile.birthdate,
+        gender=new_profile.gender,
+        phone_number=new_profile.phone_number,
+        address=new_profile.address,
+        profile_photo=new_profile.profile_photo,
+        bio=new_profile.bio,
+        followers_count=new_profile.followers_count,
+        following_count=new_profile.following_count,
+        preferences=user_account.preferences,
+    )
 
 
 async def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
@@ -216,3 +231,22 @@ def change_history_preferences(session: Session, user_id: UUID) -> MessageRespon
         raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: already checked in JWT
     status = "activado" if account.preferences & 0b1 else "desactivado"
     return MessageResponse(message=f"Historial {status} exitosamente.")
+
+
+def get_notification_preferences(session: Session, user_id: UUID) -> NotificationPreferencesResponse:
+    prefs_value = users_repo.get_user_preferences(session, user_id)
+    if prefs_value is None:
+        raise NotFoundError("Cuenta de usuario no encontrada")  # pragma: no cover # Defensive: already checked in JWT
+
+    prefs = NotificationPreferences(prefs_value)
+    return NotificationPreferencesResponse(**prefs.as_dict())
+
+
+def update_notification_preferences(session: Session, user_id: UUID, data: NotificationPreferencesUpdate) -> NotificationPreferencesResponse:
+    new_prefs_value = NotificationPreferences.from_dict(data.model_dump())
+    account = users_repo.update_notification_preferences(session, user_id, new_prefs_value)
+    if not account:
+        raise NotFoundError("Cuenta de usuario no encontrada")  # pragma: no cover
+
+    updated_prefs = NotificationPreferences(account.preferences)
+    return NotificationPreferencesResponse(**updated_prefs.as_dict())
