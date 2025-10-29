@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.constants.notification_flags import (
     BIT_KEEP_HISTORY,
     BIT_NOTIFICATIONS_NEW_RELEASES,
-    BIT_NOTIFICATIONS_FOLLOWED_ACTIVITY,
-    BIT_NOTIFICATIONS_SOCIAL_ACTIVITY,
+    BIT_NOTIFICATIONS_FOLLOW_ACTIVITY,
+    BIT_NOTIFICATIONS_SHARED_CONTENT,
+    BIT_NOTIFICATIONS_NEW_FOLLOWERS,
+    BIT_NOTIFICATIONS_PLAYLIST_LIKES,
     DEFAULT_PREFERENCES,
     NOTIFICATION_BITS_MASK,
 )
@@ -32,8 +34,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": True,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": True,
         }
 
         response = await async_client.put(
@@ -46,14 +50,18 @@ class TestPutNotificationPreferences:
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
         assert response.json() == {
             "newReleases": True,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": True,
         }
 
         preferences = await get_user_preferences(session, test_listener_full.id)
         assert_bit_is_set(preferences, BIT_NOTIFICATIONS_NEW_RELEASES)
-        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_FOLLOWED_ACTIVITY)
-        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_SOCIAL_ACTIVITY)
+        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_FOLLOW_ACTIVITY)
+        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_SHARED_CONTENT)
+        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_NEW_FOLLOWERS)
+        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_PLAYLIST_LIKES)
         assert_bit_is_set(preferences, BIT_KEEP_HISTORY)
 
     async def test_put_notifications_disable_all(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
@@ -62,8 +70,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": False,
-            "followedActivity": False,
-            "socialActivity": False,
+            "followActivity": False,
+            "sharedContent": False,
+            "newFollowers": False,
+            "playlistLikes": False,
         }
 
         response = await async_client.put(
@@ -76,14 +86,18 @@ class TestPutNotificationPreferences:
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
         assert response.json() == {
             "newReleases": False,
-            "followedActivity": False,
-            "socialActivity": False,
+            "followActivity": False,
+            "sharedContent": False,
+            "newFollowers": False,
+            "playlistLikes": False,
         }
 
         preferences = await get_user_preferences(session, test_listener_full.id)
         assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_NEW_RELEASES)
-        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_FOLLOWED_ACTIVITY)
-        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_SOCIAL_ACTIVITY)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_FOLLOW_ACTIVITY)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_SHARED_CONTENT)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_NEW_FOLLOWERS)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_PLAYLIST_LIKES)
         assert_bit_is_set(preferences, BIT_KEEP_HISTORY)
 
     async def test_put_notifications_partial_update(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
@@ -92,8 +106,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": True,
-            "followedActivity": False,
-            "socialActivity": True,
+            "followActivity": False,
+            "sharedContent": True,
+            "newFollowers": False,
+            "playlistLikes": True,
         }
 
         response = await async_client.put(
@@ -106,14 +122,18 @@ class TestPutNotificationPreferences:
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
         assert response.json() == {
             "newReleases": True,
-            "followedActivity": False,
-            "socialActivity": True,
+            "followActivity": False,
+            "sharedContent": True,
+            "newFollowers": False,
+            "playlistLikes": True,
         }
 
         preferences = await get_user_preferences(session, test_listener_full.id)
         assert_bit_is_set(preferences, BIT_NOTIFICATIONS_NEW_RELEASES)
-        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_FOLLOWED_ACTIVITY)
-        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_SOCIAL_ACTIVITY)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_FOLLOW_ACTIVITY)
+        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_SHARED_CONTENT)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_NEW_FOLLOWERS)
+        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_PLAYLIST_LIKES)
 
     async def test_put_notifications_preserves_history_flag_when_enabled(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
         """History flag remains enabled after updating notification preferences."""
@@ -121,8 +141,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": False,
-            "followedActivity": True,
-            "socialActivity": False,
+            "followActivity": True,
+            "sharedContent": False,
+            "newFollowers": True,
+            "playlistLikes": False,
         }
 
         response = await async_client.put(
@@ -141,8 +163,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": False,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": False,
+            "playlistLikes": True,
         }
 
         response = await async_client.put(
@@ -157,13 +181,15 @@ class TestPutNotificationPreferences:
 
     async def test_put_notifications_toggle_single_preference(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
         """Successfully toggle a single notification preference."""
-        initial_prefs = BIT_KEEP_HISTORY | BIT_NOTIFICATIONS_NEW_RELEASES | BIT_NOTIFICATIONS_SOCIAL_ACTIVITY
+        initial_prefs = BIT_KEEP_HISTORY | BIT_NOTIFICATIONS_NEW_RELEASES | BIT_NOTIFICATIONS_SHARED_CONTENT
         await set_user_preferences(session, test_listener_full.id, initial_prefs)
 
         request_body = {
             "newReleases": False,
-            "followedActivity": False,
-            "socialActivity": True,
+            "followActivity": False,
+            "sharedContent": True,
+            "newFollowers": False,
+            "playlistLikes": False,
         }
 
         response = await async_client.put(
@@ -175,14 +201,18 @@ class TestPutNotificationPreferences:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "newReleases": False,
-            "followedActivity": False,
-            "socialActivity": True,
+            "followActivity": False,
+            "sharedContent": True,
+            "newFollowers": False,
+            "playlistLikes": False,
         }
 
         preferences = await get_user_preferences(session, test_listener_full.id)
         assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_NEW_RELEASES)
-        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_FOLLOWED_ACTIVITY)
-        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_SOCIAL_ACTIVITY)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_FOLLOW_ACTIVITY)
+        assert_bit_is_set(preferences, BIT_NOTIFICATIONS_SHARED_CONTENT)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_NEW_FOLLOWERS)
+        assert_bit_is_not_set(preferences, BIT_NOTIFICATIONS_PLAYLIST_LIKES)
         assert_bit_is_set(preferences, BIT_KEEP_HISTORY)
 
     async def test_put_notifications_idempotent(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
@@ -191,8 +221,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": True,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": True,
         }
 
         response1 = await async_client.put(
@@ -219,8 +251,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": True,
-            "followedActivity": False,
-            "socialActivity": True,
+            "followActivity": False,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": False,
         }
 
         response = await async_client.put(
@@ -238,8 +272,10 @@ class TestPutNotificationPreferences:
 
         request_body = {
             "newReleases": False,
-            "followedActivity": False,
-            "socialActivity": False,
+            "followActivity": False,
+            "sharedContent": False,
+            "newFollowers": False,
+            "playlistLikes": False,
         }
 
         response = await async_client.put(
@@ -257,8 +293,10 @@ class TestPutNotificationPreferences:
         """Attempting to update notification preferences without authentication fails."""
         request_body = {
             "newReleases": True,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": True,
         }
 
         response = await async_client.put(
@@ -278,8 +316,10 @@ class TestPutNotificationPreferences:
         nonexistent_user_id = uuid.uuid4()
         request_body = {
             "newReleases": True,
-            "followedActivity": False,
-            "socialActivity": True,
+            "followActivity": False,
+            "sharedContent": True,
+            "newFollowers": False,
+            "playlistLikes": True,
         }
 
         response = await async_client.put(
@@ -313,8 +353,10 @@ class TestPutNotificationPreferences:
         """Sending invalid data types fails validation."""
         request_body: dict[str, str | int] = {
             "newReleases": "string",
-            "followedActivity": "string",
-            "socialActivity": 3,
+            "followActivity": "string",
+            "sharedContent": 3,
+            "newFollowers": "invalid",
+            "playlistLikes": 123,
         }
 
         response = await async_client.put(
