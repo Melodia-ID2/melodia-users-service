@@ -59,3 +59,14 @@ jobs:
           **/test-results/**/*
           **/logs/**/*
         retention-days: 5
+
+    - name: Cleanup Docker containers and volumes
+      if: always()
+      run: |
+        docker compose -f compose.test.yml down -v --remove-orphans || true
+
+    - name: Fix permissions for cleanup
+      if: always()
+      run: |
+        sudo chown -R $USER:$USER . || true
+        sudo rm -rf .pytest_cache __pycache__ **/__pycache__ **/.pytest_cache || true
