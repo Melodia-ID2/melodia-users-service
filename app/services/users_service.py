@@ -12,6 +12,7 @@ from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
 from app.schemas.message import MessageResponse
 from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
+from app.schemas.muted_artists import MuteArtistResponse, MutedArtistsListResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -23,6 +24,7 @@ from app.schemas.user import (
     UserSearchIndex,
 )
 from app.services.search_service import search_service
+import app.repositories.muted_artists_repository as muted_repo
 
 
 async def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfileCreate) -> UserProfileResponse:
@@ -250,3 +252,25 @@ def update_notification_preferences(session: Session, user_id: UUID, data: Notif
 
     updated_prefs = NotificationPreferences(account.preferences)
     return NotificationPreferencesResponse(**updated_prefs.as_dict())
+
+
+def list_muted_artists(session: Session, user_id: UUID) -> MutedArtistsListResponse:
+    artists = muted_repo.list_muted_artists(session, user_id)
+    return MutedArtistsListResponse(muted_artists=artists)
+
+
+def mute_artist(session: Session, user_id: UUID, artist_id: UUID) -> MuteArtistResponse:
+    target = users_repo.get_account_by_id(session, artist_id)
+    if not target or target.role != UserRole.ARTIST:
+        raise NotFoundError("Artista no encontrado")
+
+    muted = muted_repo.mute_artist(session, user_id, artist_id)
+    return MuteArtistResponse(artist_id=muted.artist_id)
+
+
+def unmute_artist(session: Session, user_id: UUID, artist_id: UUID) -> None:
+    target = users_repo.get_account_by_id(session, artist_id)
+    if not target or target.role != UserRole.ARTIST:
+        raise NotFoundError("Artista no encontrado")
+
+    muted_repo.unmute_artist(session, user_id, artist_id)
