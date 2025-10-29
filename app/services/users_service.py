@@ -223,8 +223,8 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID) -> Fol
     return FollowsListResponse(follows=followers)
 
 
-def get_following(session: Session, user_id: UUID, current_user_id: UUID) -> FollowsListResponse:
-    following = users_repo.get_following(session, user_id, current_user_id)
+def get_following(session: Session, user_id: UUID, current_user_id: UUID, role: UserRole | None = None) -> FollowsListResponse:
+    following = users_repo.get_following(session, user_id, current_user_id, role)
     return FollowsListResponse(follows=following)
 
 def change_history_preferences(session: Session, user_id: UUID) -> MessageResponse:

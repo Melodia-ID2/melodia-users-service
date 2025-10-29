@@ -1,7 +1,7 @@
 from typing import Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, Query, status
 from sqlmodel import Session
 
 import app.services.users_service as service
@@ -10,6 +10,7 @@ from app.core.security import get_current_user_id
 from app.schemas.message import MessageResponse
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import ArtistProfileResponse, FollowsListResponse, UserProfileCreate, UserProfilePublic, UserProfileResponse, UserProfileUpdate
+from app.models.useraccount import UserRole
 
 router = APIRouter(prefix="", tags=["Users (Listeners & Artists)"])
 
@@ -67,5 +68,10 @@ def get_followers(user_id: UUID, session: Session = Depends(get_session), curren
 
 
 @router.get("/{user_id}/following", response_model=FollowsListResponse, status_code=status.HTTP_200_OK)
-def get_following(user_id: UUID, session: Session = Depends(get_session), current_user_id: UUID = Depends(get_current_user_id)):
-    return service.get_following(session, user_id, current_user_id)
+def get_following(
+    user_id: UUID,
+    role_type: UserRole | None = Query(default=None, alias="type"),
+    session: Session = Depends(get_session),
+    current_user_id: UUID = Depends(get_current_user_id),
+):
+    return service.get_following(session, user_id, current_user_id, role_type)

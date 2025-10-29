@@ -1,10 +1,11 @@
 from uuid import UUID
+from typing import Any
 
 from sqlalchemy.orm import aliased
 from sqlmodel import Session, and_, func, select, update
 
 from app.constants.notification_flags import NOTIFICATION_BITS_MASK
-from app.models.useraccount import UserAccount
+from app.models.useraccount import UserAccount, UserRole
 from app.models.userprofile import UserFollows, UserProfile
 
 
@@ -56,7 +57,7 @@ def get_user_profile_by_user_id(session: Session, user_id: UUID):
     return session.get(UserProfile, user_id)
 
 
-def update_user_profile(session: Session, user_id: UUID, data: dict):
+def update_user_profile(session: Session, user_id: UUID, data: dict[str, Any]):
     profile = session.get(UserProfile, user_id)
     if not profile:
         return None
@@ -103,7 +104,7 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
             UserProfile.username,
             UserProfile.profile_photo,
             UserProfile.followers_count,
-            (FollowsCheck.follower_id != None).label("is_following"),
+            (FollowsCheck.follower_id.is_not(None)).label("is_following"),
         )
         .join(UserFollows, UserFollows.follower_id == UserProfile.id)
         .join(
@@ -120,7 +121,7 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
     return session.exec(stmt).all()
 
 
-def get_following(session: Session, user_id: UUID, current_user_id: UUID):
+def get_following(session: Session, user_id: UUID, current_user_id: UUID, role: UserRole | None = None):
     FollowsCheck = aliased(UserFollows)
 
     stmt = (
@@ -129,9 +130,10 @@ def get_following(session: Session, user_id: UUID, current_user_id: UUID):
             UserProfile.username,
             UserProfile.profile_photo,
             UserProfile.followers_count,
-            (FollowsCheck.follower_id != None).label("is_following"),
+            (FollowsCheck.follower_id.is_not(None)).label("is_following"),
         )
         .join(UserFollows, UserFollows.followed_id == UserProfile.id)
+        .join(UserAccount, UserAccount.id == UserProfile.id)
         .join(
             FollowsCheck,
             and_(
@@ -143,6 +145,9 @@ def get_following(session: Session, user_id: UUID, current_user_id: UUID):
         .where(UserFollows.follower_id == user_id)
         .order_by(UserProfile.username)
     )
+
+    if role is not None:
+        stmt = stmt.where(UserAccount.role == role)
 
     return session.exec(stmt).all()
 
