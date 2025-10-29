@@ -36,8 +36,8 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     
     new_profile = UserProfile(id=user_id, **profile_data.model_dump())
     new_profile = users_repo.create_user_profile(session, new_profile)
-    
-    user_account = users_repo.get_account_by_id(session, user_id)    
+
+    user_account = users_repo.get_account_by_id(session, user_id)
     if not user_account:
         raise NotFoundError("Cuenta de usuario no encontrada") # pragma: no cover # Defensive: user profile exists only if account exists (foreign key)
     
@@ -51,7 +51,20 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     import asyncio
     asyncio.create_task(search_service.index_user(search_data))
     
-    return UserProfileResponse.model_validate(new_profile)
+    return UserProfileResponse(
+        id=new_profile.id,
+        username=new_profile.username,
+        full_name=new_profile.full_name,
+        birthdate=new_profile.birthdate,
+        gender=new_profile.gender,
+        phone_number=new_profile.phone_number,
+        address=new_profile.address,
+        profile_photo=new_profile.profile_photo,
+        bio=new_profile.bio,
+        followers_count=new_profile.followers_count,
+        following_count=new_profile.following_count,
+        preferences=user_account.preferences,
+    )
 
 
 async def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
