@@ -8,6 +8,6 @@ class NotificationPreferencesResponse(ApiBaseModel):
 
 
 class NotificationPreferencesUpdate(ApiBaseModel):
-    new_releases: bool | None = None
-    followed_activity: bool | None = None
-    social_activity: bool | None = None
+    new_releases: bool
+    followed_activity: bool
+    social_activity: bool
