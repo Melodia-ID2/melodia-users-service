@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.constants.notification_flags import (
     BIT_KEEP_HISTORY,
     BIT_NOTIFICATIONS_NEW_RELEASES,
-    BIT_NOTIFICATIONS_FOLLOWED_ACTIVITY,
-    BIT_NOTIFICATIONS_SOCIAL_ACTIVITY,
+    BIT_NOTIFICATIONS_FOLLOW_ACTIVITY,
+    BIT_NOTIFICATIONS_SHARED_CONTENT,
+    BIT_NOTIFICATIONS_NEW_FOLLOWERS,
+    BIT_NOTIFICATIONS_PLAYLIST_LIKES,
     DEFAULT_PREFERENCES,
 )
 from tests.integral.conftest import TEST_BASE_URL, TestUser, auth_headers
@@ -28,8 +30,10 @@ class TestGetNotificationPreferences:
         """Successfully retrieve notification preferences when all are enabled."""
         all_notifications_enabled = (
             BIT_NOTIFICATIONS_NEW_RELEASES
-            | BIT_NOTIFICATIONS_FOLLOWED_ACTIVITY
-            | BIT_NOTIFICATIONS_SOCIAL_ACTIVITY
+            | BIT_NOTIFICATIONS_FOLLOW_ACTIVITY
+            | BIT_NOTIFICATIONS_SHARED_CONTENT
+            | BIT_NOTIFICATIONS_NEW_FOLLOWERS
+            | BIT_NOTIFICATIONS_PLAYLIST_LIKES
         )
         await set_user_preferences(session, test_listener_full.id, all_notifications_enabled | BIT_KEEP_HISTORY)
 
@@ -42,8 +46,10 @@ class TestGetNotificationPreferences:
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
         assert response.json() == {
             "newReleases": True,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": True,
         }
 
     async def test_get_notifications_with_all_disabled(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
@@ -59,8 +65,10 @@ class TestGetNotificationPreferences:
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
         assert response.json() == {
             "newReleases": False,
-            "followedActivity": False,
-            "socialActivity": False,
+            "followActivity": False,
+            "sharedContent": False,
+            "newFollowers": False,
+            "playlistLikes": False,
         }
 
     async def test_get_notifications_with_default_preferences(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
@@ -76,13 +84,15 @@ class TestGetNotificationPreferences:
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
         assert response.json() == {
             "newReleases": True,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": True,
         }
 
     async def test_get_notifications_with_partial_preferences(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
         """Successfully retrieve notification preferences when some are enabled."""
-        partial_preferences = BIT_NOTIFICATIONS_NEW_RELEASES | BIT_NOTIFICATIONS_SOCIAL_ACTIVITY
+        partial_preferences = BIT_NOTIFICATIONS_NEW_RELEASES | BIT_NOTIFICATIONS_SHARED_CONTENT | BIT_NOTIFICATIONS_PLAYLIST_LIKES
         await set_user_preferences(session, test_listener_full.id, partial_preferences | BIT_KEEP_HISTORY)
 
         response = await async_client.get(
@@ -94,8 +104,10 @@ class TestGetNotificationPreferences:
             f"Expected status code 200, got {response.status_code}. Response: {response.text}"
         assert response.json() == {
             "newReleases": True,
-            "followedActivity": False,
-            "socialActivity": True,
+            "followActivity": False,
+            "sharedContent": True,
+            "newFollowers": False,
+            "playlistLikes": True,
         }
 
     async def test_get_notifications_preserves_history_flag(self, async_client: AsyncClient, test_listener_full: TestUser, session: AsyncSession) -> None:
@@ -110,8 +122,10 @@ class TestGetNotificationPreferences:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "newReleases": True,
-            "followedActivity": False,
-            "socialActivity": False,
+            "followActivity": False,
+            "sharedContent": False,
+            "newFollowers": False,
+            "playlistLikes": False,
         }
 
         preferences = await get_user_preferences(session, test_listener_full.id)
@@ -129,8 +143,10 @@ class TestGetNotificationPreferences:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "newReleases": True,
-            "followedActivity": True,
-            "socialActivity": True,
+            "followActivity": True,
+            "sharedContent": True,
+            "newFollowers": True,
+            "playlistLikes": True,
         }
 
     async def test_get_notifications_unauthenticated(self, async_client: AsyncClient) -> None:
