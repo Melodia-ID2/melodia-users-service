@@ -114,3 +114,83 @@ class TestGetFollowing:
                 }
             ]
         }
+
+    async def test_get_following_filter_artist_only(
+        self,
+        async_client: AsyncClient,
+        test_listener_full: TestUser,
+        test_listener_minimal: TestUser,
+        test_artist_minimal: TestUser,
+        test_artist_full: TestArtist,
+        session: AsyncSession,
+    ) -> None:
+        """Filter following list by type=artist should return only artists."""
+        follow_link_1 = UserFollows(follower_id=test_listener_full.id, followed_id=test_listener_minimal.id)  # listener
+        follow_link_2 = UserFollows(follower_id=test_listener_full.id, followed_id=test_artist_minimal.id)   # artist
+        session.add_all([follow_link_1, follow_link_2])
+        await session.commit()
+
+        response = await async_client.get(
+            f"{TEST_BASE_URL}/{test_listener_full.id}/following",
+            params={"type": "artist"},
+            headers=auth_headers(test_artist_full.id, role="artist"),
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "follows": [
+                {
+                    "id": str(test_artist_minimal.id),
+                    "username": test_artist_minimal.profile.username,
+                    "profilePhoto": test_artist_minimal.profile.profile_photo,
+                    "followersCount": test_artist_minimal.profile.followers_count,
+                    "isFollowing": False,
+                }
+            ]
+        }
+
+    async def test_get_following_filter_listener_only(
+        self,
+        async_client: AsyncClient,
+        test_listener_full: TestUser,
+        test_listener_minimal: TestUser,
+        test_artist_minimal: TestUser,
+        test_artist_full: TestArtist,
+        session: AsyncSession,
+    ) -> None:
+        """Filter following list by type=listener should return only listeners."""
+        follow_link_1 = UserFollows(follower_id=test_listener_full.id, followed_id=test_listener_minimal.id)  # listener
+        follow_link_2 = UserFollows(follower_id=test_listener_full.id, followed_id=test_artist_minimal.id)   # artist
+        session.add_all([follow_link_1, follow_link_2])
+        await session.commit()
+
+        response = await async_client.get(
+            f"{TEST_BASE_URL}/{test_listener_full.id}/following",
+            params={"type": "listener"},
+            headers=auth_headers(test_artist_full.id, role="artist"),
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "follows": [
+                {
+                    "id": str(test_listener_minimal.id),
+                    "username": test_listener_minimal.profile.username,
+                    "profilePhoto": test_listener_minimal.profile.profile_photo,
+                    "followersCount": test_listener_minimal.profile.followers_count,
+                    "isFollowing": False,
+                }
+            ]
+        }
+
+    async def test_get_following_filter_invalid_type(
+        self,
+        async_client: AsyncClient,
+        test_listener_full: TestUser,
+        test_artist_full: TestArtist,
+    ) -> None:
+        """Invalid type value should return 422 Unprocessable Entity."""
+        response = await async_client.get(
+            f"{TEST_BASE_URL}/{test_listener_full.id}/following",
+            params={"type": "band"},
+            headers=auth_headers(test_artist_full.id, role="artist"),
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
