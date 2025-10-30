@@ -10,7 +10,7 @@ import app.repositories.artist_repository as artist_repo
 import app.repositories.users_repository as users_repo
 from app.errors.exceptions import FileUploadError, NotFoundError, ValidationError
 from app.models.useraccount import UserRole
-from app.schemas.artist import SocialLinksUpdateRequest
+from app.schemas.artist import SocialLinksUpdateRequest, ArtistsListResponse, ArtistListItem
 
 
 def update_artist_social_links(session: Session, user_id: UUID, data: SocialLinksUpdateRequest) -> None:
@@ -141,3 +141,22 @@ def reorder_artist_photos(session: Session, user_id: UUID, photo_urls: list[str]
     except Exception as e:
         session.rollback()
         raise ValidationError(f"Error al reordenar fotos: {str(e)}")
+
+
+def list_artists(session: Session, page: int, page_size: int) -> ArtistsListResponse:
+    rows, total = artist_repo.get_artists_paginated(session, page, page_size)
+    items = [
+        ArtistListItem(
+            id=str(row[0]),
+            username=row[1],
+            profile_photo=row[2],
+        )
+        for row in rows
+    ]
+    return ArtistsListResponse(
+        artists=items,
+        total=total or 0,
+        page=page,
+        page_size=page_size,
+        total_pages=((total + page_size - 1) // page_size) if total else 0,
+    )
