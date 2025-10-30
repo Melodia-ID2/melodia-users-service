@@ -13,3 +13,17 @@ class ArtistPhotosUpdateRequest(ApiBaseModel):
 
 class DeletePhotoRequest(ApiBaseModel):
     photo_url: str
+
+
+class ArtistListItem(ApiBaseModel):
+    id: str
+    username: str | None = None
+    profile_photo: str | None = None
+
+
+class ArtistsListResponse(ApiBaseModel):
+    artists: list[ArtistListItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int

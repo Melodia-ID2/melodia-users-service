@@ -1,12 +1,12 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, Query, status
 from sqlmodel import Session
 
 import app.services.artist_service as service
 from app.core.database import get_session
 from app.core.security import get_current_user_id
-from app.schemas.artist import ArtistPhotosUpdateRequest, DeletePhotoRequest, SocialLinksUpdateRequest
+from app.schemas.artist import ArtistPhotosUpdateRequest, DeletePhotoRequest, SocialLinksUpdateRequest, ArtistsListResponse
 
 router = APIRouter(prefix="/artist", tags=["Artists"])
 
@@ -46,3 +46,12 @@ def reorder_artist_photos(
     user_id: UUID = Depends(get_current_user_id),
 ):
     return service.reorder_artist_photos(session, user_id, data.photos)
+
+
+@router.get("", response_model=ArtistsListResponse, status_code=status.HTTP_200_OK)
+def list_artists(
+    session: Session = Depends(get_session),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, alias="pageSize", ge=1, le=100),
+):
+    return service.list_artists(session, page, page_size)
