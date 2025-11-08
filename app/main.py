@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.routers.admin_router import router as admin_router
 from app.api.v1.routers.artist_router import router as artist_router
+from app.api.v1.routers.device_token_router import router as device_token_router
 from app.api.v1.routers.system_router import router as system_router
 from app.api.v1.routers.users_router import router as users_router
 from app.api.v1.routers.users_preferences_router import router as users_preferences_router
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
     app.include_router(artist_router)
     app.include_router(users_router)
     app.include_router(users_preferences_router)
+    app.include_router(device_token_router)
 
     return app
 
