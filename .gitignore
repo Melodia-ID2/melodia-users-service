@@ -5,6 +5,7 @@
 .env.*.local
 *.secret
 secrets.yml
+*-service-account.json
 
 # ---------- Python ----------
 # virtualenvs
