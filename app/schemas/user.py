@@ -109,7 +109,7 @@ class FollowItem(ApiBaseModel):
     profile_photo: str | None = None
     followers_count: int
     is_following: bool = False
-
+    country: Country | None = None 
 
 class FollowsListResponse(ApiBaseModel):
     follows: list[FollowItem]
