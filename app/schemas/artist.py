@@ -1,13 +1,6 @@
 from typing import List
 
 from app.schemas.base import ApiBaseModel
-from app.schemas.user import UserProfilePublic
-
-
-class ArtistProfileView(UserProfilePublic):
-    is_following: bool = False
-    photos: List[str]
-    links: List[str]
 
 
 class SocialLinksUpdateRequest(ApiBaseModel):
@@ -20,3 +13,17 @@ class ArtistPhotosUpdateRequest(ApiBaseModel):
 
 class DeletePhotoRequest(ApiBaseModel):
     photo_url: str
+
+
+class ArtistListItem(ApiBaseModel):
+    id: str
+    username: str | None = None
+    profile_photo: str | None = None
+
+
+class ArtistsListResponse(ApiBaseModel):
+    artists: list[ArtistListItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int

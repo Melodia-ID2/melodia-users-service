@@ -10,15 +10,14 @@ from app.schemas.base import ApiBaseModel
 
 
 class _UserProfilePayload(ApiBaseModel):
-    username: Optional[str] = None
+    username: str
     full_name: str
-    birthdate: date | None = None
+    birthdate: date
     gender: UserGender
     phone_number: str | None = None
     address: str | None = None
     profile_photo: str | None = None
     bio: str | None = None
-    country: Country | None = None
     followers_count: int = 0
     following_count: int = 0
 
@@ -39,6 +38,7 @@ class UserProfileCreate(_UserProfilePayload):
 
 class UserProfileResponse(_UserProfilePayload):
     id: UUID
+    preferences: int = 1
 
 
 class ArtistProfileResponse(UserProfileResponse):
@@ -49,17 +49,17 @@ class ArtistProfileResponse(UserProfileResponse):
 class UserBasicInfo(ApiBaseModel):
     id: str
     email: str
-    username: str | None = None
+    username: str
     role: str
     status: str
 
 
 class UserDetailedInfo(UserBasicInfo):
-    full_name: Optional[str] = None
+    full_name: str
     phone_number: Optional[str] = None
     address: Optional[str] = None
-    country: Optional[Country] = None
-    birthdate: date | None = None
+    country: Country
+    birthdate: date
     profile_photo: str | None = None
     last_login: Optional[datetime] = None
     created_at: Optional[datetime] = None
@@ -78,29 +78,18 @@ class GetAllUserResponse(ApiBaseModel):
     total_pages: int
 
 
-class UserSearchItem(ApiBaseModel):
-    id: str
-    role: str
-    username: str | None = None
-    profile_photo: str | None = None
-    similarity_score: float
-
 
 class UserProfilePublic(ApiBaseModel):
     id: str
+    role: str
     username: str | None
     profile_photo: str | None
     bio: str | None
     followers_count: int
     following_count: int
-
-
-class ListenerProfileView(UserProfilePublic):
     is_following: bool = False
-
-
-class SearchUsersResponse(ApiBaseModel):
-    users: list[UserSearchItem]
+    photos: list[str] = []
+    links: list[str] = []
 
 
 class FollowItem(ApiBaseModel):

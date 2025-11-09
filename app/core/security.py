@@ -4,10 +4,11 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import exceptions, jwt
 from sqlmodel import Session
+from uuid import UUID
 
 from app.core.config import settings
 from app.core.database import get_session
-from app.errors.exceptions import AuthenticationError
+from app.errors.exceptions import AuthenticationError, NotFoundError
 from app.repositories import users_repository as user_repo
 
 security = HTTPBearer(auto_error=False)
@@ -52,13 +53,13 @@ def require_admin(payload: dict[str, Any] = Depends(get_jwt_payload)) -> dict[st
     return payload
 
 
-def get_current_user_id(payload: dict[str, Any] = Depends(get_jwt_payload), session: Session = Depends(get_session)) -> str:
-    user_id = payload.get("user_id")
+def get_current_user_id(payload: dict[str, Any] = Depends(get_jwt_payload), session: Session = Depends(get_session)) -> UUID:
+    user_id = UUID(payload.get("user_id"))
     if not user_id:
         raise AuthenticationError("ID de usuario no encontrado en el token")
     user = user_repo.get_account_by_id(session, user_id)
     if not user:
-        raise AuthenticationError("Usuario no encontrado")
+        raise NotFoundError("Usuario no encontrado")
     if user.status != "active":
         raise AuthenticationError("El usuario está bloqueado")
     if payload.get("role") != user.role:

@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from sqlmodel import Field, SQLModel
 
+from app.constants.notification_flags import DEFAULT_PREFERENCES
 from app.models.regions import Country
 
 
@@ -30,3 +31,4 @@ class UserAccount(SQLModel, table=True):
     status: UserStatus = Field(default=UserStatus.ACTIVE, nullable=False)
     country: Country = Field(default=Country.AR, nullable=False)
     is_profile_completed: bool = Field(default=False)
+    preferences: int = Field(default=DEFAULT_PREFERENCES, nullable=False)

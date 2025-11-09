@@ -25,15 +25,30 @@ services:
       target: test
     container_name: users-integral-tests
     env_file: .env.test
+    environment:
+      COVERAGE_DIR: /app/coverage_reports
     networks:
       - test-net
     depends_on:
       users-test-db:
         condition: service_healthy
+    volumes:
+      - .:/app
+      - ./coverage_reports:/app/coverage_reports
     command: >
-      pytest -c pytest_integral.ini tests/integral --maxfail=1 --disable-warnings
+      bash -c '
+      pip install pytest-cov &&
+      mkdir -p /app/coverage_reports &&
+      PYTHONPATH=/app python -m pytest tests/integral \
+        -c pytest_integral.ini \
+        --maxfail=1 \
+        --disable-warnings \
+        --cov=app \
+        --cov-report=xml:/app/coverage_reports/coverage.xml \
+        --cov-report=html:/app/coverage_reports/html \
+        --cov-report=term
+      '
 
-  # servicio para tests unitarios (usa pytest por defecto en el stage test)
   users-tests:
     build:
       context: .

@@ -7,6 +7,7 @@ from app.api.v1.routers.admin_router import router as admin_router
 from app.api.v1.routers.artist_router import router as artist_router
 from app.api.v1.routers.system_router import router as system_router
 from app.api.v1.routers.users_router import router as users_router
+from app.api.v1.routers.users_preferences_router import router as users_preferences_router
 from app.core.database import init_db
 from app.errors.middleware import Middleware
 from sqlalchemy.exc import ProgrammingError
@@ -34,9 +35,10 @@ def create_app() -> FastAPI:
 
     app.add_middleware(Middleware)
     app.include_router(system_router)
-    app.include_router(users_router)
-    app.include_router(artist_router)
     app.include_router(admin_router)
+    app.include_router(artist_router)
+    app.include_router(users_router)
+    app.include_router(users_preferences_router)
 
     return app
 

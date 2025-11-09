@@ -1,73 +1,12 @@
-from typing import List
 from uuid import UUID
+from typing import Any
 
 from sqlalchemy.orm import aliased
-from sqlmodel import Session, and_, case, delete, func, select, update
+from sqlmodel import Session, and_, func, select, update
 
-from app.models.useraccount import AccountProvider, UserAccount
-from app.models.usercredential import UserCredential
-from app.models.userprofile import ArtistPhoto, SocialLink, UserFollows, UserProfile
-
-
-def get_all_users(session: Session, page: int, page_size: int):
-    # Subquery: get one credential per user, preferring local provider
-    subq = (
-        select(
-            UserCredential.email,
-            UserCredential.provider,
-            UserCredential.user_id,
-            case((UserCredential.provider == AccountProvider.LOCAL, 1), else_=0).label("is_local"),
-            func.row_number()
-            .over(
-                partition_by=UserCredential.user_id,
-                order_by=case((UserCredential.provider == AccountProvider.LOCAL, 1), else_=0).desc(),
-            )
-            .label("rn"),
-        )
-        .subquery()
-    )
-
-    filtered_subq = select(subq).where(subq.c.rn == 1).subquery()
-
-    # Main query
-    stmt = (
-        select(
-            UserAccount.id,
-            UserProfile.username,
-            filtered_subq.c.email,
-            UserAccount.role,
-            UserAccount.status,
-        )
-        .outerjoin(UserProfile, UserAccount.id == UserProfile.id)
-        .outerjoin(filtered_subq, UserAccount.id == filtered_subq.c.user_id)
-        .order_by(UserAccount.created_at)
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
-
-    users = session.exec(stmt).all()
-    total = session.scalar(select(func.count()).select_from(UserAccount))
-    return users, total
-
-
-def search_users(session: Session, query: str, role: str | None, page: int, page_size: int):
-    contains_boost = case((UserProfile.username.ilike(f"%{query}%"), 0.3), else_=0)
-    prefix_boost = case((UserProfile.username.ilike(f"{query}%"), 0.2), else_=0)
-
-    similarity_expr = func.similarity(UserProfile.username, query) + contains_boost + prefix_boost
-
-    stmt = (
-        select(UserProfile.id, UserAccount.role, UserProfile.username, UserProfile.profile_photo, similarity_expr.label("similarity_score"))
-        .join(UserAccount, UserProfile.id == UserAccount.id)
-        .order_by(similarity_expr.desc(), UserProfile.username.asc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
-
-    if role:
-        stmt = stmt.where(UserAccount.role == role)
-
-    return session.exec(stmt).all()
+from app.constants.notification_flags import NOTIFICATION_BITS_MASK
+from app.models.useraccount import UserAccount, UserRole
+from app.models.userprofile import UserFollows, UserProfile
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
@@ -102,12 +41,6 @@ def create_user_account(session: Session, user: UserAccount) -> UserAccount:
     return user
 
 
-def delete_user_account(session: Session, account: UserAccount) -> None:
-    session.delete(account)
-    session.commit()
-    return None
-
-
 def update_profile_picture(session: Session, user_id: UUID, photo_url: str) -> UserProfile | None:
     user_profile = session.get(UserProfile, user_id)
     if not user_profile:
@@ -124,7 +57,7 @@ def get_user_profile_by_user_id(session: Session, user_id: UUID):
     return session.get(UserProfile, user_id)
 
 
-def update_user_profile(session: Session, user_id: UUID, data: dict):
+def update_user_profile(session: Session, user_id: UUID, data: dict[str, Any]):
     profile = session.get(UserProfile, user_id)
     if not profile:
         return None
@@ -135,83 +68,6 @@ def update_user_profile(session: Session, user_id: UUID, data: dict):
     session.commit()
     session.refresh(profile)
     return profile
-
-
-def search_profiles(session: Session, query: str, role: str | None, page: int, page_size: int):
-    stmt = select(UserProfile).outerjoin(UserAccount, UserAccount.id == UserProfile.id)
-    if query:
-        q = f"%{query}%"
-        stmt = stmt.where((UserProfile.full_name.ilike(q)) | (UserProfile.username.ilike(q)))
-    if role:
-        stmt = stmt.where(UserAccount.role == role)
-    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
-    results = session.exec(stmt).all()
-    return results
-
-
-def get_artist_photos(session: Session, artist_id: UUID):
-    return session.exec(select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id).order_by(ArtistPhoto.position)).all()
-
-
-def get_artist_links(session: Session, artist_id: UUID):
-    return session.exec(select(SocialLink).where(SocialLink.artist_id == artist_id)).all()
-
-
-def update_artist_social_links(session: Session, artist_id: UUID, urls: List[str]):
-    try:
-        stmt = delete(SocialLink).where(SocialLink.artist_id == artist_id)
-        session.exec(stmt)
-
-        for url in urls:
-            link = SocialLink(artist_id=artist_id, url=url)
-            session.add(link)
-
-        session.commit()
-
-    except Exception as e:
-        session.rollback()
-        raise e
-
-
-def delete_artist_photos(session: Session, artist_id: UUID):
-    session.exec(select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id)).delete(synchronize_session=False)
-    session.commit()
-
-
-def add_artist_photo(session: Session, artist_id: UUID, url: str, position: int):
-    """Agregar una foto de artista"""
-    photo = ArtistPhoto(artist_id=artist_id, url=url, position=position)
-    session.add(photo)
-    session.commit()
-    session.refresh(photo)
-    return photo
-
-
-def get_artist_photo_by_url(session: Session, artist_id: UUID, photo_url: str):
-    stmt = select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id, ArtistPhoto.url == photo_url)
-    return session.exec(stmt).first()
-
-
-def delete_artist_photo(session: Session, artist_id: UUID, photo_url: str):
-    stmt = delete(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id, ArtistPhoto.url == photo_url)
-    session.exec(stmt)
-    session.commit()
-
-
-def update_photo_position(session: Session, photo_id: UUID, new_position: int):
-    stmt = select(ArtistPhoto).where(ArtistPhoto.id == photo_id)
-    photo = session.exec(stmt).first()
-    if photo:
-        photo.position = new_position
-        session.commit()
-
-
-def update_photo_position_by_url(session: Session, artist_id: UUID, photo_url: str, new_position: int):
-    stmt = select(ArtistPhoto).where(ArtistPhoto.artist_id == artist_id, ArtistPhoto.url == photo_url)
-    photo = session.exec(stmt).first()
-    if photo:
-        photo.position = new_position
-        session.commit()
 
 
 def is_following(session: Session, follower_id: UUID, followed_id: UUID) -> bool:
@@ -249,7 +105,7 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
             UserProfile.profile_photo,
             UserProfile.followers_count,
             UserAccount.country,
-            (FollowsCheck.follower_id != None).label("is_following"),
+            (FollowsCheck.follower_id.is_not(None)).label("is_following"),
         )
         .join(UserFollows, UserFollows.follower_id == UserProfile.id)
         .join(
@@ -266,7 +122,7 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
     return session.exec(stmt).all()
 
 
-def get_following(session: Session, user_id: UUID, current_user_id: UUID):
+def get_following(session: Session, user_id: UUID, current_user_id: UUID, role: UserRole | None = None):
     FollowsCheck = aliased(UserFollows)
 
     stmt = (
@@ -276,9 +132,10 @@ def get_following(session: Session, user_id: UUID, current_user_id: UUID):
             UserProfile.profile_photo,
             UserProfile.followers_count,
             UserAccount.country,
-            (FollowsCheck.follower_id != None).label("is_following"),
+            (FollowsCheck.follower_id.is_not(None)).label("is_following"),
         )
         .join(UserFollows, UserFollows.followed_id == UserProfile.id)
+        .join(UserAccount, UserAccount.id == UserProfile.id)
         .join(
             FollowsCheck,
             and_(
@@ -291,4 +148,37 @@ def get_following(session: Session, user_id: UUID, current_user_id: UUID):
         .order_by(UserProfile.username)
     )
 
+    if role is not None:
+        stmt = stmt.where(UserAccount.role == role)
+
     return session.exec(stmt).all()
+
+def change_history_preferences(session: Session, user_id: UUID):
+    account = session.get(UserAccount, user_id)
+    if not account:
+        return None
+
+    account.preferences ^= 0b1
+    session.commit()
+    session.refresh(account)
+
+    return account
+
+
+def get_user_preferences(session: Session, user_id: UUID) -> int | None:
+    stmt = select(UserAccount.preferences).where(UserAccount.id == user_id)
+    return session.exec(stmt).one_or_none()
+
+
+def update_notification_preferences(session: Session, user_id: UUID, new_preferences: int) -> UserAccount | None:
+    account = session.get(UserAccount, user_id)
+    if not account:
+        return None
+
+    account.preferences = (account.preferences & ~NOTIFICATION_BITS_MASK) | (new_preferences & NOTIFICATION_BITS_MASK)
+
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+
+    return account
