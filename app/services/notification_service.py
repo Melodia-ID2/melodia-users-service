@@ -74,22 +74,25 @@ def send_notification_to_user(
     preferences = NotificationPreferences(user_account.preferences)
     required_flag = NOTIFICATION_TYPE_TO_FLAG.get(notification_type)
     
-    should_send = True
+    should_send_push = True
+    should_create_notification = True
     skip_reason = None
     
     if required_flag and not preferences.has(required_flag):
-        should_send = False
+        should_send_push = False
+        should_create_notification = False
         skip_reason = "user_disabled_notification_type"
     
-    if should_send and notification_type == NotificationType.NEW_RELEASE and actor_id:
+    if should_send_push and notification_type == NotificationType.NEW_RELEASE and actor_id:
         is_muted = muted_repo.is_artist_muted(session, user_id, actor_id)
         if is_muted:
-            should_send = False
+            should_send_push = False
+            should_create_notification = False
             skip_reason = "artist_muted"
     
     device_tokens = token_repo.get_user_device_tokens(session, user_id, active_only=True)
-    if should_send and not device_tokens:
-        should_send = False
+    if should_send_push and not device_tokens:
+        should_send_push = False
         skip_reason = "no_device_tokens"
     
     success_count = 0
@@ -103,7 +106,7 @@ def send_notification_to_user(
         "notification_type": notification_type.value,
     }
     
-    if should_send and device_tokens:
+    if should_send_push and device_tokens:
         tokens_list = [dt.device_token for dt in device_tokens]
         
         fcm_data = {k: str(v) for k, v in enriched_data.items()}
@@ -124,7 +127,8 @@ def send_notification_to_user(
         
         if success_count > 0:
             sent_at = datetime.now(timezone.utc)
-        
+    
+    if should_create_notification:
         notif_repo.create_notification(
             session=session,
             user_id=user_id,
@@ -140,7 +144,7 @@ def send_notification_to_user(
         "sent": success_count > 0,
         "success_count": success_count,
         "failed_tokens": failed_tokens,
-        "reason": skip_reason if not should_send else None
+        "reason": skip_reason if not should_create_notification else None
     }
 
 
