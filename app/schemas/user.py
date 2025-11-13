@@ -90,6 +90,7 @@ class UserProfilePublic(ApiBaseModel):
     is_following: bool = False
     photos: list[str] = []
     links: list[str] = []
+    country: Country
 
 
 class FollowItem(ApiBaseModel):
@@ -98,7 +99,7 @@ class FollowItem(ApiBaseModel):
     profile_photo: str | None = None
     followers_count: int
     is_following: bool = False
-
+    country: Country | None = None 
 
 class FollowsListResponse(ApiBaseModel):
     follows: list[FollowItem]

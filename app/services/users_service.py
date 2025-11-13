@@ -200,6 +200,7 @@ def get_public_profile(session: Session, user_id: UUID, current_user_id: UUID) -
         is_following=users_repo.is_following(session, current_user_id, user_id),
         photos=photos_list,
         links=links_list,
+        country=account.country,
     )
 
 
