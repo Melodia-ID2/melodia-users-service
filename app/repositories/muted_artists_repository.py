@@ -30,3 +30,11 @@ def unmute_artist(session: Session, user_id: UUID, artist_id: UUID) -> None:
     )
     session.exec(stmt)
     session.commit()
+
+
+def is_artist_muted(session: Session, user_id: UUID, artist_id: UUID) -> bool:
+    stmt = select(UserMutedArtist).where(
+        UserMutedArtist.user_id == user_id,
+        UserMutedArtist.artist_id == artist_id,
+    )
+    return session.exec(stmt).first() is not None
