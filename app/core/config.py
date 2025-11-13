@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str = ""
     
     SEARCH_SERVICE_URL: str = "http://localhost:8001"
+    SERVICE_TOKEN: str = "dev-service-token"
     
     @property
     def DATABASE_URL(self) -> str:
