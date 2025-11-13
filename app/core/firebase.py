@@ -1,29 +1,33 @@
+import os
+from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials
-from pathlib import Path
-
-_firebase_initialized = False
 
 
-def initialize_firebase():
-    global _firebase_initialized
-    
-    if _firebase_initialized:
+def _service_account_path() -> str:
+    return os.getenv("FIREBASE_CREDENTIALS_PATH", "config/firebase-service-account.json")
+
+
+def initialize_firebase() -> None:
+    try:
+        firebase_admin.get_app()
         return
-    
-    cred_path = "config/firebase-service-account.json"
-    if not Path(cred_path).exists():
-        raise FileNotFoundError(
-            f"Firebase credentials not found at {cred_path}."
-        )
-    
-    cred = credentials.Certificate(cred_path)
-    firebase_admin.initialize_app(cred)
+    except ValueError:
+        pass
 
-    _firebase_initialized = True
+    cred_path = _service_account_path()
+    if Path(cred_path).exists():
+        cred = credentials.Certificate(cred_path)
+        firebase_admin.initialize_app(cred)
+        return
+
+    cred = credentials.ApplicationDefault()
+    firebase_admin.initialize_app(cred)
 
 
 def get_firebase_app():
-    if not _firebase_initialized:
+    try:
+        return firebase_admin.get_app()
+    except ValueError:
         initialize_firebase()
-    return firebase_admin.get_app()
+        return firebase_admin.get_app()
