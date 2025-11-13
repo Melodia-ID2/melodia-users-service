@@ -108,6 +108,7 @@ def get_followers(session: Session, user_id: UUID, current_user_id: UUID):
             (FollowsCheck.follower_id.is_not(None)).label("is_following"),
         )
         .join(UserFollows, UserFollows.follower_id == UserProfile.id)
+        .join(UserAccount, UserAccount.id == UserProfile.id)
         .join(
             FollowsCheck,
             and_(
