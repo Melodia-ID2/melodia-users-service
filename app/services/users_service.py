@@ -10,6 +10,7 @@ from app.constants.notification_flags import NotificationPreferences
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
+from app.models.notification import NotificationType
 from app.schemas.message import MessageResponse
 from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
 from app.schemas.muted_artists import MuteArtistResponse, MutedArtistsListResponse
@@ -24,6 +25,7 @@ from app.schemas.user import (
     UserSearchIndex,
 )
 from app.services.search_service import search_service
+from app.services.notification_service import send_notification_to_user
 import app.repositories.muted_artists_repository as muted_repo
 
 
@@ -213,7 +215,23 @@ def follow_user(session: Session, current_user_id: UUID, user_id: UUID) -> Messa
         raise NotFoundError("Usuario a seguir no encontrado")
 
     is_now_following = users_repo.toggle_follow(session, current_user_id, user_id)
+    
     if is_now_following:
+        follower_profile = users_repo.get_profile_by_id(session, current_user_id)
+        if follower_profile:
+            send_notification_to_user(
+                session=session,
+                user_id=user_id,
+                notification_type=NotificationType.NEW_FOLLOWER,
+                title="Nuevo seguidor",
+                body=f"{follower_profile.username} empezó a seguirte",
+                image_url=follower_profile.profile_photo,
+                actor_id=current_user_id,
+                data={
+                    "followerId": str(current_user_id),
+                    "followerName": follower_profile.username
+                }
+            )
         return MessageResponse(message=f"Ahora sigues a {followed.username}")
     else:
         return MessageResponse(message=f"Dejaste de seguir a {followed.username}")

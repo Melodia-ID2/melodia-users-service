@@ -40,7 +40,7 @@ def build_deep_link(notification_type: NotificationType, metadata: dict[str, Any
             return f"{base}playlist/{playlist_id}" if playlist_id else f"{base}notifications"
 
         case NotificationType.NEW_FOLLOWER:
-            follower_id = metadata.get("actor_id") or metadata.get("actorId")
+            follower_id = metadata.get("follower_id") or metadata.get("followerId")
             return f"{base}user/{follower_id}" if follower_id else f"{base}notifications"
 
         case NotificationType.CONTENT_SHARED:
