@@ -50,5 +50,5 @@ class SocialLink(SQLModel, table=True):
 
 
 class UserFollows(SQLModel, table=True):
-    follower_id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True)
-    followed_id: UUID = Field(foreign_key="useraccount.id", primary_key=True, index=True)
+    follower_id: UUID = Field(foreign_key="useraccount.id", ondelete="CASCADE", primary_key=True, index=True)
+    followed_id: UUID = Field(foreign_key="useraccount.id", ondelete="CASCADE", primary_key=True, index=True)
