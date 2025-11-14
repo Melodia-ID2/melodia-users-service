@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import asyncio
 import cloudinary.uploader
 from sqlmodel import Session
 
@@ -55,12 +54,12 @@ def get_user(session: Session, user_id: UUID) -> UserDetailedInfo:
     )
 
 
-async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateResponse:
+def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateResponse:
     user = users_repo.get_account_by_id(session, user_id)
     if not user:
         raise NotFoundError(f"Cuenta de usuario con id: {user_id} no encontrada")
     
-    asyncio.create_task(search_service.delete_user(user.role, user_id))
+    search_service.delete_user(user.role, user_id)
     user.role = UserRole.ARTIST if user.role == UserRole.LISTENER else UserRole.LISTENER
     user_account = users_repo.create_user_account(session, user)
 
@@ -73,7 +72,7 @@ async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateRes
             image_url=user_profile.profile_photo,
             is_blocked=user_account.status == UserStatus.BLOCKED
         )
-        asyncio.create_task(search_service.index_user(search_data))
+        search_service.index_user(search_data)
 
 
     return UserRoleUpdateResponse(
@@ -82,7 +81,7 @@ async def update_user_role(session: Session, user_id: UUID) -> UserRoleUpdateRes
     )
 
 
-async def delete_user(session: Session, user_id: UUID) -> None:
+def delete_user(session: Session, user_id: UUID) -> None:
     account = users_repo.get_account_by_id(session, user_id)
     if not account:
         raise NotFoundError("Usuario con id: {} no encontrado".format(user_id))
@@ -91,7 +90,7 @@ async def delete_user(session: Session, user_id: UUID) -> None:
     if user_profile and user_profile.profile_photo:
         cloudinary.uploader.destroy(public_id=f"user-photo-profile/{user_id}")
 
-    asyncio.create_task(search_service.delete_user(account.role, user_id))
+    search_service.delete_user(account.role, user_id)
 
     admin_repo.delete_user_account(session, account)
     return None

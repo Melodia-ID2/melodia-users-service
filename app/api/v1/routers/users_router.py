@@ -24,22 +24,22 @@ def get_me(
 
 
 @router.patch("/me", response_model=UserProfileResponse)
-async def update_me(
+def update_me(
     data: UserProfileUpdate,
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),
 ):
-    return await service.update_me(session, user_id, data)
+    return service.update_me(session, user_id, data)
 
 
 
 @router.post("/me", response_model=UserProfileResponse, status_code=status.HTTP_201_CREATED)
-async def create_user_profile(
+def create_user_profile(
     profile_data: UserProfileCreate,
     session: Session = Depends(get_session),
     user_id: UUID = Depends(get_current_user_id),
 ):
-    return await service.create_user_profile(session, user_id, profile_data)
+    return service.create_user_profile(session, user_id, profile_data)
 
 
 @router.patch("/me/profile-photo", response_model=ProfilePhotoResponse)
@@ -49,7 +49,7 @@ async def update_profile_picture(
     session: Session = Depends(get_session),
 ):
     file_bytes = await file.read()
-    return await service.update_profile_picture(session, current_user_id, file_bytes)
+    return service.update_profile_picture(session, current_user_id, file_bytes)
 
 
 @router.get("/{user_id}", response_model=UserProfilePublic)

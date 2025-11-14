@@ -29,7 +29,7 @@ from app.services.notification_service import send_notification_to_user
 import app.repositories.muted_artists_repository as muted_repo
 
 
-async def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfileCreate) -> UserProfileResponse:
+def create_user_profile(session: Session, user_id: UUID, profile_data: UserProfileCreate) -> UserProfileResponse:
     existing_profile = users_repo.get_profile_by_id(session, user_id)
     if existing_profile:
         raise ProfileAlreadyExistsError("El perfil ya existe")
@@ -52,8 +52,7 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
         image_url=new_profile.profile_photo,
         is_blocked=False
     )
-    import asyncio
-    asyncio.create_task(search_service.index_user(search_data))
+    search_service.index_user(search_data)
     
     return UserProfileResponse(
         id=new_profile.id,
@@ -71,7 +70,7 @@ async def create_user_profile(session: Session, user_id: UUID, profile_data: Use
     )
 
 
-async def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
+def update_profile_picture(session: Session, user_id: UUID, photo_file_bytes: bytes) -> ProfilePhotoResponse:
     uploaded_url = cloudinary.uploader.upload(photo_file_bytes, folder="user-photo-profile", public_id=str(user_id), overwrite=True)["secure_url"]
     if not uploaded_url:
         raise FileUploadError("Error al guardar la foto de perfil")
@@ -91,8 +90,7 @@ async def update_profile_picture(session: Session, user_id: UUID, photo_file_byt
         image_url=user_profile.profile_photo,
         is_blocked=user_account.status == UserStatus.BLOCKED
     )
-    import asyncio
-    asyncio.create_task(search_service.index_user(search_data))
+    search_service.index_user(search_data)
 
     return ProfilePhotoResponse(profile_photo=uploaded_url)
 
@@ -131,7 +129,7 @@ def get_me(session: Session, user_id: UUID) -> Union[UserProfileResponse, Artist
 
 
 
-async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
+def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) -> UserProfileResponse:
     profile = users_repo.get_user_profile_by_user_id(session, user_id)
     if not profile:
         raise NotFoundError("Perfil no encontrado") # pragma: no cover # Defensive: already checked in JWT
@@ -157,8 +155,7 @@ async def update_me(session: Session, user_id: UUID, data: UserProfileUpdate) ->
         image_url=updated_profile.profile_photo,
         is_blocked=user_account.status == UserStatus.BLOCKED
     )
-    import asyncio
-    asyncio.create_task(search_service.index_user(search_data))
+    search_service.index_user(search_data)
 
     return UserProfileResponse(
         id=updated_profile.id,

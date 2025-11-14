@@ -32,18 +32,18 @@ def get_user(
 
 
 @router.patch("/{user_id}/role", response_model=UserRoleUpdateResponse, status_code=status.HTTP_200_OK, responses=error_responses(401, 404))
-async def update_user_role(
+def update_user_role(
     user_id: UUID,
     session: Session = Depends(get_session),
     _: None = Depends(require_admin),
 ):
-    return await service.update_user_role(session, user_id)
+    return service.update_user_role(session, user_id)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, responses=error_responses(401, 404))
-async def delete_user(
+def delete_user(
     user_id: UUID,
     session: Session = Depends(get_session),
     _: None = Depends(require_admin),
 ):
-    return await service.delete_user(session, user_id)
+    return service.delete_user(session, user_id)
