@@ -40,7 +40,6 @@ docker compose -f compose.test.yml up --build --abort-on-container-exit
 - si ya se levantó previamente solo se requiere:
 
 ```bash
-
 docker compose -f compose.test.yml up --abort-on-container-exit
 ```
 
