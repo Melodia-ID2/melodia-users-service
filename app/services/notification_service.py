@@ -28,7 +28,7 @@ NOTIFICATION_TYPE_TO_FLAG = {
 
 
 def build_deep_link(notification_type: NotificationType, metadata: dict[str, Any]) -> str:
-    base = "com.melodia.is2://"
+    base = "com.melodia.is2.app://"
     
     match notification_type:
         case NotificationType.NEW_RELEASE:
