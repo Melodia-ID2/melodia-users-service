@@ -34,3 +34,6 @@ cloudinary
 
 # Firebase
 firebase-admin==7.1.0
+
+# Monitoreo
+newrelic
