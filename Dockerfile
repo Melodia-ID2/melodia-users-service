@@ -25,4 +25,4 @@ CMD ["pytest", "--maxfail=1", "--disable-warnings", "-q"]
 
 # Stage dev
 FROM base AS dev
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
+CMD ["sh", "-c", "newrelic-admin run-program uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
