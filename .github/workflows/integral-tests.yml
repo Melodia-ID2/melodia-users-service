@@ -7,7 +7,7 @@ on:
 
 jobs:
   integral-tests:
-    runs-on: [ self-hosted, ci ]
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout repository

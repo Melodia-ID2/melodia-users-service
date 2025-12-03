@@ -46,6 +46,10 @@ class ArtistProfileResponse(UserProfileResponse):
     links: List[str] = []
 
 
+class AutoplayPreferenceResponse(ApiBaseModel):
+    autoplay: bool
+
+
 class UserBasicInfo(ApiBaseModel):
     id: str
     email: str
