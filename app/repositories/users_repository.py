@@ -154,6 +154,18 @@ def get_following(session: Session, user_id: UUID, current_user_id: UUID, role: 
 
     return session.exec(stmt).all()
 
+def change_autoplay_preferences(session: Session, user_id: UUID):
+    account = session.get(UserAccount, user_id)
+    if not account:
+        return None
+
+    from app.constants.notification_flags import BIT_AUTOPLAY
+    account.preferences ^= BIT_AUTOPLAY
+    session.commit()
+    session.refresh(account)
+
+    return account
+
 def change_history_preferences(session: Session, user_id: UUID):
     account = session.get(UserAccount, user_id)
     if not account:

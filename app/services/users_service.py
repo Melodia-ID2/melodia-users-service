@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 import app.repositories.artist_repository as artists_repo
 import app.repositories.users_repository as users_repo
-from app.constants.notification_flags import NotificationPreferences
+from app.constants.notification_flags import NotificationPreferences, BIT_AUTOPLAY
 from app.errors.exceptions import FileUploadError, NotFoundError, ProfileAlreadyExistsError, UsernameTakenError, ValidationError
 from app.models.useraccount import UserRole, UserStatus
 from app.models.userprofile import UserProfile
@@ -23,6 +23,7 @@ from app.schemas.user import (
     UserProfileResponse,
     UserProfileUpdate,
     UserSearchIndex,
+    AutoplayPreferenceResponse,
 )
 from app.services.search_service import search_service
 from app.services.notification_service import send_notification_to_user
@@ -290,3 +291,21 @@ def unmute_artist(session: Session, user_id: UUID, artist_id: UUID) -> None:
         raise NotFoundError("Artista no encontrado")
 
     muted_repo.unmute_artist(session, user_id, artist_id)
+
+
+def change_autoplay_preferences(session: Session, user_id: UUID) -> AutoplayPreferenceResponse:
+    account = users_repo.change_autoplay_preferences(session, user_id)
+    if not account:
+        raise NotFoundError("Cuenta de usuario no encontrada")
+    
+    is_enabled = (account.preferences & BIT_AUTOPLAY) != 0
+    return AutoplayPreferenceResponse(autoplay=is_enabled)
+
+
+def get_autoplay_preferences(session: Session, user_id: UUID) -> AutoplayPreferenceResponse:
+    prefs_value = users_repo.get_user_preferences(session, user_id)
+    if prefs_value is None:
+        raise NotFoundError("Cuenta de usuario no encontrada")
+
+    is_enabled = (prefs_value & BIT_AUTOPLAY) != 0
+    return AutoplayPreferenceResponse(autoplay=is_enabled)
