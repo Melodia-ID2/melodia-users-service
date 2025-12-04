@@ -10,6 +10,7 @@ from app.schemas.message import MessageResponse
 from app.schemas.user import AutoplayPreferenceResponse
 from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
 from app.schemas.muted_artists import MuteArtistResponse, MutedArtistsListResponse
+from app.schemas.preferred_genres import PreferredGenresResponse, PreferredGenresUpdate
 
 
 router = APIRouter(prefix="/preferences", tags=["Users Preferences"])
@@ -79,3 +80,22 @@ def unmute_artist(
     user_id: UUID = Depends(get_current_user_id),
 ):
     service.unmute_artist(session, user_id, artist_id)
+
+
+@router.get("/genres", status_code=status.HTTP_200_OK, response_model=PreferredGenresResponse)
+def get_preferred_genres(
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    """Get user's preferred genres."""
+    return service.get_preferred_genres(session, user_id)
+
+
+@router.put("/genres", status_code=status.HTTP_200_OK, response_model=PreferredGenresResponse)
+def update_preferred_genres(
+    data: PreferredGenresUpdate,
+    session: Session = Depends(get_session),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    """Update user's preferred genres (max 5)."""
+    return service.update_preferred_genres(session, user_id, data)
