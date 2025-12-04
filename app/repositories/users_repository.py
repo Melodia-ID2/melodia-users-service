@@ -1,12 +1,13 @@
 from uuid import UUID
-from typing import Any
+from typing import Any, List
 
 from sqlalchemy.orm import aliased
-from sqlmodel import Session, and_, func, select, update
+from sqlmodel import Session, and_, delete, func, select, update
 
 from app.constants.notification_flags import NOTIFICATION_BITS_MASK
 from app.models.useraccount import UserAccount, UserRole
 from app.models.userprofile import UserFollows, UserProfile
+from app.models.user_preferred_genre import UserPreferredGenre
 
 
 def get_profile_by_id(session: Session, user_id: UUID) -> UserProfile | None:
@@ -195,3 +196,23 @@ def update_notification_preferences(session: Session, user_id: UUID, new_prefere
     session.refresh(account)
 
     return account
+
+
+def get_preferred_genres(session: Session, user_id: UUID) -> List[str]:
+    stmt = select(UserPreferredGenre.genre_code).where(
+        UserPreferredGenre.user_id == user_id
+    )
+    return list(session.exec(stmt).all())
+
+
+def set_preferred_genres(session: Session, user_id: UUID, genres: List[str]) -> List[str]:
+    session.exec(
+        delete(UserPreferredGenre).where(UserPreferredGenre.user_id == user_id)
+    )
+    
+    for genre_code in genres:
+        genre = UserPreferredGenre(user_id=user_id, genre_code=genre_code.upper())
+        session.add(genre)
+    
+    session.commit()
+    return genres

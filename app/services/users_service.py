@@ -14,6 +14,7 @@ from app.models.notification import NotificationType
 from app.schemas.message import MessageResponse
 from app.schemas.notifications import NotificationPreferencesResponse, NotificationPreferencesUpdate
 from app.schemas.muted_artists import MuteArtistResponse, MutedArtistsListResponse
+from app.schemas.preferred_genres import PreferredGenresResponse, PreferredGenresUpdate
 from app.schemas.profile_photo import ProfilePhotoResponse
 from app.schemas.user import (
     ArtistProfileResponse,
@@ -309,3 +310,15 @@ def get_autoplay_preferences(session: Session, user_id: UUID) -> AutoplayPrefere
 
     is_enabled = (prefs_value & BIT_AUTOPLAY) != 0
     return AutoplayPreferenceResponse(autoplay=is_enabled)
+
+
+def get_preferred_genres(session: Session, user_id: UUID) -> PreferredGenresResponse:
+    genres = users_repo.get_preferred_genres(session, user_id)
+    return PreferredGenresResponse(genres=genres)
+
+
+def update_preferred_genres(
+    session: Session, user_id: UUID, data: PreferredGenresUpdate
+) -> PreferredGenresResponse:
+    genres = users_repo.set_preferred_genres(session, user_id, data.genres)
+    return PreferredGenresResponse(genres=genres)
