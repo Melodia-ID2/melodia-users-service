@@ -55,6 +55,7 @@ class UserBasicInfo(ApiBaseModel):
     email: str
     username: str
     role: str
+    profile_photo: str | None = None
     status: str
 
 
@@ -64,7 +65,6 @@ class UserDetailedInfo(UserBasicInfo):
     address: Optional[str] = None
     country: Country
     birthdate: date
-    profile_photo: str | None = None
     last_login: Optional[datetime] = None
     created_at: Optional[datetime] = None
 

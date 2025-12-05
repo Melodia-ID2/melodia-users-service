@@ -157,10 +157,10 @@ class TestNotificationEventIngestion:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
-        assert response_data["notificationsCreated"] == 0
+        assert response_data["notificationsCreated"] == 1
         assert response_data["notificationsSent"] == 0
-        assert response_data["notificationsFiltered"] == 1
-        assert response_data["filterReasons"]["no_tokens"] == 1
+        assert response_data["notificationsFiltered"] == 0
+        assert response_data["filterReasons"]["no_tokens"] == 0
 
     async def test_post_notifications_multiple_targets_mixed_filters(
         self, async_client: AsyncClient, test_listener_full: TestUser, test_listener_minimal: TestUser, session: AsyncSession

@@ -35,6 +35,7 @@ class TestGetFollowers:
                     "id": str(test_listener_minimal.id),
                     "username": test_listener_minimal.profile.username,
                     "profilePhoto": test_listener_minimal.profile.profile_photo,
+                    "country": test_listener_minimal.account.country,
                     "followersCount": test_listener_minimal.profile.followers_count,
                     "isFollowing": False,
                 }
@@ -56,6 +57,7 @@ class TestGetFollowers:
                     "id": str(test_listener_minimal.id),
                     "username": test_listener_minimal.profile.username,
                     "profilePhoto": test_listener_minimal.profile.profile_photo,
+                    "country": test_listener_minimal.account.country,
                     "followersCount": test_listener_minimal.profile.followers_count,
                     "isFollowing": True,
                 }
@@ -88,6 +90,7 @@ class TestGetFollowing:
                     "id": str(test_listener_minimal.id),
                     "username": test_listener_minimal.profile.username,
                     "profilePhoto": test_listener_minimal.profile.profile_photo,
+                    "country": test_listener_minimal.account.country,
                     "followersCount": test_listener_minimal.profile.followers_count,
                     "isFollowing": False,
                 }
@@ -109,6 +112,7 @@ class TestGetFollowing:
                     "id": str(test_listener_minimal.id),
                     "username": test_listener_minimal.profile.username,
                     "profilePhoto": test_listener_minimal.profile.profile_photo,
+                    "country": test_listener_minimal.account.country,
                     "followersCount": test_listener_minimal.profile.followers_count,
                     "isFollowing": True,
                 }
@@ -142,6 +146,7 @@ class TestGetFollowing:
                     "id": str(test_artist_minimal.id),
                     "username": test_artist_minimal.profile.username,
                     "profilePhoto": test_artist_minimal.profile.profile_photo,
+                    "country": test_artist_minimal.account.country,
                     "followersCount": test_artist_minimal.profile.followers_count,
                     "isFollowing": False,
                 }
@@ -175,6 +180,7 @@ class TestGetFollowing:
                     "id": str(test_listener_minimal.id),
                     "username": test_listener_minimal.profile.username,
                     "profilePhoto": test_listener_minimal.profile.profile_photo,
+                    "country": test_listener_minimal.account.country,
                     "followersCount": test_listener_minimal.profile.followers_count,
                     "isFollowing": False,
                 }
