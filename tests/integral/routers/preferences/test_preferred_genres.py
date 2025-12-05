@@ -52,6 +52,9 @@ def test_02_get_preferred_genres_returns_saved_genres():
     with Session(sync_engine) as session:
         user = UserAccount(id=user_id)
         session.add(user)
+        session.commit()
+
+    with Session(sync_engine) as session:
         session.add(UserPreferredGenre(user_id=user_id, genre_code="INDIE"))
         session.add(UserPreferredGenre(user_id=user_id, genre_code="METAL"))
         session.commit()
@@ -72,9 +75,13 @@ def test_02_get_preferred_genres_returns_saved_genres():
 def test_03_put_preferred_genres_replaces_existing():
     """Test that PUT /preferences/genres replaces existing genres."""
     user_id = uuid.uuid4()
+    # Crear usuario y confirmar la transacción antes de insertar los géneros existentes.
     with Session(sync_engine) as session:
         user = UserAccount(id=user_id)
         session.add(user)
+        session.commit()
+
+    with Session(sync_engine) as session:
         session.add(UserPreferredGenre(user_id=user_id, genre_code="OLD1"))
         session.add(UserPreferredGenre(user_id=user_id, genre_code="OLD2"))
         session.commit()
