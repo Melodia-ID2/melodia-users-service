@@ -17,8 +17,15 @@ from app.schemas.user import (
 from app.services.search_service import search_service
 
 
-def get_all_users(session: Session, page: int, page_size: int) -> GetAllUserResponse:
-    users, total = admin_repo.get_all_users(session, page, page_size)
+def get_all_users(
+    session: Session,
+    page: int,
+    page_size: int,
+    role: UserRole | None = None,
+    sort_by: str = "created_at",
+    sort_order: str = "asc",
+) -> GetAllUserResponse:
+    users, total = admin_repo.get_all_users(session, page, page_size, role, sort_by, sort_order)
     return GetAllUserResponse(
         users=[{
             "id": str(u.id),
