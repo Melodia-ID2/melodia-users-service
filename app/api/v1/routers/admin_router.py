@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
@@ -8,6 +9,7 @@ from app.core.database import get_session
 from app.core.security import require_admin
 from app.errors.error_responses import error_responses
 from app.schemas.user import GetAllUserResponse, UserDetailedInfo, UserRoleUpdateResponse
+from app.models.useraccount import UserRole
 
 router = APIRouter(prefix="/admin", tags=["Admin - User Management"])
 
@@ -18,8 +20,11 @@ def get_all_users(
     _: None = Depends(require_admin),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
+    role: UserRole | None = Query(None),
+    sort_by: Literal["created_at", "username", "role", "status"] = Query("created_at"),
+    sort_order: Literal["asc", "desc"] = Query("asc"),
 ):
-    return service.get_all_users(session, page, page_size)
+    return service.get_all_users(session, page, page_size, role, sort_by, sort_order)
 
 
 @router.get("/{user_id}", response_model=UserDetailedInfo, status_code=status.HTTP_200_OK, responses=error_responses(401, 404))
