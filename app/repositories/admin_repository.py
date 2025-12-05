@@ -31,6 +31,7 @@ def get_all_users(session: Session, page: int, page_size: int):
             filtered_subq.c.email,
             UserAccount.role,
             UserAccount.status,
+            UserProfile.profile_photo,
         )
         .outerjoin(UserProfile, UserAccount.id == UserProfile.id)
         .outerjoin(filtered_subq, UserAccount.id == filtered_subq.c.user_id)

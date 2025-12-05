@@ -20,7 +20,14 @@ from app.services.search_service import search_service
 def get_all_users(session: Session, page: int, page_size: int) -> GetAllUserResponse:
     users, total = admin_repo.get_all_users(session, page, page_size)
     return GetAllUserResponse(
-        users=[{"id": str(u.id), "username": u.username, "email": u.email or "", "role": u.role, "status": u.status} for u in users],
+        users=[{
+            "id": str(u.id),
+            "username": u.username,
+            "email": u.email or "",
+            "role": u.role,
+            "status": u.status,
+            "profile_photo": u.profile_photo,
+        } for u in users],
         total=total or 0,
         page=page,
         page_size=page_size,
